@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(flight-booking VERSION 0.1 LANGUAGES CXX)
+project(flight-booking VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -16,11 +16,19 @@ include_directories(include)
 set(RESOURCES_DIR resources)
 set(TS_FILES ${RESOURCES_DIR}/language/language_zh_CN.ts)
 
+aux_source_directory(src/ui UI_SRC)
+aux_source_directory(src/User USER_SRC)
+
 set(PROJECT_SOURCES
         src/main.cpp
-        src/mainwindow.cpp
-        include/mainwindow.h
+        ${UI_SRC}
+        src/User/UserServer.cpp
+
+        include/ui/LoginWindow.h
+        include/ui/RegisterWindow.h
+        include/ui/MainWindow.h
         ${TS_FILES}
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
