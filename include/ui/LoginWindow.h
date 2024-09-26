@@ -5,6 +5,7 @@
 
 class QLineEdit;
 class QPushButton;
+class QCheckBox;
 
 class LoginWindow : public QWidget {
     Q_OBJECT
@@ -24,6 +25,7 @@ private:
     QLineEdit *lineEditPassword;
     QPushButton *buttonLogin;
     QPushButton *registerButton;
+    QCheckBox *autoLoginCheckBox;
 
     void setupUI();
     void setupConnections();

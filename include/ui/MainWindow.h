@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QListWidget>
-#include <QStackedWidget>
-#include <QVBoxLayout>
-#include <QGraphicsView>
-#include <QGraphicsScene>
 
+
+class QListWidget;
+class QStackedWidget;
+class QGraphicsView;
+class QGraphicsScene;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

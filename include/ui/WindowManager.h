@@ -1,9 +1,10 @@
-#include <QStackedWidget>
-#include <ui/LoginWindow.h>
-#include <ui/RegisterWindow.h>
-#include <ui/MainWindow.h>
-#include <User/UserServer.h>
-#include <iostream>
+#pragma once
+
+
+class QStackedWidget;
+class LoginWindow;
+class RegisterWindow;
+class MainWindow;
 
 class WindowManager : public QObject {
 public:

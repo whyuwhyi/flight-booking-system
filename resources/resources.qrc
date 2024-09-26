@@ -3,5 +3,7 @@
         <file>icons/route.svg</file>
         <file>icons/service.svg</file>
         <file>icons/personal.svg</file>
+        <file>icons/eye_closed.svg</file>
+        <file>icons/eye_open.svg</file>
     </qresource>
 </RCC>

@@ -14,6 +14,7 @@ RegisterWindow::RegisterWindow(QWidget *parent) : QWidget(parent) {
     setupConnections();
 }
 
+
 void RegisterWindow::setupUI() {
     setWindowTitle("注册");
     setFixedSize(1000, 800);
@@ -32,6 +33,46 @@ void RegisterWindow::setupUI() {
     lineEditPassword->setPlaceholderText("请输入密码");
     lineEditConfirmPassword->setPlaceholderText("请再次输入密码");
 
+    lineEditPhoneNumber->setFixedHeight(40);
+    lineEditPassword->setFixedHeight(40);
+    lineEditConfirmPassword->setFixedHeight(40);
+
+    lineEditPhoneNumber->setFixedWidth(300);
+    lineEditPassword->setFixedWidth(300);
+    lineEditConfirmPassword->setFixedWidth(300);
+
+    // 添加显示密码的图标
+    QPushButton *togglePasswordVisibility = new QPushButton(this);
+    togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.png")); // 初始为闭眼图标
+    togglePasswordVisibility->setFixedSize(30, 30);
+    togglePasswordVisibility->setStyleSheet("border: none; background: transparent;");
+
+    QPushButton *toggleConfirmPasswordVisibility = new QPushButton(this);
+    toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.png")); // 初始为闭眼图标
+    toggleConfirmPasswordVisibility->setFixedSize(30, 30);
+    toggleConfirmPasswordVisibility->setStyleSheet("border: none; background: transparent;");
+
+    // 点击按钮切换密码可见性
+    connect(togglePasswordVisibility, &QPushButton::clicked, this, [this, togglePasswordVisibility]() {
+        if (lineEditPassword->echoMode() == QLineEdit::Password) {
+            lineEditPassword->setEchoMode(QLineEdit::Normal);
+            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg")); // 开眼图标
+        } else {
+            lineEditPassword->setEchoMode(QLineEdit::Password);
+            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg")); // 闭眼图标
+        }
+    });
+
+    connect(toggleConfirmPasswordVisibility, &QPushButton::clicked, this, [this, toggleConfirmPasswordVisibility]() {
+        if (lineEditConfirmPassword->echoMode() == QLineEdit::Password) {
+            lineEditConfirmPassword->setEchoMode(QLineEdit::Normal);
+            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg")); // 开眼图标
+        } else {
+            lineEditConfirmPassword->setEchoMode(QLineEdit::Password);
+            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg")); // 闭眼图标
+        }
+    });
+
     buttonRegister = new QPushButton("注册", this);
     buttonBack = new QPushButton("返回登录", this);
 
@@ -43,8 +84,18 @@ void RegisterWindow::setupUI() {
 
     QFormLayout *formLayout = new QFormLayout;
     formLayout->addRow(labelPhoneNumber, lineEditPhoneNumber);
-    formLayout->addRow(labelPassword, lineEditPassword);
-    formLayout->addRow(labelConfirmPassword, lineEditConfirmPassword);
+
+    // 密码输入框和眼睛图标布局
+    QHBoxLayout *passwordLayout = new QHBoxLayout();
+    passwordLayout->addWidget(lineEditPassword);
+    passwordLayout->addWidget(togglePasswordVisibility);
+    formLayout->addRow(labelPassword, passwordLayout);
+
+    // 确认密码输入框和眼睛图标布局
+    QHBoxLayout *confirmPasswordLayout = new QHBoxLayout();
+    confirmPasswordLayout->addWidget(lineEditConfirmPassword);
+    confirmPasswordLayout->addWidget(toggleConfirmPasswordVisibility);
+    formLayout->addRow(labelConfirmPassword, confirmPasswordLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(formLayout);

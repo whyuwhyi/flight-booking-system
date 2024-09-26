@@ -1,8 +1,11 @@
 #include <ui/MainWindow.h>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QListWidget>
 #include <QListWidgetItem>
 #include <QIcon>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGeoServiceProvider>
