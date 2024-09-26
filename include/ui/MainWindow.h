@@ -4,6 +4,9 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -11,7 +14,7 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    
 private slots:
     void changePage(int index);
 
@@ -24,6 +27,9 @@ private:
     QWidget *routeMapWidget;
     QWidget *serviceHallWidget;
     QWidget *personalCenterWidget;
+    QGraphicsView *mapView;  // 地图视图
+    QGraphicsScene *mapScene; // 地图场景
 
-    void setupUi();
+    void setupUI();
+    void createRouteMap();
 };
