@@ -9,6 +9,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+
+
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
@@ -20,13 +23,19 @@ aux_source_directory(src/ui UI_SRC)
 aux_source_directory(src/User USER_SRC)
 
 set(PROJECT_SOURCES
-        src/main.cpp
+        "src/main.cpp"
         ${UI_SRC}
-        src/User/UserServer.cpp
+        "src/String/String.cpp"
+        "src/User/User.cpp"
+        "src/User/UserServer.cpp"
 
-        include/ui/LoginWindow.h
-        include/ui/RegisterWindow.h
-        include/ui/MainWindow.h
+        "include/ui/LoginWindow.h"
+        "include/ui/RegisterWindow.h"
+        "include/ui/MainWindow.h"
+        "include/ui/WindowManager.h"
+        "include/String/String.h"
+        "include/User/User.h"
+        "include/User/UserServer.h"
         ${TS_FILES}
 
 )

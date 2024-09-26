@@ -1,18 +1,29 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QListWidget>
 #include <QStackedWidget>
-#include <ui/LoginWindow.h>
-#include <ui/RegisterWindow.h>
+#include <QVBoxLayout>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void changePage(int index);
 
 private:
+    QWidget *centralWidget;
+    QListWidget *menuList;
     QStackedWidget *stackedWidget;
-    LoginWindow *loginWindow;
-    RegisterWindow *registerWindow;
+
+    // 这里可以添加各个页面的指针
+    QWidget *routeMapWidget;
+    QWidget *serviceHallWidget;
+    QWidget *personalCenterWidget;
+
+    void setupUi();
 };

@@ -13,7 +13,8 @@ public:
     LoginWindow(QWidget *parent = nullptr);
 
 signals:
-    void showRegisterWindow();
+    void registerRequested();
+    void loginSuccess();
 
 private slots:
     void onLoginClicked();

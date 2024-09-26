@@ -9,6 +9,8 @@
 #include <QFormLayout>
 #include <QMessageBox>
 
+#include <iostream>
+
 LoginWindow::LoginWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
@@ -54,19 +56,26 @@ void LoginWindow::setupUI() {
 void LoginWindow::setupConnections() {
     connect(buttonLogin, &QPushButton::clicked, this, &LoginWindow::onLoginClicked);
     connect(registerButton, &QPushButton::clicked, [this]() {
-        emit showRegisterWindow();
+        this->close();
+        emit registerRequested();
     });
 }
 
 void LoginWindow::onLoginClicked() {
-    QString phoneNumber = lineEditPhoneNumber->text();
-    QString password = lineEditPassword->text();
+    String phoneNumber = lineEditPhoneNumber->text().toStdString().c_str();
+    String password = lineEditPassword->text().toStdString().c_str();
+    User temp_user(phoneNumber, password);
+    Link<User>* userPointer = user_list.getHead();
 
-    if (phoneNumber == "admin" && password == "1234") {
-        MainWindow *mainWindow = new MainWindow(this);
-        mainWindow->show();
-        this->close();
-    } else {
-        QMessageBox::warning(this, "登录失败", "无效的手机号码或密码！");
+    while(userPointer != NULL) {
+        if(userPointer->getElement() == temp_user){
+            std::cout << "Login Success" << std::endl;
+            emit loginSuccess();
+            return;
+        }
+        userPointer = userPointer->getNext();
     }
+
+    QMessageBox::warning(this, "登录失败", "账号或密码错误！");
+
 }

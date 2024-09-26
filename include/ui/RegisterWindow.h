@@ -12,7 +12,7 @@ public:
     RegisterWindow(QWidget *parent = nullptr);
 
 signals:
-    void showLoginWindow();
+    void loginRequested();
 
 private slots:
     void onRegisterClicked();
@@ -20,7 +20,7 @@ private slots:
 private:
     QLineEdit *lineEditPhoneNumber;
     QLineEdit *lineEditPassword;
-    QLineEdit *lineEditRepeatPassword;
+    QLineEdit *lineEditConfirmPassword;
     QPushButton *buttonRegister;
     QPushButton *buttonBack;
 

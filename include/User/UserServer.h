@@ -4,13 +4,15 @@
 #include <User/User.h>
 
 
-User current_login_user;
-String user_file("/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/users.txt");
-
 typedef LinkedList<User> UserList;
 
-UserList user_list;
+extern User current_login_user;
+extern UserList user_list;
+extern String user_file;
+extern String local_user_file;
 
 bool loadUserFromFile(UserList& userList, String& fileName);
-
 bool writeUserToFile(UserList& userList, String& fileName);
+
+bool loadLocalUserFromFile(User& user, String& fieName);
+bool writeLocalUserToFile(User& user,String& fileName);

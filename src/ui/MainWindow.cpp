@@ -1,22 +1,53 @@
 #include <ui/MainWindow.h>
-#include <User/UserServer.h>
+#include <QHBoxLayout>
+#include <QLabel>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    loadUserFromFile(user_list, user_file);
-    stackedWidget = new QStackedWidget(this);
-    loginWindow = new LoginWindow(this);
-    registerWindow = new RegisterWindow(this);
+    setupUi();
+}
 
-    stackedWidget->addWidget(loginWindow);
-    stackedWidget->addWidget(registerWindow);
-    
-    setCentralWidget(stackedWidget);
-    connect(loginWindow, &LoginWindow::showRegisterWindow, [this]() {
-        stackedWidget->setCurrentWidget(registerWindow);
-    });
-    connect(registerWindow, &RegisterWindow::showLoginWindow, [this]() {
-    stackedWidget->setCurrentWidget(loginWindow);
-});
+MainWindow::~MainWindow() {
+    // 资源清理（如果需要）
+}
 
+void MainWindow::setupUi() {
+    centralWidget = new QWidget(this);
+    setCentralWidget(centralWidget);
 
+    QHBoxLayout *layout = new QHBoxLayout(centralWidget);
+
+    menuList = new QListWidget();
+    menuList->addItem("航线图");
+    menuList->addItem("服务大厅");
+    menuList->addItem("个人中心");
+
+    stackedWidget = new QStackedWidget();
+
+    routeMapWidget = new QWidget();
+    QLabel *routeMapLabel = new QLabel("航线图内容", routeMapWidget);
+    QVBoxLayout *routeMapLayout = new QVBoxLayout(routeMapWidget);
+    routeMapLayout->addWidget(routeMapLabel);
+
+    serviceHallWidget = new QWidget();
+    QLabel *serviceHallLabel = new QLabel("服务大厅内容", serviceHallWidget);
+    QVBoxLayout *serviceHallLayout = new QVBoxLayout(serviceHallWidget);
+    serviceHallLayout->addWidget(serviceHallLabel);
+
+    personalCenterWidget = new QWidget();
+    QLabel *personalCenterLabel = new QLabel("个人中心内容", personalCenterWidget);
+    QVBoxLayout *personalCenterLayout = new QVBoxLayout(personalCenterWidget);
+    personalCenterLayout->addWidget(personalCenterLabel);
+
+    stackedWidget->addWidget(routeMapWidget);
+    stackedWidget->addWidget(serviceHallWidget);
+    stackedWidget->addWidget(personalCenterWidget);
+
+    layout->addWidget(menuList);
+    layout->addWidget(stackedWidget);
+
+    connect(menuList, &QListWidget::currentRowChanged, this, &MainWindow::changePage);
+}
+
+void MainWindow::changePage(int index) {
+    stackedWidget->setCurrentIndex(index);
 }
