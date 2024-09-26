@@ -6,13 +6,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUi();
 }
 
-MainWindow::~MainWindow() {
-    // 资源清理（如果需要）
-}
+MainWindow::~MainWindow() {}
 
 void MainWindow::setupUi() {
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
+    
 
     QHBoxLayout *layout = new QHBoxLayout(centralWidget);
 

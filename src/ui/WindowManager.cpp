@@ -4,14 +4,12 @@
 
 WindowManager::WindowManager(QWidget *parent)
     : QStackedWidget(parent) {
-
     mainWindow = new MainWindow(this);
-
+    
     if (localLogin()) {
         addWidget(mainWindow);
         setCurrentWidget(mainWindow);
-    }
-    else {
+    } else {
         loginWindow = new LoginWindow(this);
         registerWindow = new RegisterWindow(this);
 
@@ -36,6 +34,8 @@ void WindowManager::showRegisterWindow() {
 }
 
 void WindowManager::showMainWindow() {
+    delete loginWindow;
+    delete registerWindow;
     setCurrentWidget(mainWindow);
 }
 
@@ -48,7 +48,7 @@ bool WindowManager::localLogin() {
     while(userPointer != NULL) {
         if(userPointer->getElement() == temp_user){
             std::cout << "Local Login Success!" << std::endl;
-            return false;
+            return true;
         }
         userPointer = userPointer->getNext();
     }
