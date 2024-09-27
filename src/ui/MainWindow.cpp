@@ -10,14 +10,15 @@
 #include <QGraphicsScene>
 #include <QGeoServiceProvider>
 #include <QGeoRoutingManager>
-#include <QPlace>
-#include <QGraphicsEllipseItem>
-#include <QPlaceManager>
 #include <QGeoRoute>
+#include <QPlace>
+#include <QPlaceManager>
+
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setupUI();
+    setupConnections();
 }
 
 MainWindow::~MainWindow() {}
@@ -72,23 +73,23 @@ void MainWindow::createRouteMap() {
 
 
 void MainWindow::setupUI() {
-    setWindowTitle("天地航空系统");
-    setFixedSize(1200, 800); // 固定窗口大小
+    setWindowTitle("航空系统");
+    setFixedSize(1200, 800);
 
     centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
-    QHBoxLayout *layout = new QHBoxLayout(centralWidget);
-    layout->setContentsMargins(10, 10, 10, 10); // 设置边距
-    layout->setSpacing(10); // 设置间距
+
 
     menuList = new QListWidget();
-    menuList->setViewMode(QListView::IconMode); // 设置为图标模式
-    menuList->setIconSize(QSize(48, 48)); // 设置图标大小
-    menuList->setFixedWidth(100); // 减短菜单栏宽度
-    menuList->setSpacing(10); // 图标与文字间距
+    menuList->setViewMode(QListView::IconMode);
+    menuList->setIconSize(QSize(48, 48));
+    menuList->setFixedWidth(100);
+    menuList->setSpacing(10);
+    menuList->setDragEnabled(false);
+    menuList->setDropIndicatorShown(false);
 
-    // 添加图标和文字
+
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/route.svg"), "航线图"));
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/service.svg"), "服务大厅"));
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/personal.svg"), "个人中心"));
@@ -96,12 +97,10 @@ void MainWindow::setupUI() {
     menuList->setStyleSheet("QListWidget { background-color: #2E8BFF; color: white; font-size: 14px; border: none; }"
                             "QListWidget::item { padding: 10px; }"
                             "QListWidget::item:selected { background-color: #007BFF; }");
-
     stackedWidget = new QStackedWidget();
 
     createRouteMap();
 
-    // 设置其他模块
     serviceHallWidget = new QWidget();
     QLabel *serviceHallLabel = new QLabel("服务大厅内容", serviceHallWidget);
     serviceHallLabel->setStyleSheet("font-size: 20px; font-weight: bold;");
@@ -117,13 +116,15 @@ void MainWindow::setupUI() {
     stackedWidget->addWidget(serviceHallWidget);
     stackedWidget->addWidget(personalCenterWidget);
 
+    QHBoxLayout *layout = new QHBoxLayout(centralWidget);
+    layout->setContentsMargins(10, 10, 10, 10);
+    layout->setSpacing(10);
     layout->addWidget(menuList);
     layout->addWidget(stackedWidget);
-
-    connect(menuList, &QListWidget::currentRowChanged, this, &MainWindow::changePage);
 }
 
-
-void MainWindow::changePage(int index) {
-    stackedWidget->setCurrentIndex(index);
+void MainWindow::setupConnections() {
+    connect(menuList, &QListWidget::currentRowChanged, this, [this](int index) {
+        stackedWidget->setCurrentIndex(index);
+    });
 }

@@ -21,10 +21,11 @@ private slots:
     void onLoginClicked();
 
 private:
-    QLineEdit *lineEditPhoneNumber;
-    QLineEdit *lineEditPassword;
-    QPushButton *buttonLogin;
+    QLineEdit *phoneNumberLineEdit;
+    QLineEdit *passwordLineEdit;
+    QPushButton *loginButton;
     QPushButton *registerButton;
+    QPushButton *togglePasswordVisibility;
     QCheckBox *autoLoginCheckBox;
 
     void setupUI();

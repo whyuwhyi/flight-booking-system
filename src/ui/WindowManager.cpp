@@ -13,7 +13,7 @@ WindowManager::WindowManager(QWidget *parent) {
     mainWindow = new MainWindow();
 
     if (localLogin()) {
-        mainWindow->show();
+        showMainWindow();
     }
     else {
         stackedWidget = new QStackedWidget(parent);
@@ -30,12 +30,8 @@ WindowManager::WindowManager(QWidget *parent) {
     }
 }
 
-WindowManager::~WindowManager() {
-    delete loginWindow;
-    delete registerWindow;
-    delete stackedWidget;
-    delete mainWindow;
-}
+WindowManager::~WindowManager() {}
+
 
 void WindowManager::showLoginWindow() {
     stackedWidget->setCurrentWidget(loginWindow);
@@ -53,6 +49,7 @@ void WindowManager::showMainWindow() {
     registerWindow = NULL;
     stackedWidget = NULL;
     mainWindow->show();
+    user_list.destroy();
 }
 
 bool WindowManager::localLogin() {

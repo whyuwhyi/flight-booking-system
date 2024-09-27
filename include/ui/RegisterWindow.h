@@ -18,11 +18,13 @@ private slots:
     void onRegisterClicked();
 
 private:
-    QLineEdit *lineEditPhoneNumber;
-    QLineEdit *lineEditPassword;
-    QLineEdit *lineEditConfirmPassword;
-    QPushButton *buttonRegister;
-    QPushButton *buttonBack;
+    QLineEdit *phoneNumberLineEdit;
+    QLineEdit *passwordLineEdit;
+    QLineEdit *confirmPasswordLineEdit;
+    QPushButton *registerButton;
+    QPushButton *togglePasswordVisibility;
+    QPushButton *toggleConfirmPasswordVisibility;
+    QPushButton *backButton;
 
     void setupUI();
     void setupConnections();

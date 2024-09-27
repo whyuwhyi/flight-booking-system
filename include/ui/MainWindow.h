@@ -14,9 +14,6 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    
-private slots:
-    void changePage(int index);
 
 private:
     QWidget *centralWidget;
@@ -31,5 +28,6 @@ private:
     QGraphicsScene *mapScene; // 地图场景
 
     void setupUI();
+    void setupConnections();
     void createRouteMap();
 };

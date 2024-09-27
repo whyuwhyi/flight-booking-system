@@ -23,87 +23,63 @@ void RegisterWindow::setupUI() {
     QLabel *labelPassword = new QLabel("密码:", this);
     QLabel *labelConfirmPassword = new QLabel("确认密码:", this);
 
-    lineEditPhoneNumber = new QLineEdit(this);
-    lineEditPassword = new QLineEdit(this);
-    lineEditConfirmPassword = new QLineEdit(this);
-    lineEditPassword->setEchoMode(QLineEdit::Password);
-    lineEditConfirmPassword->setEchoMode(QLineEdit::Password);
+    phoneNumberLineEdit = new QLineEdit(this);
+    passwordLineEdit = new QLineEdit(this);
+    confirmPasswordLineEdit = new QLineEdit(this);
+    passwordLineEdit->setEchoMode(QLineEdit::Password);
+    confirmPasswordLineEdit->setEchoMode(QLineEdit::Password);
 
-    lineEditPhoneNumber->setPlaceholderText("请输入11位手机号码");
-    lineEditPassword->setPlaceholderText("请输入密码");
-    lineEditConfirmPassword->setPlaceholderText("请再次输入密码");
+    phoneNumberLineEdit->setPlaceholderText("请输入11位手机号码");
+    passwordLineEdit->setPlaceholderText("请输入密码");
+    confirmPasswordLineEdit->setPlaceholderText("请再次输入密码");
 
-    lineEditPhoneNumber->setFixedHeight(40);
-    lineEditPassword->setFixedHeight(40);
-    lineEditConfirmPassword->setFixedHeight(40);
+    phoneNumberLineEdit->setFixedHeight(40);
+    passwordLineEdit->setFixedHeight(40);
+    confirmPasswordLineEdit->setFixedHeight(40);
 
-    lineEditPhoneNumber->setFixedWidth(300);
-    lineEditPassword->setFixedWidth(300);
-    lineEditConfirmPassword->setFixedWidth(300);
+    phoneNumberLineEdit->setFixedWidth(300);
+    passwordLineEdit->setFixedWidth(300);
+    confirmPasswordLineEdit->setFixedWidth(300);
 
-    // 添加显示密码的图标
-    QPushButton *togglePasswordVisibility = new QPushButton(this);
-    togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.png")); // 初始为闭眼图标
+    togglePasswordVisibility = new QPushButton(this);
+    togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg"));
     togglePasswordVisibility->setFixedSize(30, 30);
     togglePasswordVisibility->setStyleSheet("border: none; background: transparent;");
 
-    QPushButton *toggleConfirmPasswordVisibility = new QPushButton(this);
-    toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.png")); // 初始为闭眼图标
+    toggleConfirmPasswordVisibility = new QPushButton(this);
+    toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg"));
     toggleConfirmPasswordVisibility->setFixedSize(30, 30);
     toggleConfirmPasswordVisibility->setStyleSheet("border: none; background: transparent;");
 
-    // 点击按钮切换密码可见性
-    connect(togglePasswordVisibility, &QPushButton::clicked, this, [this, togglePasswordVisibility]() {
-        if (lineEditPassword->echoMode() == QLineEdit::Password) {
-            lineEditPassword->setEchoMode(QLineEdit::Normal);
-            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg")); // 开眼图标
-        } else {
-            lineEditPassword->setEchoMode(QLineEdit::Password);
-            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg")); // 闭眼图标
-        }
-    });
+    registerButton = new QPushButton("注册", this);
+    backButton = new QPushButton("返回登录", this);
 
-    connect(toggleConfirmPasswordVisibility, &QPushButton::clicked, this, [this, toggleConfirmPasswordVisibility]() {
-        if (lineEditConfirmPassword->echoMode() == QLineEdit::Password) {
-            lineEditConfirmPassword->setEchoMode(QLineEdit::Normal);
-            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg")); // 开眼图标
-        } else {
-            lineEditConfirmPassword->setEchoMode(QLineEdit::Password);
-            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg")); // 闭眼图标
-        }
-    });
+    registerButton->setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;");
+    backButton->setStyleSheet("background-color: #FF5722; color: white; font-weight: bold;");
+    phoneNumberLineEdit->setStyleSheet("font-size: 14px; padding: 6px;");
+    passwordLineEdit->setStyleSheet("font-size: 14px; padding: 6px;");
+    confirmPasswordLineEdit->setStyleSheet("font-size: 14px; padding: 6px;");
 
-    buttonRegister = new QPushButton("注册", this);
-    buttonBack = new QPushButton("返回登录", this);
+    QHBoxLayout *confirmPasswordLayout = new QHBoxLayout();
+    confirmPasswordLayout->addWidget(confirmPasswordLineEdit);
+    confirmPasswordLayout->addWidget(toggleConfirmPasswordVisibility);
 
-    buttonRegister->setStyleSheet("background-color: #4CAF50; color: white; font-weight: bold;");
-    buttonBack->setStyleSheet("background-color: #FF5722; color: white; font-weight: bold;");
-    lineEditPhoneNumber->setStyleSheet("font-size: 14px; padding: 6px;");
-    lineEditPassword->setStyleSheet("font-size: 14px; padding: 6px;");
-    lineEditConfirmPassword->setStyleSheet("font-size: 14px; padding: 6px;");
+    QHBoxLayout *passwordLayout = new QHBoxLayout();
+    passwordLayout->addWidget(passwordLineEdit);
+    passwordLayout->addWidget(togglePasswordVisibility);
 
     QFormLayout *formLayout = new QFormLayout;
-    formLayout->addRow(labelPhoneNumber, lineEditPhoneNumber);
-
-    // 密码输入框和眼睛图标布局
-    QHBoxLayout *passwordLayout = new QHBoxLayout();
-    passwordLayout->addWidget(lineEditPassword);
-    passwordLayout->addWidget(togglePasswordVisibility);
+    formLayout->addRow(labelPhoneNumber, phoneNumberLineEdit);
     formLayout->addRow(labelPassword, passwordLayout);
-
-    // 确认密码输入框和眼睛图标布局
-    QHBoxLayout *confirmPasswordLayout = new QHBoxLayout();
-    confirmPasswordLayout->addWidget(lineEditConfirmPassword);
-    confirmPasswordLayout->addWidget(toggleConfirmPasswordVisibility);
     formLayout->addRow(labelConfirmPassword, confirmPasswordLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(formLayout);
-    mainLayout->addWidget(buttonRegister);
-    mainLayout->addWidget(buttonBack);
+    mainLayout->addWidget(registerButton);
+    mainLayout->addWidget(backButton);
 
     QWidget *centeredWidget = new QWidget(this);
-    centeredWidget->setFixedSize(400, 300);
+    centeredWidget->setFixedSize(400, 250);
     centeredWidget->setLayout(mainLayout);
 
     QVBoxLayout *outerLayout = new QVBoxLayout(this);
@@ -113,17 +89,37 @@ void RegisterWindow::setupUI() {
 
 
 void RegisterWindow::setupConnections() {
-    connect(buttonRegister, &QPushButton::clicked, this, &RegisterWindow::onRegisterClicked);
-    connect(buttonBack, &QPushButton::clicked, [this]() {
+    connect(registerButton, &QPushButton::clicked, this, &RegisterWindow::onRegisterClicked);
+    connect(backButton, &QPushButton::clicked, [this]() {
         this->close();
         emit loginRequested();
+    });
+
+    connect(togglePasswordVisibility, &QPushButton::clicked, this, [this]() {
+        if (passwordLineEdit->echoMode() == QLineEdit::Password) {
+            passwordLineEdit->setEchoMode(QLineEdit::Normal);
+            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg"));
+        } else {
+            passwordLineEdit->setEchoMode(QLineEdit::Password);
+            togglePasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg"));
+        }
+    });
+
+    connect(toggleConfirmPasswordVisibility, &QPushButton::clicked, this, [this]() {
+        if (confirmPasswordLineEdit->echoMode() == QLineEdit::Password) {
+            confirmPasswordLineEdit->setEchoMode(QLineEdit::Normal);
+            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_open.svg"));
+        } else {
+            confirmPasswordLineEdit->setEchoMode(QLineEdit::Password);
+            toggleConfirmPasswordVisibility->setIcon(QIcon(":/icons/eye_closed.svg"));
+        }
     });
 }
 
 void RegisterWindow::onRegisterClicked() {
-    String phoneNumber = lineEditPhoneNumber->text().toStdString().c_str();
-    String password = lineEditPassword->text().toStdString().c_str();
-    String confirmPassword = lineEditConfirmPassword->text().toStdString().c_str();
+    String phoneNumber = phoneNumberLineEdit->text().toStdString().c_str();
+    String password = passwordLineEdit->text().toStdString().c_str();
+    String confirmPassword = confirmPasswordLineEdit->text().toStdString().c_str();
 
     QRegularExpression phoneRegex("^1[3-9]\\d{9}$");
     QRegularExpression passwordRegex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,16}$");
@@ -153,8 +149,6 @@ void RegisterWindow::onRegisterClicked() {
         return;
     }
 
-
-
     User newUser(phoneNumber, password);
     user_list.append(newUser);
 
@@ -162,7 +156,7 @@ void RegisterWindow::onRegisterClicked() {
 
     writeUserToFile(user_list, user_file);
 
-    lineEditPhoneNumber->clear();
-    lineEditPassword->clear();
-    lineEditConfirmPassword->clear();
+    phoneNumberLineEdit->clear();
+    passwordLineEdit->clear();
+    confirmPasswordLineEdit->clear();
 }

@@ -13,6 +13,7 @@ public:
     Link<T>* getHead() const;
     void setHead(Link<T>* head);
     void append(T& element);
+    void destroy();
 
     template<typename U>
     friend std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list);
@@ -22,21 +23,12 @@ public:
 };
 
 
-
-
-
 template<typename T>
 LinkedList<T>::LinkedList():head(NULL){ }
 
 template<typename T>
 LinkedList<T>::~LinkedList() {
-    Link<T>* node;
-    while(head != NULL){
-        node = head;
-        head = head->getNext();
-        delete node;
-    }
-    head = NULL;
+    this->destroy();
 }
 
 template<typename T>
@@ -61,7 +53,17 @@ void LinkedList<T>::append(T& element) {
         pointer = pointer->getNext();
     }
     pointer->setNext(new Link<T>(element));
+}
 
+template<typename T>
+void LinkedList<T>::destroy() {
+    Link<T>* node;
+    while(head != NULL){
+        node = head;
+        head = head->getNext();
+        delete node;
+    }
+    head = NULL;
 }
 
 template<typename U>
