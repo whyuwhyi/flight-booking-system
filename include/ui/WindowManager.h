@@ -9,6 +9,7 @@ class MainWindow;
 class WindowManager : public QObject {
 public:
     WindowManager(QWidget *parent = nullptr);
+    void initFrame();
     ~WindowManager();
 
 private:

@@ -15,6 +15,8 @@ public:
 
     String& operator=(const String& other);
     String& operator=(String&& other) noexcept;
+    String operator+(const String& other) const;
+    char* operator+(const char *) const;
     bool operator==(const String& other) const;
     bool operator==(const char* other) const;
     size_t size() const;
@@ -22,5 +24,4 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const String& str);
     friend std::istream& operator>>(std::istream& in, String& str);
-
 };

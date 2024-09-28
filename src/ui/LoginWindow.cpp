@@ -51,7 +51,7 @@ void LoginWindow::setupUI() {
     autoLoginCheckBox = new QCheckBox("自动登录", this);
     autoLoginCheckBox->setStyleSheet("font-size: 14px;");
 
-    QHBoxLayout *passwordLayout = new QHBoxLayout();
+    QHBoxLayout *passwordLayout = new QHBoxLayout;
     passwordLayout->addWidget(passwordLineEdit);
     passwordLayout->addWidget(togglePasswordVisibility);
 
@@ -104,11 +104,12 @@ void LoginWindow::onLoginClicked() {
 
     while(userPointer != NULL) {
         if(userPointer->getElement() == temp_user){
-            std::cout << "Login Success" << std::endl;
-            emit loginSuccess();
+            std::cout << "Login Success!" << std::endl;
             if (autoLoginCheckBox->isChecked()) {
-                writeLocalUserToFile(temp_user, local_user_file);
+                std::cout << "Save the user information." << std::endl;
+                writeLocalUserToFile(temp_user, local_path + "local-user.txt");
             }
+            emit loginSuccess();
             return;
         }
         userPointer = userPointer->getNext();

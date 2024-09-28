@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cstdio>
-
-
 struct Date {
     int year;
     int month;

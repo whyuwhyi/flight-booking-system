@@ -10,7 +10,6 @@ struct Time {
 
 };
 
-Time::Time(int hours, int minutes, int seconds) 
-    : hours(hours), minutes(minutes), seconds(seconds) {}
+Time::Time(int hours, int minutes, int seconds) : hours(hours), minutes(minutes), seconds(seconds) {}
 
 

@@ -8,29 +8,34 @@
 
 
 
-WindowManager::WindowManager(QWidget *parent) {
+WindowManager::WindowManager(QWidget *parent) { }
 
-    mainWindow = new MainWindow();
-
+void WindowManager::initFrame() {
     if (localLogin()) {
-        showMainWindow();
+        mainWindow = new MainWindow();
+        mainWindow->show();
     }
     else {
-        stackedWidget = new QStackedWidget(parent);
-        loginWindow = new LoginWindow();
-        registerWindow = new RegisterWindow();
+        stackedWidget = new QStackedWidget();
+        loginWindow = new LoginWindow(stackedWidget);
+        registerWindow = new RegisterWindow(stackedWidget);
 
         stackedWidget->addWidget(loginWindow);
         stackedWidget->addWidget(registerWindow);
-        stackedWidget->show();
+
         stackedWidget->setCurrentWidget(loginWindow);
+        stackedWidget->show();
+        
         connect(loginWindow, &LoginWindow::loginSuccess, this, &WindowManager::showMainWindow);
         connect(loginWindow, &LoginWindow::registerRequested, this, &WindowManager::showRegisterWindow);
         connect(registerWindow, &RegisterWindow::loginRequested, this, &WindowManager::showLoginWindow);
     }
 }
 
-WindowManager::~WindowManager() {}
+WindowManager::~WindowManager() {
+    delete mainWindow;
+    delete stackedWidget;
+}
 
 
 void WindowManager::showLoginWindow() {
@@ -42,20 +47,17 @@ void WindowManager::showRegisterWindow() {
 }
 
 void WindowManager::showMainWindow() {
-    delete loginWindow;
-    delete registerWindow;
-    delete stackedWidget;
-    loginWindow = NULL;
-    registerWindow = NULL;
-    stackedWidget = NULL;
+    mainWindow = new MainWindow();
     mainWindow->show();
+    delete stackedWidget;
+    stackedWidget = NULL;
     user_list.destroy();
 }
 
 bool WindowManager::localLogin() {
     User temp_user;
-    loadUserFromFile(user_list, user_file);
-    loadLocalUserFromFile(temp_user, local_user_file);
+    loadUserFromFile(user_list, data_path + "users.txt");
+    loadLocalUserFromFile(temp_user, local_path + "local-user.txt");
     Link<User>* userPointer = user_list.getHead();
 
     while (userPointer != NULL) {

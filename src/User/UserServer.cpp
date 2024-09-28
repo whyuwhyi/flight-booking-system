@@ -2,15 +2,16 @@
 #include <iostream>
 
 User current_login_user;
-String user_file("/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/users.txt");
-String local_user_file("/home/yuyi/.flight-booking/local-user.txt");
+String data_path("/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/");
+String local_path("/home/yuyi/.flight-booking/");
 UserList user_list;
 
 
-bool loadUserFromFile(UserList& userList, String& fileName) {
-    std::ifstream inFile(fileName.c_str(), std::ios::in);
+bool loadUserFromFile(UserList& userList, const char* fileName) {
+    std::ifstream inFile(fileName, std::ios::in);
     
     if (!inFile.is_open()) {
+        std::cout << "File open filed!" << std::endl;
         return false;
     }
 
@@ -18,10 +19,11 @@ bool loadUserFromFile(UserList& userList, String& fileName) {
     return true;
 }
 
-bool writeUserToFile(UserList& userList, String& fileName) {
-    std::ofstream outFile(fileName.c_str(), std::ios::out);
+bool writeUserToFile(UserList& userList, const char* fileName) {
+    std::ofstream outFile(fileName, std::ios::out);
     
     if (!outFile.is_open()) {
+        std::cout << "File open filed" << std::endl;
         return false;
     }
 
@@ -29,8 +31,8 @@ bool writeUserToFile(UserList& userList, String& fileName) {
     return true;
 }
 
-bool loadLocalUserFromFile(User& user, String& fieName) {
-    std::ifstream inFile(fieName.c_str(), std::ios::in);
+bool loadLocalUserFromFile(User& user, const char* fieName) {
+    std::ifstream inFile(fieName, std::ios::in);
 
     if (!inFile.is_open()) {
         return false;
@@ -39,8 +41,8 @@ bool loadLocalUserFromFile(User& user, String& fieName) {
     return true;
 }
 
-bool writeLocalUserToFile(User& user,String& fileName) {
-    std::ofstream outFile(fileName.c_str(), std::ios::out);
+bool writeLocalUserToFile(User& user, const char* fileName) {
+    std::ofstream outFile(fileName, std::ios::out);
     
     if (!outFile.is_open()) {
         return false;

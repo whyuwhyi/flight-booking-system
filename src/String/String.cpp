@@ -46,13 +46,32 @@ String& String::operator=(String&& other) noexcept {
     return *this;
 }
 
+String String::operator+(const String& other) const {
+    size_t newLength = length + other.length;
+    char* newData = new char[newLength + 1];
+    std::copy(data, data + length, newData);
+    std::copy(other.data, other.data + other.length, newData + length);
+    newData[newLength] = '\0';
+    return String(newData);
+}
+
+char* String::operator+(const char* other) const {
+    size_t otherLength = strlen(other);
+    size_t newLength = length + otherLength;
+    char* newData = new char[newLength + 1];
+    std::copy(data, data + length, newData);
+    std::copy(other, other + otherLength, newData + length);
+    newData[newLength] = '\0';
+    return newData;
+}
+
 bool String::operator==(const String& other) const {
         if (length != other.length) return false;
         return std::strcmp(data, other.data) == 0;
     }
 
 bool String::operator==(const char* other) const {
-    if (other == nullptr) return false;
+    if (other == nullptr) return (data == NULL);
     return std::strcmp(data, other) == 0;
 }
 

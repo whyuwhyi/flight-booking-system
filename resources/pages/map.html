@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>航线图示例</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 750px; }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([30.5, 114.4], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var route = [
+            [39.9042, 116.4074], // 北京
+            [31.2304, 121.4737], // 上海
+            [22.3964, 114.1095]  // 香港
+        ];
+
+        // var polyline = L.polyline(route, { color: 'blue' }).addTo(map);
+        // map.fitBounds(polyline.getBounds());
+        // 使用 L.curve 绘制曲线
+        var curvedLine = L.curve([
+            'M', route[0],
+            'C',
+            [39.5, 116], // 控制点1
+            [31, 121],   // 控制点2
+            route[1]
+        ], { color: 'blue' }).addTo(map);
+
+        // 适应地图边界
+        map.fitBounds(curvedLine.getBounds());
+    </script>
+</body>
+</html>

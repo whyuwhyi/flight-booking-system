@@ -8,11 +8,11 @@ typedef LinkedList<User> UserList;
 
 extern User current_login_user;
 extern UserList user_list;
-extern String user_file;
-extern String local_user_file;
+extern String data_path;
+extern String local_path;
 
-bool loadUserFromFile(UserList& userList, String& fileName);
-bool writeUserToFile(UserList& userList, String& fileName);
+bool loadUserFromFile(UserList& userList, const char* fileName);
+bool writeUserToFile(UserList& userList, const char* fileName);
 
-bool loadLocalUserFromFile(User& user, String& fieName);
-bool writeLocalUserToFile(User& user,String& fileName);
+bool loadLocalUserFromFile(User& user, const char* fieName);
+bool writeLocalUserToFile(User& user, const char* fileName);

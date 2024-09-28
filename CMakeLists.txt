@@ -9,11 +9,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # 查找 Qt6 库
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location)
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location WebEngineWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location WebEngineWidgets)
 
 include_directories(include)
 
@@ -45,7 +45,7 @@ qt_add_executable(flight-booking
 )
 
 # 链接 Qt6 库
-target_link_libraries(flight-booking PRIVATE Qt6::Widgets Qt6::Location)
+target_link_libraries(flight-booking PRIVATE Qt6::Widgets Qt6::Location Qt6::WebEngineWidgets)
 
 # 设置 macOS 和 Windows 属性
 set_target_properties(flight-booking PROPERTIES

@@ -32,7 +32,7 @@ ListGraph::ListGraph(int verNumber):Graph(verNumber),graphList(NULL){
 
 ListGraph::~ListGraph(){
     for(int i = 0;i < getVertexNumber();i++)
-        graphList[i].~LinkedList();
+        graphList[i].destroy();
     graphList = NULL;
 }
 
