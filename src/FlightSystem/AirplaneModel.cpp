@@ -24,3 +24,21 @@ void AirplaneModel::setCabin(CabinType type, int rows, int columns) {
 const Cabin& AirplaneModel::getCabin(CabinType type) const {
     return cabins[type];
 }
+
+// 重载输出运算符
+std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
+    out << airplane.modelName << " " << airplane.passengerCapacity << "\n";
+    for (const auto& cabin : airplane.cabins) {
+        out << cabin.rows << " " << cabin.columns << "\n";
+    }
+    return out;
+}
+
+// 重载输入运算符
+std::istream& operator>>(std::istream& in, AirplaneModel& airplane) {
+    in >> airplane.modelName >> airplane.passengerCapacity;
+    for (auto& cabin : airplane.cabins) {
+        in >> cabin.rows >> cabin.columns;
+    }
+    return in;
+}

@@ -154,7 +154,7 @@ void RegisterWindow::onRegisterClicked() {
 
     QMessageBox::information(this, "注册成功", "注册成功！");
 
-    writeUserToFile();
+    writeUserToFile(user_list);
 
     phoneNumberLineEdit->clear();
     passwordLineEdit->clear();

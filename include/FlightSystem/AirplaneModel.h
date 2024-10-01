@@ -1,6 +1,7 @@
 #pragma once
 
 #include <String/String.h>
+#include <iostream>
 
 class Cabin {
 public:
@@ -26,4 +27,8 @@ public:
     
     void setCabin(CabinType type, int rows, int columns);
     const Cabin& getCabin(CabinType type) const;
+
+    friend std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane);
+    friend std::istream& operator>>(std::istream& in, AirplaneModel& airplane);
 };
+
