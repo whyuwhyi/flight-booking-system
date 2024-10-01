@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <functional>
+
 template<typename Key, typename Value>
 class Map {
 private:
@@ -22,12 +25,19 @@ private:
     Node* rotateRight(Node* node);
     Node* rotateLeft(Node* node);
     Node* balance(Node* node);
+    void traverseNode(Node* node, std::function<void(const Value&)> func) const;
 
 public:
     Map();
     ~Map();
     void insert(const Value &value);
     Value* get(const Key &key) const;
+    void traverse(std::function<void(const Value&)> func) const;
+
+    template<typename K, typename V>
+    friend std::ostream& operator<<(std::ostream& out, const Map<U, Value>& map);
+    template<typename K, typename V>
+    friend std::istream& operator>>(std::istream& in, Map<U, V>& map);
 };
 
 template<typename Key, typename Value>
@@ -131,4 +141,37 @@ typename Map<Key, Value>::Node* Map<Key, Value>::balance(Node* node) {
         return rotateLeft(node);
     }
     return node;
+}
+
+#include <functional>
+
+template<typename Key, typename Value>
+void Map<Key, Value>::traverse(std::function<void(const Value&)> func) const {
+    traverseNode(root, func);
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::traverseNode(Node* node, std::function<void(const Value&)> func) const {
+    if (node) {
+        traverseNode(node->left, func); // 先遍历左子树
+        func(node->value);                // 处理当前节点
+        traverseNode(node->right, func); // 再遍历右子树
+    }
+}
+
+template<typename K, typename V>
+std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
+    map.traverse([&out](const Value& value) {
+        out << value << std::endl; // 假设Value类已重载了<<操作符
+    });
+    return out;
+}
+
+template<typename K, typename V>
+std::istream& operator>>(std::istream& in, Map<K, V>& map) {
+    V value;
+    while (in >> value) { // 假设Value类已重载了>>操作符
+        map.insert(value);
+    }
+    return in;
 }
