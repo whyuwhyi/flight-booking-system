@@ -56,7 +56,7 @@ void WindowManager::showMainWindow() {
 
 bool WindowManager::localLogin() {
     User temp_user;
-    loadUserFromFile(user_list, data_path + "users.txt");
+    loadUserFromFile(user_list, data_path + "users/users.txt");
     loadLocalUserFromFile(temp_user, local_path + "local-user.txt");
     Link<User>* userPointer = user_list.getHead();
 

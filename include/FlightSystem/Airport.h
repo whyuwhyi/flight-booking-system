@@ -3,15 +3,16 @@
 
 class Airport {
 private:
+    String name;
     String country;
     String city;
-    String name;
+
 
 public:
-    Airport(const String& country = NULL, const String& city = NULL, const String& name = NULL);
-    String getCountry() const;
-    String getCity() const;
-    String getName() const;
+    Airport( const String& name = NULL, const String& country = NULL, const String& city = NULL);
+    const String& getCountry() const;
+    const String& getCity() const;
+    const String& getName() const;
     void setCountry(const String& country);
     void setCity(const String& city);
     void setName(const String& name);

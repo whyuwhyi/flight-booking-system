@@ -1,5 +1,4 @@
 #pragma once
-#include <MinHeap.h>
 #define QUICKSORT_THRESHOLD 16
 #define MERGESORT_THRESHOLD 28
 
@@ -24,7 +23,6 @@ public:
     static void modifyMergeSort(T array[],T tempArray[],int left,int right);
     static void modifyMerge(T array[],T tempArray[],int left,int right,int middle);
     static void bucketSort(T array[],int n,int max);
-    static void heapSort(T array[],int n);
     static void radixSort(T array[],int n,int d,int r);
 };
 
@@ -226,12 +224,6 @@ void Sorter<T>::bucketSort(T array[],int n,int max){
     delete[] count;
 }
 
-template<typename T>
-void Sorter<T>::heapSort(T array[],int n){
-    MinHeap<T> mh(array,n);
-    for(int i = 0;i < n;i++)
-        array[i] = mh.removeMin();
-}
 
 template<typename T>
 void Sorter<T>::radixSort(T array[],int n,int d,int r){

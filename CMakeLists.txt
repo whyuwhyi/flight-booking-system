@@ -12,8 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # 查找 Qt6 库
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location WebEngineWidgets)
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Location WebEngineWidgets)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools WebEngineWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools WebEngineWidgets)
 
 include_directories(include)
 
@@ -32,6 +32,7 @@ set(PROJECT_SOURCES
     "include/ui/RegisterWindow.h"
     "include/ui/MainWindow.h"
     "include/ui/WindowManager.h"
+    "include/ui/ServerWindow.h"
     "include/String/String.h"
     "include/User/User.h"
     "include/User/UserServer.h"
@@ -45,7 +46,7 @@ qt_add_executable(flight-booking
 )
 
 # 链接 Qt6 库
-target_link_libraries(flight-booking PRIVATE Qt6::Widgets Qt6::Location Qt6::WebEngineWidgets)
+target_link_libraries(flight-booking PRIVATE Qt6::Widgets Qt6::WebEngineWidgets)
 
 # 设置 macOS 和 Windows 属性
 set_target_properties(flight-booking PROPERTIES

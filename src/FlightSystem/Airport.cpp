@@ -1,18 +1,22 @@
 #include <FlightSystem/Airport.h>
 
-Airport::Airport(const String& country, const String& city, const String& name)
-    : country(country), city(city), name(name) {}
+Airport::Airport(const String& name, const String& country, const String& city)
+    : name(name), country(country), city(city){}
 
-String Airport::getCountry() const {
+const String& Airport::getName() const {
+    return name;
+}
+
+const String& Airport::getCountry() const {
     return country;
 }
 
-String Airport::getCity() const {
+const String& Airport::getCity() const {
     return city;
 }
 
-String Airport::getName() const {
-    return name;
+void Airport::setName(const String& name) {
+    this->name = name;
 }
 
 void Airport::setCountry(const String& country) {
@@ -21,10 +25,6 @@ void Airport::setCountry(const String& country) {
 
 void Airport::setCity(const String& city) {
     this->city = city;
-}
-
-void Airport::setName(const String& name) {
-    this->name = name;
 }
 
 bool Airport::operator==(const Airport& other) const {

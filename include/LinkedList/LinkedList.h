@@ -12,7 +12,7 @@ public:
     ~LinkedList();
     Link<T>* getHead() const;
     void setHead(Link<T>* head);
-    void append(T& element);
+    void append(const T& element);
     void destroy();
 
     template<typename U>
@@ -43,7 +43,7 @@ void LinkedList<T>::setHead(Link<T>* head) {
 }
 
 template<typename T>
-void LinkedList<T>::append(T& element) {
+void LinkedList<T>::append(const T& element) {
     Link<T>* pointer = head;
     if (head == NULL) {
         head = new Link<T>(element);

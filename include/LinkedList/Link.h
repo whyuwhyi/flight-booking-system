@@ -16,7 +16,7 @@ public:
     Link(Link<T>* next = NULL);
     ~Link();
     void setElement(const T& element);
-    T& getElement();
+    const T& getElement() const;
     void setNext(Link<T>* next);
     Link<T>* getNext();
 
@@ -47,7 +47,7 @@ void Link<T>::setElement(const T& element){
 }
 
 template<typename T>
-T& Link<T>::getElement(){
+const T& Link<T>::getElement() const {
     return element;
 }
 

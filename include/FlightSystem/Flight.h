@@ -3,21 +3,44 @@
 #include <Time/Date.h>
 #include <Time/Time.h>
 #include <String/String.h>
-
-
-
+#include <FlightSystem/Airport.h>
+#include <FlightSystem/Point.h>
+#include <LinkedList/LinkedList.h>
 
 class Flight {
 private:
-    String airline;            // 航空公司
-    String flightNumber;       // 航班编号
-    Airport departureAirPort;  // 出发城市
-    Airport arrivalAirPort;    // 到达城市
-    Time departureTime;        // 出发时间
-    Time costTime;             // 飞行时间
+    String airline;
+    String flightNumber;
+    String airplaneModel;
+    String departureAirport;
+    String arrivalAirport;
+    Time departureTime;
+    Time costTime;
+    LinkedList<Point> airRoute;
 
 public:
+    Flight(const String& airline = NULL, const String& flightNumber = NULL,
+           const String& airplaneModel = NULL, const String& departureAirport = NULL,
+           const String& arrivalAirport = NULL, const Time& departureTime = Time(),
+           const Time& costTime = Time(), const LinkedList<Point>& airRoute = LinkedList<Point>());
 
+    const String& getAirline() const;
+    const String& getFlightNumber() const;
+    const String& getAirplaneModel() const;
+    const String& getDepartureAirport() const;
+    const String& getArrivalAirport() const;
+    const Time& getDepartureTime() const;
+    const Time& getCostTime() const;
+    const LinkedList<Point>& getAirRoute() const;
+
+    void setAirline(const String& airline);
+    void setFlightNumber(const String& flightNumber);
+    void setAirplaneModel(const String& airplaneModel);
+    void setDepartureAirport(const String& departureAirport);
+    void setArrivalAirport(const String& arrivalAirport);
+    void setDepartureTime(const Time& departureTime);
+    void setCostTime(const Time& costTime);
+    void addAirRoutePoint(const Point& point);
 };
 
 
