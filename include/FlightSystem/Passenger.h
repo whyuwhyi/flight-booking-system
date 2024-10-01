@@ -16,7 +16,7 @@ public:
     const String& getIdNumber() const;
 };
 
-Passenger::Passenger(const String& name, const String& idNumber)
+Passenger::Passenger(const String& name = nullptr, const String& idNumber = nullptr)
     : name(name), idNumber(idNumber) {}
 
 Passenger::Passenger(const Passenger& other)

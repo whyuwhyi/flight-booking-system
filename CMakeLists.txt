@@ -19,14 +19,13 @@ include_directories(include)
 
 # 定义源文件
 aux_source_directory(src/ui UI_SRC)
-aux_source_directory(src/User USER_SRC)
 
 set(PROJECT_SOURCES
     "src/main.cpp"
     ${UI_SRC}
     "src/String/String.cpp"
     "src/User/User.cpp"
-    "src/User/UserServer.cpp"
+    "src/data/datamanagement.cpp"
 
     "include/ui/LoginWindow.h"
     "include/ui/RegisterWindow.h"
@@ -35,7 +34,7 @@ set(PROJECT_SOURCES
     "include/ui/ServerWindow.h"
     "include/String/String.h"
     "include/User/User.h"
-    "include/User/UserServer.h"
+    "include/data/datamanagement.h"
     "resources/resources.qrc"
 )
 

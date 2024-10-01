@@ -1,15 +1,17 @@
 #pragma once
 #include <String/String.h>
+#include <FlightSystem/Point.h>
 
 class Airport {
 private:
     String name;
     String country;
     String city;
+    Point position;
 
 
 public:
-    Airport( const String& name = NULL, const String& country = NULL, const String& city = NULL);
+    Airport( const String& name = nullptr, const String& country = nullptr, const String& city = nullptr);
     const String& getCountry() const;
     const String& getCity() const;
     const String& getName() const;

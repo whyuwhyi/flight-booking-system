@@ -3,7 +3,7 @@
 #include <ui/RegisterWindow.h>
 #include <ui/MainWindow.h>
 #include <ui/WindowManager.h>
-#include <User/UserServer.h>
+#include <data/datamanagement.h>
 #include <iostream>
 
 
@@ -56,8 +56,8 @@ void WindowManager::showMainWindow() {
 
 bool WindowManager::localLogin() {
     User temp_user;
-    loadUserFromFile(user_list, data_path + "users/users.txt");
-    loadLocalUserFromFile(temp_user, local_path + "local-user.txt");
+    loadUserFromFile();
+    loadLocalUserFromFile(temp_user);
     Link<User>* userPointer = user_list.getHead();
 
     while (userPointer != NULL) {

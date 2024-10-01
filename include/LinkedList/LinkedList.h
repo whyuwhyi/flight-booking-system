@@ -24,7 +24,7 @@ public:
 
 
 template<typename T>
-LinkedList<T>::LinkedList():head(NULL){ }
+LinkedList<T>::LinkedList():head(nullptr){ }
 
 template<typename T>
 LinkedList<T>::~LinkedList() {
@@ -58,12 +58,12 @@ void LinkedList<T>::append(const T& element) {
 template<typename T>
 void LinkedList<T>::destroy() {
     Link<T>* node;
-    while(head != NULL){
+    while(head != nullptr){
         node = head;
         head = head->getNext();
         delete node;
     }
-    head = NULL;
+    head = nullptr;
 }
 
 template<typename U>
@@ -79,10 +79,10 @@ std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list) {
 template<typename U>
 std::istream& operator>>(std::istream& in, LinkedList<U>& list) {
     U element;
-    Link<U>* tail = NULL;
+    Link<U>* tail = nullptr;
     while (in >> element) {
         Link<U>* newLink = new Link<U>(element);
-        if (tail == NULL) {
+        if (tail == nullptr) {
             list.setHead(newLink);
         }
         else {

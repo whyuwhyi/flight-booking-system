@@ -1,5 +1,5 @@
 #include <ui/RegisterWindow.h>
-#include <User/UserServer.h>
+#include <data/datamanagement.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -154,7 +154,7 @@ void RegisterWindow::onRegisterClicked() {
 
     QMessageBox::information(this, "注册成功", "注册成功！");
 
-    writeUserToFile(user_list, data_path + "users/users.txt");
+    writeUserToFile();
 
     phoneNumberLineEdit->clear();
     passwordLineEdit->clear();

@@ -4,7 +4,6 @@
 
 class QListWidget;
 class QStackedWidget;
-class QWebEngineView;
 
 class ServerWindow : public QMainWindow {
     Q_OBJECT
@@ -20,6 +19,7 @@ private:
 
     QWidget *airportManagementWidget;
     QWidget *flightManagementWidget;
+    QWidget *airplaneModelManagementWidget;
 
     void setupUI();
     void setupConnections();

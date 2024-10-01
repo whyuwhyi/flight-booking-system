@@ -2,9 +2,6 @@
 
 #include <fstream>
 
-#ifndef NULL
-#define NULL 0
-#endif
 
 template<typename T>
 class Link{
@@ -12,8 +9,8 @@ private:
     T element;
     Link<T>* next;
 public:
-    Link(const T& element,Link<T>* next = NULL);
-    Link(Link<T>* next = NULL);
+    Link(const T& element,Link<T>* next = nullptr);
+    Link(Link<T>* next = nullptr);
     ~Link();
     void setElement(const T& element);
     const T& getElement() const;

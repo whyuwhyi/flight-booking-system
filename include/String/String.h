@@ -8,7 +8,7 @@ private:
     char* data;
     size_t length;
 public:
-    String(const char* str = NULL);
+    String(const char* str = nullptr);
     String(const String& other);
     String(String&& other) noexcept;
     ~String();

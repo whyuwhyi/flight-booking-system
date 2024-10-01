@@ -7,7 +7,7 @@ String::String(const char* str) {
         data = new char[length + 1];
         std::strcpy(data, str);
     } else {
-        data = NULL;
+        data = nullptr;
         length = 0;
     }
 }
@@ -19,7 +19,7 @@ String::String(const String& other) {
 }
 
 String::String(String&& other) noexcept : data(other.data), length(other.length) {
-    other.data = NULL;
+    other.data = nullptr;
     other.length = 0;
 }
 
@@ -41,7 +41,7 @@ String& String::operator=(String&& other) noexcept {
     delete[] data;
     data = other.data;
     length = other.length;
-    other.data = NULL;
+    other.data = nullptr;
     other.length = 0;
     return *this;
 }
@@ -71,7 +71,7 @@ bool String::operator==(const String& other) const {
     }
 
 bool String::operator==(const char* other) const {
-    if (other == nullptr) return (data == NULL);
+    if (other == nullptr) return (data == nullptr);
     return std::strcmp(data, other) == 0;
 }
 

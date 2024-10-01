@@ -1,7 +1,7 @@
 #include <ui/LoginWindow.h>
 #include <ui/MainWindow.h>
 #include <ui/RegisterWindow.h>
-#include <User/UserServer.h>
+#include <data/datamanagement.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -107,7 +107,7 @@ void LoginWindow::onLoginClicked() {
             std::cout << "Login Success!" << std::endl;
             if (autoLoginCheckBox->isChecked()) {
                 std::cout << "Save the user information." << std::endl;
-                writeLocalUserToFile(temp_user, local_path + "local-user.txt");
+                writeLocalUserToFile(temp_user);
             }
             emit loginSuccess();
             return;
