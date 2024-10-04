@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+set(ENV{QT_IM_MODULE} "fcitx")
+
+
 # 查找 Qt6 库
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools WebEngineWidgets)
 find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools WebEngineWidgets)
@@ -19,10 +22,14 @@ include_directories(include)
 
 # 定义源文件
 aux_source_directory(src/ui UI_SRC)
+aux_source_directory(src/FlightSystem FLIGHTSYSTEM_SRC)
 
 set(PROJECT_SOURCES
     "src/main.cpp"
     ${UI_SRC}
+    "src/ui/server/ServerWindow.cpp"
+    "src/ui/server/AirportManagementWindow.cpp"
+    ${FLIGHTSYSTEM_SRC}
     "src/String/String.cpp"
     "src/User/User.cpp"
     "src/data/datamanagement.cpp"
@@ -31,10 +38,16 @@ set(PROJECT_SOURCES
     "include/ui/RegisterWindow.h"
     "include/ui/MainWindow.h"
     "include/ui/WindowManager.h"
-    "include/ui/ServerWindow.h"
+    "include/ui/server/ServerWindow.h"
+    "include/ui/server/AirportManagementWindow.h"
+    "include/FlightSystem/AirplaneModel.h"
+    "include/FlightSystem/Airport.h"
+    "include/FlightSystem/Flight.h"
+    "include/FlightSystem/Point.h"
     "include/String/String.h"
     "include/User/User.h"
     "include/data/datamanagement.h"
+    
     "resources/resources.qrc"
 )
 

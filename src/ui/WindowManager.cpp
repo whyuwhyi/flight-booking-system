@@ -51,21 +51,17 @@ void WindowManager::showMainWindow() {
     mainWindow->show();
     delete stackedWidget;
     stackedWidget = NULL;
-    user_list.destroy();
 }
 
 bool WindowManager::localLogin() {
     User temp_user;
-    loadUserFromFile(user_list);
-    loadLocalUserFromFile(temp_user);
-    Link<User>* userPointer = user_list.getHead();
-
-    while (userPointer != NULL) {
-        if (userPointer->getElement() == temp_user) {
+    loadUserFromFile(user_map);
+    if(loadLocalUserFromFile(temp_user)) {
+        User* user_node = user_map.get(temp_user.getPhoneNumber());
+        if(user_node != NULL && user_node->getPassword() == temp_user.getPassword()) {
             std::cout << "Local Login Success!" << std::endl;
-            return true;
+                return true;
         }
-        userPointer = userPointer->getNext();
     }
     return false;
 }

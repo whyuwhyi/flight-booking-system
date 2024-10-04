@@ -124,14 +124,9 @@ void RegisterWindow::onRegisterClicked() {
     QRegularExpression phoneRegex("^1[3-9]\\d{9}$");
     QRegularExpression passwordRegex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,16}$");
 
-    Link<User>* userPointer = user_list.getHead();
-
-    while (userPointer != NULL) {
-        if (userPointer->getElement().getPhoneNumber() == phoneNumber) {
-            QMessageBox::warning(this, "注册失败", "该手机号已被注册。");
+    if(user_map.get(phoneNumber) != NULL) {
+        QMessageBox::warning(this, "注册失败", "该手机号已被注册。");
             return;
-        }
-        userPointer = userPointer->getNext();
     }
 
     if (!phoneRegex.match(phoneNumber.c_str()).hasMatch()) {
@@ -149,12 +144,9 @@ void RegisterWindow::onRegisterClicked() {
         return;
     }
 
-    User newUser(phoneNumber, password);
-    user_list.append(newUser);
+    addUser(User(phoneNumber, password));
 
     QMessageBox::information(this, "注册成功", "注册成功！");
-
-    writeUserToFile(user_list);
 
     phoneNumberLineEdit->clear();
     passwordLineEdit->clear();

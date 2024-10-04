@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加机场</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="addAirport.css" />
+</head>
+<body>
+
+<div class="search-container">
+    <input type="text" id="airportSearch" placeholder="搜索机场..." />
+    <div id="suggestions" class="suggestions"></div>
+</div>
+<div id="map"></div>
+
+<!-- 模态框 -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <span id="cancelButton">X</span>
+        <h2>确认添加机场</h2>
+        <label for="airportName">机场名称:</label>
+        <input type="text" id="airportName" />
+        <label for="airportCountry">国家:</label>
+        <input type="text" id="airportCountry" readonly />
+        <label for="airportCity">城市:</label>
+        <input type="text" id="airportCity" />
+        <label for="airportLat">纬度:</label>
+        <input type="text" id="airportLat" readonly />
+        <label for="airportLng">经度:</label>
+        <input type="text" id="airportLng" readonly />
+        <button id="confirmButton">确认添加</button>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script src="addAirport.js"></script>
+
+</body>
+</html>
+

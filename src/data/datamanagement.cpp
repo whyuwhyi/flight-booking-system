@@ -3,47 +3,48 @@
 #include <fstream>
 
 User current_login_user;
-UserList user_list;
-AirportList airport_list;
+UserMap user_map([] (const User &user) { return user.getPhoneNumber(); });
+AirportMap airport_map([] (const Airport &airport) { return airport.getName(); });
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);
     size_t len2 = strlen(str2);
     char* result = new char[len1 + len2 + 1];
-    
+
     strcpy(result, str1);
     strcat(result, str2);
-    
+
     return result;
 }
 
-// User management functions
-bool loadUserFromFile(UserList &user_list) {
+bool loadUserFromFile(UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
     std::ifstream inFile(filename, std::ios::in);
-    
+
     if (!inFile.is_open()) {
         std::cout << "File open failed!" << std::endl;
         delete[] filename;
         return false;
     }
 
-    inFile >> user_list;
+    inFile >> user_map;
+    std::cout << user_map;
     delete[] filename;
     return true;
 }
 
-bool writeUserToFile(const UserList &user_list) {
+bool writeUserToFile(const UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
     std::ofstream outFile(filename, std::ios::out);
-    
+
     if (!outFile.is_open()) {
         std::cout << "File open failed" << std::endl;
         delete[] filename;
         return false;
     }
 
-    outFile << user_list;
+    outFile << user_map;
+
     delete[] filename;
     return true;
 }
@@ -57,7 +58,7 @@ bool loadLocalUserFromFile(User &local_user) {
         delete[] filename;
         return false;
     }
-    
+
     inFile >> local_user;
     delete[] filename;
     return true;
@@ -66,7 +67,7 @@ bool loadLocalUserFromFile(User &local_user) {
 bool writeLocalUserToFile(User &local_user) {
     char* filename = myStrcat(LOCAL_DATA_PATH, "local-user.txt");
     std::ofstream outFile(filename, std::ios::out);
-    
+
     if (!outFile.is_open()) {
         std::cout << "File open failed" << std::endl;
         delete[] filename;
@@ -78,35 +79,27 @@ bool writeLocalUserToFile(User &local_user) {
     return true;
 }
 
-// User management functions
-bool addUser(const User& user) {
-    user_list.add(user); // Assuming add method exists
-    return writeUserToFile(user_list);
+bool addUser(const User &user) {
+    user_map.insert(user);
+    return writeUserToFile(user_map);
 }
 
-bool modifyUser(const String& username, const User& updatedUser) {
-    for (int i = 0; i < user_list.size(); ++i) {
-        if (user_list[i].getUsername() == username) { // Assuming getUsername() is defined
-            user_list[i] = updatedUser; // Assuming assignment operator is defined
-            return writeUserToFile(user_list);
-        }
+bool modifyUser(const String &username, const User &updatedUser) {
+    if (user_map.erase(username)) {
+        user_map.insert(updatedUser);
+        return writeUserToFile(user_map);
     }
-    return false; // Not found
+    return false;
 }
 
-bool deleteUser(const String& username) {
-    for (int i = 0; i < user_list.size(); ++i) {
-        if (user_list[i].getUsername() == username) {
-            user_list.removeAt(i); // Assuming removeAt method exists
-            return writeUserToFile(user_list);
-        }
+bool deleteUser(const String &username) {
+    if (user_map.erase(username)) {
+        return writeUserToFile(user_map);
     }
-    return false; // Not found
+    return false;
 }
 
-
-// Airport management functions
-bool loadAirportFromFile(AirportList &airport_list) {
+bool loadAirportFromFile(AirportMap &airport_map) {
     char* filename = myStrcat(DATA_PATH, "airport/airports.txt");
     std::ifstream inFile(filename, std::ios::in);
 
@@ -116,54 +109,102 @@ bool loadAirportFromFile(AirportList &airport_list) {
         return false;
     }
 
-    Airport airport;
-    while (inFile >> airport) {
-        airport_list.add(airport); // Assuming add method exists
-    }
+    inFile >> airport_map;
+    std::cout << airport_map;
 
     delete[] filename;
     return true;
 }
 
-bool writeAirportToFile(const AirportList &airport_list) {
+bool writeAirportToFile(const AirportMap &airport_map) {
     char* filename = myStrcat(DATA_PATH, "airport/airports.txt");
     std::ofstream outFile(filename, std::ios::out);
-    
+
     if (!outFile.is_open()) {
         std::cout << "File open failed" << std::endl;
         delete[] filename;
         return false;
     }
 
-    for (const auto& airport : airport_list) {
-        outFile << airport; // Assuming operator<< is overloaded
-    }
+    outFile << airport_map;
 
     delete[] filename;
     return true;
 }
 
-bool addAirport(const Airport& airport) {
-    airport_list.add(airport); // Assuming add method exists
-    return writeAirportToFile(airport_list);
+bool addAirport(const Airport &airport) {
+    if (airport_map.insert(airport)) {
+        return writeAirportToFile(airport_map);
+    }
+    return false;
 }
 
-bool modifyAirport(const String& airportName, const Airport& updatedAirport) {
-    for (int i = 0; i < airport_list.size(); ++i) {
-        if (airport_list[i].getName() == airportName) {
-            airport_list[i] = updatedAirport; // Assuming assignment operator is defined
-            return writeAirportToFile(airport_list);
-        }
+bool modifyAirport(const String &airportName, const Airport &updatedAirport) {
+    if (airport_map.erase(airportName)) {
+        airport_map.insert(updatedAirport);
+        return writeAirportToFile(airport_map);
     }
-    return false; // Not found
+    return false;
 }
 
-bool deleteAirport(const String& airportName) {
-    for (int i = 0; i < airport_list.size(); ++i) {
-        if (airport_list[i].getName() == airportName) {
-            airport_list.removeAt(i); // Assuming removeAt method exists
-            return writeAirportToFile(airport_list);
-        }
+bool deleteAirport(const String &airportName) {
+    if (airport_map.erase(airportName)) {
+        return writeAirportToFile(airport_map);
     }
-    return false; // Not found
+    return false;
+}
+
+bool loadAirlineFromFile(AirlineMap &airline_map) {
+    char* filename = myStrcat(DATA_PATH, "airline/airlines.txt");
+    std::ifstream inFile(filename, std::ios::in);
+
+    if (!inFile.is_open()) {
+        std::cout << "File open failed!" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    inFile >> airline_map;
+    std::cout << airline_map;
+
+    delete[] filename;
+    return true;
+}
+
+bool writeAirlineToFile(const AirlineMap &airline_map) {
+    char* filename = myStrcat(DATA_PATH, "airline/airlines.txt");
+    std::ofstream outFile(filename, std::ios::out);
+
+    if (!outFile.is_open()) {
+        std::cout << "File open failed" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    outFile << airline_map;
+
+    delete[] filename;
+    return true;
+}
+
+bool addAirline(const Airline &airline) {
+    if (airline_map.insert(airline)) {
+        return writeAirlineToFile(airline_map);
+    }
+    return false;
+}
+
+bool modifyAirline(const String &airlineName, const Airline &updatedAirline) {
+    if (airline_map.erase(airlineName)) {
+        airline_map.insert(updatedAirline);
+        return writeAirlineToFile(airline_map);
+    }
+    return false;
+}
+
+bool deleteAirline(const String &airlineName) {
+    if (airline_map.erase(airlineName)) {
+        return writeAirlineToFile(airline_map);
+    }
+    return false;
 }

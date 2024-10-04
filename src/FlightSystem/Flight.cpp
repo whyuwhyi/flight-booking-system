@@ -1,5 +1,7 @@
 #include <FlightSystem/Flight.h>
 
+Flight::Flight(){}
+
 Flight::Flight(const String& airline, const String& flightNumber,
                const String& airplaneModel, const String& departureAirport,
                const String& arrivalAirport, const Time& departureTime,

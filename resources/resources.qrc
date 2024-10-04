@@ -1,11 +1,17 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/app.svg</file>
-        <file>icons/route.svg</file>
-        <file>icons/service.svg</file>
-        <file>icons/personal.svg</file>
-        <file>icons/eye_closed.svg</file>
         <file>icons/eye_open.svg</file>
+        <file>icons/route.svg</file>
+        <file>icons/airplane.svg</file>
+        <file>icons/service.svg</file>
+        <file>icons/airport.svg</file>
+        <file>icons/flight.svg</file>
+        <file>icons/app.svg</file>
+        <file>icons/eye_closed.svg</file>
+        <file>icons/personal.svg</file>
+        <file>pages/addAirport.css</file>
         <file>pages/map.html</file>
+        <file>pages/addAirport.html</file>
+        <file>pages/addAirport.js</file>
     </qresource>
 </RCC>

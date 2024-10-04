@@ -1,14 +1,16 @@
-#include "FlightSystem/AirplaneModel.h"
+#include <FlightSystem/AirplaneModel.h>
+
+AirplaneModel::AirplaneModel(){}
 
 AirplaneModel::AirplaneModel(const String &name, int capacity)
-    : modelName(name), passengerCapacity(capacity) {
+    : name(name), passengerCapacity(capacity) {
     cabins[FirstClass] = Cabin();   // 默认初始化
     cabins[BusinessClass] = Cabin(); // 默认初始化
     cabins[EconomyClass] = Cabin();   // 默认初始化
 }
 
-const String& AirplaneModel::getModelName() const {
-    return modelName;
+const String& AirplaneModel::getName() const {
+    return name;
 }
 
 int AirplaneModel::getPassengerCapacity() const {
@@ -27,7 +29,7 @@ const Cabin& AirplaneModel::getCabin(CabinType type) const {
 
 // 重载输出运算符
 std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
-    out << airplane.modelName << " " << airplane.passengerCapacity << "\n";
+    out << airplane.name << " " << airplane.passengerCapacity << "\n";
     for (const auto& cabin : airplane.cabins) {
         out << cabin.rows << " " << cabin.columns << "\n";
     }
@@ -36,7 +38,7 @@ std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
 
 // 重载输入运算符
 std::istream& operator>>(std::istream& in, AirplaneModel& airplane) {
-    in >> airplane.modelName >> airplane.passengerCapacity;
+    in >> airplane.name >> airplane.passengerCapacity;
     for (auto& cabin : airplane.cabins) {
         in >> cabin.rows >> cabin.columns;
     }

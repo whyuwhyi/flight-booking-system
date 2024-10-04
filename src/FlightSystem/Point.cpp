@@ -24,14 +24,11 @@ bool Point::operator==(const Point& other) const {
 
 // 流操作符重载
 std::ostream& operator<<(std::ostream& out, const Point& point) {
-    out << point.getLongitude() << ' ' << point.getLatitude();
+    out << point.longitude << ' ' << point.latitude;
     return out;
 }
 
 std::istream& operator>>(std::istream& in, Point& point) {
-    double longitude, latitude;
-    in >> longitude >> latitude;
-    point.setLongitude(longitude);
-    point.setLatitude(latitude);
+    in >> point.longitude >> point.latitude;
     return in;
 }

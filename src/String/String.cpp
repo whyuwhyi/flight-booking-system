@@ -65,6 +65,22 @@ char* String::operator+(const char* other) const {
     return newData;
 }
 
+bool String::operator<(const String& other) const {
+    return strcmp(data, other.data) < 0;
+}
+
+bool String::operator>(const String& other) const {
+    return strcmp(data, other.data) > 0;
+}
+
+bool String::operator<=(const String& other) const {
+    return strcmp(data, other.data) <= 0;
+}
+
+bool String::operator>=(const String& other) const {
+    return strcmp(data, other.data) >= 0;
+}
+
 bool String::operator==(const String& other) const {
         if (length != other.length) return false;
         return std::strcmp(data, other.data) == 0;

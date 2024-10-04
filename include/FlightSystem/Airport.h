@@ -12,7 +12,8 @@ private:
 
 
 public:
-    Airport( const String& name = nullptr, const String& country = nullptr, const String& city = nullptr, const Point& position = Point());
+    Airport();
+    Airport( const String& name, const String& country, const String& city, const Point& position = Point());
     const String& getCountry() const;
     const String& getCity() const;
     const String& getName() const;
@@ -21,7 +22,6 @@ public:
     void setCity(const String& city);
     void setName(const String& name);
     void setPosition(const Point& position);
-    bool operator==(const Airport& other) const;
 
     friend std::ostream& operator<<(std::ostream& out, const Airport& airport);
     friend std::istream& operator>>(std::istream& in, Airport& airport);

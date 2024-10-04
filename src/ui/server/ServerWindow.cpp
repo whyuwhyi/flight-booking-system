@@ -1,11 +1,15 @@
-#include <ui/ServerWindow.h>
+#include <ui/server/ServerWindow.h>
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <ui/server/AirportManagementWindow.h>
+#include <data/datamanagement.h>
 
 ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
+    loadUserFromFile(user_map);
+    loadAirportFromFile(airport_map);
     setupUI();
     setupConnections();
 }
@@ -38,10 +42,7 @@ void ServerWindow::setupUI() {
     stackedWidget = new QStackedWidget();
 
     // 机场管理界面
-    airportManagementWidget = new QWidget();
-    QLabel *airportLabel = new QLabel("机场管理内容", airportManagementWidget);
-    QVBoxLayout *airportLayout = new QVBoxLayout(airportManagementWidget);
-    airportLayout->addWidget(airportLabel);
+    airportManagementWidget = new AirportManagementWindow(); // 使用AirportManagementWindow类
 
     // 机型管理界面
     airplaneModelManagementWidget = new QWidget();

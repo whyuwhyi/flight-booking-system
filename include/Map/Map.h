@@ -16,9 +16,11 @@ private:
     };
 
     Node *root;
+    std::function<Key(const Value&)> getKey;
 
     Node* insert(Node* node, const Value &value);
     Node* find(Node* node, const Key &key) const;
+    Node* erase(Node* node, const Key &key);
     void destroy(Node* node);
     int height(Node* node) const;
     int balanceFactor(Node* node) const;
@@ -26,22 +28,26 @@ private:
     Node* rotateLeft(Node* node);
     Node* balance(Node* node);
     void traverseNode(Node* node, std::function<void(const Value&)> func) const;
-
+    void traverseNode(Node* node, std::function<void(Value*)> func) const;
 public:
-    Map();
+    Map(std::function<Key(const Value&)> getKeyFunc);
     ~Map();
-    void insert(const Value &value);
+    bool insert(const Value &value);
     Value* get(const Key &key) const;
+    bool erase(const Key& key);
     void traverse(std::function<void(const Value&)> func) const;
+    void traverse(std::function<void(Value*)> func) const;
 
     template<typename K, typename V>
-    friend std::ostream& operator<<(std::ostream& out, const Map<U, Value>& map);
+    friend std::ostream& operator<<(std::ostream& out, const Map<K, V>& map);
     template<typename K, typename V>
-    friend std::istream& operator>>(std::istream& in, Map<U, V>& map);
+    friend std::istream& operator>>(std::istream& in, Map<K, V>& map);
 };
 
+
+
 template<typename Key, typename Value>
-Map<Key, Value>::Map() : root(nullptr) {}
+Map<Key, Value>::Map(std::function<Key(const Value&)> getKeyFunc) : root(nullptr), getKey(getKeyFunc) {}
 
 template<typename Key, typename Value>
 Map<Key, Value>::~Map() {
@@ -58,15 +64,19 @@ void Map<Key, Value>::destroy(Node* node) {
 }
 
 template<typename Key, typename Value>
-void Map<Key, Value>::insert(const Value &value) {
+bool Map<Key, Value>::insert(const Value &value) {
+    if (find(root, getKey(value))) {
+        return false;
+    }
     root = insert(root, value);
+    return true;
 }
 
 template<typename Key, typename Value>
 typename Map<Key, Value>::Node* Map<Key, Value>::insert(Node* node, const Value &value) {
     if (!node) return new Node(value);
 
-    if (value.getKey() < node->value.getKey()) {
+    if (getKey(value) < getKey(node->value)) {
         node->left = insert(node->left, value);
     } else {
         node->right = insert(node->right, value);
@@ -80,9 +90,9 @@ template<typename Key, typename Value>
 typename Map<Key, Value>::Node* Map<Key, Value>::find(Node* node, const Key &key) const {
     if (!node) return nullptr;
 
-    if (key < node->value.getKey()) {
+    if (key < getKey(node->value)) {
         return find(node->left, key);
-    } else if (key > node->value.getKey()) {
+    } else if (key > getKey(node->value)) {
         return find(node->right, key);
     } else {
         return node;
@@ -143,7 +153,32 @@ typename Map<Key, Value>::Node* Map<Key, Value>::balance(Node* node) {
     return node;
 }
 
-#include <functional>
+template<typename Key, typename Value>
+bool Map<Key, Value>::erase(const Key& key) {
+    if (find(root, key)) {
+        root = erase(root, key);
+        return true;
+    }
+    return false;
+}
+
+template<typename Key, typename Value>
+typename Map<Key, Value>::Node* Map<Key, Value>::erase(Node* node, const Key &key) {
+    if (!node) return nullptr;
+    if (key < getKey(node->value)) {
+        node->left = erase(node->left, key);
+    } else if (key > getKey(node->value)) {
+        node->right = erase(node->right, key);
+    } else {
+        if (!node->left) return node->right;
+        if (!node->right) return node->left;
+        Node* minNode = node->right;
+        while (minNode->left) minNode = minNode->left;
+        node->value = minNode->value;
+        node->right = erase(node->right, getKey(minNode->value));
+    }
+    return balance(node);
+}
 
 template<typename Key, typename Value>
 void Map<Key, Value>::traverse(std::function<void(const Value&)> func) const {
@@ -153,16 +188,30 @@ void Map<Key, Value>::traverse(std::function<void(const Value&)> func) const {
 template<typename Key, typename Value>
 void Map<Key, Value>::traverseNode(Node* node, std::function<void(const Value&)> func) const {
     if (node) {
-        traverseNode(node->left, func); // 先遍历左子树
-        func(node->value);                // 处理当前节点
-        traverseNode(node->right, func); // 再遍历右子树
+        traverseNode(node->left, func);
+        func(node->value);
+        traverseNode(node->right, func);
+    }
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::traverse(std::function<void(Value*)> func) const {
+    traverseNode(root, func);
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::traverseNode(Node* node, std::function<void(Value*)> func) const {
+    if (node) {
+        traverseNode(node->left, func);
+        func(&node->value);
+        traverseNode(node->right, func);
     }
 }
 
 template<typename K, typename V>
 std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
-    map.traverse([&out](const Value& value) {
-        out << value << std::endl; // 假设Value类已重载了<<操作符
+    map.traverse([&out](const V& value) {
+        out << value << std::endl;
     });
     return out;
 }
@@ -170,7 +219,7 @@ std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
 template<typename K, typename V>
 std::istream& operator>>(std::istream& in, Map<K, V>& map) {
     V value;
-    while (in >> value) { // 假设Value类已重载了>>操作符
+    while (in >> value) {
         map.insert(value);
     }
     return in;

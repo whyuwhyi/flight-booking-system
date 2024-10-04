@@ -19,9 +19,10 @@ private:
     LinkedList<Point> airRoute;
 
 public:
-    Flight(const String& airline = nullptr, const String& flightNumber = nullptr,
-           const String& airplaneModel = nullptr, const String& departureAirport = nullptr,
-           const String& arrivalAirport = nullptr, const Time& departureTime = Time(),
+    Flight();
+    Flight(const String& airline, const String& flightNumber,
+           const String& airplaneModel, const String& departureAirport,
+           const String& arrivalAirport, const Time& departureTime = Time(),
            const Time& costTime = Time(), const LinkedList<Point>& airRoute = LinkedList<Point>());
 
     const String& getAirline() const;

@@ -99,20 +99,18 @@ void LoginWindow::setupConnections() {
 void LoginWindow::onLoginClicked() {
     String phoneNumber = phoneNumberLineEdit->text().toStdString().c_str();
     String password = passwordLineEdit->text().toStdString().c_str();
-    User temp_user(phoneNumber, password);
-    Link<User>* userPointer = user_list.getHead();
 
-    while(userPointer != NULL) {
-        if(userPointer->getElement() == temp_user){
-            std::cout << "Login Success!" << std::endl;
-            if (autoLoginCheckBox->isChecked()) {
-                std::cout << "Save the user information." << std::endl;
-                writeLocalUserToFile(temp_user);
-            }
-            emit loginSuccess();
-            return;
+    User* user_node = user_map.get(phoneNumber);
+
+    if(user_node != nullptr&&password == user_node->getPassword()){
+        std::cout << "Login Success!" << std::endl;
+        if (autoLoginCheckBox->isChecked()) {
+            std::cout << "Save the user information." << std::endl;
+            current_login_user = User(phoneNumber, password);
+            writeLocalUserToFile(current_login_user);
         }
-        userPointer = userPointer->getNext();
+        emit loginSuccess();
+        return;
     }
 
     QMessageBox::warning(this, "登录失败", "账号或密码错误！");
