@@ -11,10 +11,10 @@
 #include <QWebChannel>
 #include <FlightSystem/Airline.h>
 
-class AirlineManagementBackend : public QObject {
+class AirlineManageBackend : public QObject {
     Q_OBJECT
 public:
-    AirlineManagementBackend(QObject *parent = nullptr) : QObject(parent) {}
+    AirlineManageBackend(QObject *parent = nullptr) : QObject(parent) {}
 
     Q_INVOKABLE void receiveRouteData(const QVariantList &routePoints, double routeLengthInKm) {
         emit routeDataReceived(routePoints, routeLengthInKm);
@@ -32,7 +32,7 @@ signals:
     void airlineDataRequested();
 };
 
-class AirlineManagementWindow : public QWidget {
+class AirlineManageWindow : public QWidget {
     Q_OBJECT
 
 private slots:
@@ -66,7 +66,7 @@ private:
     void openMapSearchWindow(const QString &airport1, const QString &airport2);
 
 public:
-    AirlineManagementWindow(QWidget *parent = nullptr);
+    AirlineManageWindow(QWidget *parent = nullptr);
     void setupUI();
     void setupConnections();
 };

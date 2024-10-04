@@ -22,6 +22,16 @@ void Cabin::setColumns(int c) {
     columns = c;
 }
 
+std::ostream& operator<<(std::ostream& out, const Cabin& cabin) {
+    out << cabin.rows <<" " << cabin.columns;
+    return out;
+}
+
+std::istream& operator>>(std::istream& in, Cabin& cabin) {
+    in >> cabin.rows >> cabin.columns;
+    return in;
+}
+
 // AirplaneModel class implementation
 AirplaneModel::AirplaneModel() : name(""), firstClassCabin(), businessClassCabin(), economyClassCabin() {}
 
@@ -70,10 +80,10 @@ void AirplaneModel::setCabin(CabinType type, const Cabin& cabin) {
 }
 
 std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
-    out << "Airplane Model: " << airplane.name << "\n"
-        << "First Class Cabin: " << airplane.firstClassCabin.getPassengerCapacity() << " passengers\n"
-        << "Business Class Cabin: " << airplane.businessClassCabin.getPassengerCapacity() << " passengers\n"
-        << "Economy Class Cabin: " << airplane.economyClassCabin.getPassengerCapacity() << " passengers";
+    out << airplane.name << "\n"
+        << airplane.firstClassCabin << "\n"
+        << airplane.businessClassCabin << "\n"
+        << airplane.economyClassCabin << "\n";
     return out;
 }
 

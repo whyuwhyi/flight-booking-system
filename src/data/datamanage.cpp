@@ -1,4 +1,4 @@
-#include <data/datamanagement.h>
+#include <data/datamanage.h>
 #include <iostream>
 #include <fstream>
 
@@ -6,6 +6,7 @@ User current_login_user;
 UserMap user_map([] (const User &user) { return user.getPhoneNumber(); });
 AirportMap airport_map([] (const Airport &airport) { return airport.getName(); });
 AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
+AirplaneModelMap airplane_model_map([] (const AirplaneModel &model) { return model.getName(); });
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);
@@ -18,6 +19,7 @@ char* myStrcat(const char* str1, const char* str2) {
     return result;
 }
 
+// User management functions
 bool loadUserFromFile(UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -29,7 +31,6 @@ bool loadUserFromFile(UserMap &user_map) {
     }
 
     inFile >> user_map;
-    std::cout << user_map;
     delete[] filename;
     return true;
 }
@@ -45,7 +46,6 @@ bool writeUserToFile(const UserMap &user_map) {
     }
 
     outFile << user_map;
-
     delete[] filename;
     return true;
 }
@@ -100,6 +100,7 @@ bool deleteUser(const String &username) {
     return false;
 }
 
+// Airport management functions
 bool loadAirportFromFile(AirportMap &airport_map) {
     char* filename = myStrcat(DATA_PATH, "airport/airports.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -111,8 +112,6 @@ bool loadAirportFromFile(AirportMap &airport_map) {
     }
 
     inFile >> airport_map;
-    std::cout << airport_map;
-
     delete[] filename;
     return true;
 }
@@ -128,7 +127,6 @@ bool writeAirportToFile(const AirportMap &airport_map) {
     }
 
     outFile << airport_map;
-
     delete[] filename;
     return true;
 }
@@ -155,6 +153,7 @@ bool deleteAirport(const String &airportName) {
     return false;
 }
 
+// Airline management functions
 bool loadAirlineFromFile(AirlineMap &airline_map) {
     char* filename = myStrcat(DATA_PATH, "airline/airlines.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -166,8 +165,6 @@ bool loadAirlineFromFile(AirlineMap &airline_map) {
     }
 
     inFile >> airline_map;
-    std::cout << airline_map;
-
     delete[] filename;
     return true;
 }
@@ -183,7 +180,6 @@ bool writeAirlineToFile(const AirlineMap &airline_map) {
     }
 
     outFile << airline_map;
-
     delete[] filename;
     return true;
 }
@@ -206,6 +202,59 @@ bool modifyAirline(const String &airlineName, const Airline &updatedAirline) {
 bool deleteAirline(const String &airlineName) {
     if (airline_map.erase(airlineName)) {
         return writeAirlineToFile(airline_map);
+    }
+    return false;
+}
+
+// AirplaneModel management functions
+bool loadAirplaneModelFromFile(AirplaneModelMap &airplane_model_map) {
+    char* filename = myStrcat(DATA_PATH, "airplanemodel/models.txt");
+    std::ifstream inFile(filename, std::ios::in);
+
+    if (!inFile.is_open()) {
+        std::cout << "File open failed!" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    inFile >> airplane_model_map;
+    delete[] filename;
+    return true;
+}
+
+bool writeAirplaneModelToFile(const AirplaneModelMap &airplane_model_map) {
+    char* filename = myStrcat(DATA_PATH, "airplanemodel/models.txt");
+    std::ofstream outFile(filename, std::ios::out);
+
+    if (!outFile.is_open()) {
+        std::cout << "File open failed" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    outFile << airplane_model_map;
+    delete[] filename;
+    return true;
+}
+
+bool addAirplaneModel(const AirplaneModel &airplane_model) {
+    if (airplane_model_map.insert(airplane_model)) {
+        return writeAirplaneModelToFile(airplane_model_map);
+    }
+    return false;
+}
+
+bool modifyAirplaneModel(const String &modelName, const AirplaneModel &updatedAirplaneModel) {
+    if (airplane_model_map.erase(modelName)) {
+        airplane_model_map.insert(updatedAirplaneModel);
+        return writeAirplaneModelToFile(airplane_model_map);
+    }
+    return false;
+}
+
+bool deleteAirplaneModel(const String &modelName) {
+    if (airplane_model_map.erase(modelName)) {
+        return writeAirplaneModelToFile(airplane_model_map);
     }
     return false;
 }

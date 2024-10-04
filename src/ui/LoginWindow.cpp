@@ -1,7 +1,7 @@
 #include <ui/LoginWindow.h>
 #include <ui/MainWindow.h>
 #include <ui/RegisterWindow.h>
-#include <data/datamanagement.h>
+#include <data/datamanage.h>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>

@@ -20,5 +20,3 @@ public:
     const String& getSeatNumber() const;
     double getPrice() const;
 };
-
-

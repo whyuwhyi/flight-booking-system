@@ -1,4 +1,4 @@
-#include <ui/FlightManageWindow.h>
+#include <ui/server/FlightManageWindow.h>
 #include <QVBoxLayout>
 #include <QLabel>
 

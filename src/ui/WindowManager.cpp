@@ -3,7 +3,7 @@
 #include <ui/RegisterWindow.h>
 #include <ui/MainWindow.h>
 #include <ui/WindowManager.h>
-#include <data/datamanagement.h>
+#include <data/datamanage.h>
 #include <iostream>
 
 

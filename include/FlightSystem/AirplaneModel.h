@@ -16,6 +16,9 @@ public:
     void setRows(int r);
     int getColumns() const;
     void setColumns(int c);
+
+    friend std::ostream& operator<<(std::ostream& out, const Cabin& cabin);
+    friend std::istream& operator>>(std::istream& in, Cabin& cabin);
 };
 
 class AirplaneModel {

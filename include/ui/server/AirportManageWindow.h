@@ -10,10 +10,10 @@
 #include <QWebChannel>
 #include <FlightSystem/Airport.h>
 
-class AirportManagementBackend : public QObject {
+class AirportManageBackend : public QObject {
     Q_OBJECT
 public:
-    AirportManagementBackend(QObject *parent = nullptr) : QObject(parent) {}
+    AirportManageBackend(QObject *parent = nullptr) : QObject(parent) {}
 
     Q_INVOKABLE void receiveAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
         emit airportDataReceived(name, country, city, latitude, longitude);
@@ -23,7 +23,7 @@ signals:
     void airportDataReceived(const QString &name, const QString &country, const QString &city, double latitude, double longitude);
 };
 
-class AirportManagementWindow : public QWidget {
+class AirportManageWindow : public QWidget {
     Q_OBJECT
 
 private slots:
@@ -51,8 +51,7 @@ private:
     void addAirportItem(const Airport &airport);
     void openMapSearchWindow();
 public:
-    AirportManagementWindow(QWidget *parent = nullptr);
+    AirportManageWindow(QWidget *parent = nullptr);
     void setupUI();
     void setupConnections();
 };
-

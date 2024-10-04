@@ -1,15 +1,15 @@
-#include <ui/server/AirportManagementWindow.h>
-#include <data/datamanagement.h>
+#include <ui/server/AirportManageWindow.h>
+#include <data/datamanage.h>
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QWebEngineView>
 
-AirportManagementWindow::AirportManagementWindow(QWidget *parent) : QWidget(parent) {
+AirportManageWindow::AirportManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
 }
 
-void AirportManagementWindow::setupUI() {
+void AirportManageWindow::setupUI() {
     mainLayout = new QVBoxLayout(this);
 
     // searchLineEdit = new QLineEdit(this);
@@ -25,7 +25,7 @@ void AirportManagementWindow::setupUI() {
     airport_map.traverse([this](const Airport& airport){ addAirportItem(airport); });
 }
 
-void AirportManagementWindow::setupConnections() {
+void AirportManageWindow::setupConnections() {
     connect(addAirportButton, &QPushButton::clicked, this, [this]() {
         openMapSearchWindow();
     });
@@ -35,7 +35,7 @@ void AirportManagementWindow::setupConnections() {
     // });
 }
 
-void AirportManagementWindow::openMapSearchWindow() {
+void AirportManageWindow::openMapSearchWindow() {
     // 创建并配置 HTML 窗口
     QDialog *mapDialog = new QDialog(this);
     mapDialog->setWindowTitle("搜索机场");
@@ -47,8 +47,8 @@ void AirportManagementWindow::openMapSearchWindow() {
     QWebEngineView *webView = new QWebEngineView(mapDialog);
     QWebChannel *channel = new QWebChannel(this);
 
-    AirportManagementBackend *backend = new AirportManagementBackend(this);
-    connect(backend, &AirportManagementBackend::airportDataReceived, this, &AirportManagementWindow::handleAirportData);
+    AirportManageBackend *backend = new AirportManageBackend(this);
+    connect(backend, &AirportManageBackend::airportDataReceived, this, &AirportManageWindow::handleAirportData);
 
     webView->page()->setWebChannel(channel);
     channel->registerObject(QStringLiteral("qt_addAirport"), backend);
@@ -60,7 +60,7 @@ void AirportManagementWindow::openMapSearchWindow() {
 }
 
 
-void AirportManagementWindow::handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
+void AirportManageWindow::handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
     Airport newAirport(name.toStdString().c_str(), country.toStdString().c_str(), city.toStdString().c_str(), Point(longitude, latitude));
     if (addAirport(newAirport)) {
         addAirportItem(newAirport);
@@ -70,7 +70,7 @@ void AirportManagementWindow::handleAirportData(const QString &name, const QStri
 }
 
 
-void AirportManagementWindow::addAirportItem(const Airport& airport) {
+void AirportManageWindow::addAirportItem(const Airport& airport) {
     AirportItem *item = new AirportItem(airport, airportListWidget);
     airportListWidget->addItem(item);
     connect(item->getDeleteButton(), &QPushButton::clicked, this, [this, item]() {
@@ -78,7 +78,7 @@ void AirportManagementWindow::addAirportItem(const Airport& airport) {
     });
 }
 
-void AirportManagementWindow::onDeleteAirport(AirportItem *item) {
+void AirportManageWindow::onDeleteAirport(AirportItem *item) {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "确认删除", "确定要删除这个机场吗？", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
@@ -90,7 +90,7 @@ void AirportManagementWindow::onDeleteAirport(AirportItem *item) {
     }
 }
 
-AirportManagementWindow::AirportItem::AirportItem(const Airport& airport, QListWidget *parent)
+AirportManageWindow::AirportItem::AirportItem(const Airport& airport, QListWidget *parent)
     : QListWidgetItem(parent) {
     deleteButton = new QPushButton("删除", parent);
 
@@ -114,10 +114,10 @@ AirportManagementWindow::AirportItem::AirportItem(const Airport& airport, QListW
     parent->setItemWidget(this, itemWidget);
 }
 
-QPushButton* AirportManagementWindow::AirportItem::getDeleteButton() {
+QPushButton* AirportManageWindow::AirportItem::getDeleteButton() {
     return deleteButton;
 }
 
-String AirportManagementWindow::AirportItem::getAirportName() {
+String AirportManageWindow::AirportItem::getAirportName() {
     return nameLabel->text().toStdString().c_str();
 }

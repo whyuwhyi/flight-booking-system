@@ -16,7 +16,6 @@ class AirplaneModelManageWindow : public QWidget {
 
 public:
     AirplaneModelManageWindow(QWidget *parent = nullptr);
-    ~AirplaneModelManageWindow();
 
 private:
     void setupUI();
