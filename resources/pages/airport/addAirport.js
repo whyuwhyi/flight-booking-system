@@ -2,7 +2,7 @@ var map = L.map('map').setView([39.9, 116.4], 5);
 
 // 初始化 QWebChannel，确保与 Qt 进行通信
 new QWebChannel(qt.webChannelTransport, function(channel) {
-    window.qt = channel.objects.qt; // 注册 qt 对象
+    window.qt_addAirport = channel.objects.qt_addAirport; // 注册 qt 对象
 });
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -22,7 +22,6 @@ document.getElementById('airportSearch').addEventListener('input', function() {
     var airportName = this.value;
     if (airportName) {
         fetch(`https://nominatim.openstreetmap.org/search?q=${airportName} airport&format=json`)
-        // fetch(`https://nominatim.openstreetmap.org/search?city=${airportName}&format=json`)
             .then(response => response.json())
             .then(data => {
                 suggestionsElement.innerHTML = '';
@@ -85,8 +84,8 @@ document.getElementById('confirmButton').addEventListener('click', function() {
     var lng = airportLngInput.value;
 
     // 通过 QWebChannel 发送数据
-    if (window.qt) {
-        window.qt.receiveAirportData(name, country, city, parseFloat(lat), parseFloat(lng));
+    if (window.qt_addAirport) {
+        window.qt_addAirport.receiveAirportData(name, country, city, parseFloat(lat), parseFloat(lng));
     }
 
     // 关闭模态框

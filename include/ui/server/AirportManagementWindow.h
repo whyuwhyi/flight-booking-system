@@ -10,10 +10,10 @@
 #include <QWebChannel>
 #include <FlightSystem/Airport.h>
 
-class Backend : public QObject {
+class AirportManagementBackend : public QObject {
     Q_OBJECT
 public:
-    Backend(QObject *parent = nullptr) : QObject(parent) {}
+    AirportManagementBackend(QObject *parent = nullptr) : QObject(parent) {}
 
     Q_INVOKABLE void receiveAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
         emit airportDataReceived(name, country, city, latitude, longitude);
@@ -55,3 +55,4 @@ public:
     void setupUI();
     void setupConnections();
 };
+

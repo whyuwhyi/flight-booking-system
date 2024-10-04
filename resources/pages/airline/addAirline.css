@@ -1,0 +1,81 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.search-container {
+    margin: 20px;
+    position: relative;
+}
+
+#citySearch {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#map {
+    height: 500px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 20px 0;
+}
+
+.suggestions {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+    position: absolute;
+    z-index: 1000;
+    width: calc(100% - 20px);
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+.info-container {
+    padding: 20px;
+}
+
+.airport-info label, .airport-info input {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.airport-info input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #eaeaea;
+}
+
+.action-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+#confirmRouteButton {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#confirmRouteButton:hover {
+    background-color: #45a049;
+}

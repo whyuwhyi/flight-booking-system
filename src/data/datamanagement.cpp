@@ -5,6 +5,7 @@
 User current_login_user;
 UserMap user_map([] (const User &user) { return user.getPhoneNumber(); });
 AirportMap airport_map([] (const Airport &airport) { return airport.getName(); });
+AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);

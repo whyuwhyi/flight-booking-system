@@ -1,46 +1,92 @@
 #include <FlightSystem/AirplaneModel.h>
 
-AirplaneModel::AirplaneModel(){}
+Cabin::Cabin(int r, int c) : rows(r), columns(c) {}
 
-AirplaneModel::AirplaneModel(const String &name, int capacity)
-    : name(name), passengerCapacity(capacity) {
-    cabins[FirstClass] = Cabin();   // 默认初始化
-    cabins[BusinessClass] = Cabin(); // 默认初始化
-    cabins[EconomyClass] = Cabin();   // 默认初始化
+int Cabin::getPassengerCapacity() const {
+    return rows * columns;
+}
+
+int Cabin::getRows() const {
+    return rows;
+}
+
+void Cabin::setRows(int r) {
+    rows = r;
+}
+
+int Cabin::getColumns() const {
+    return columns;
+}
+
+void Cabin::setColumns(int c) {
+    columns = c;
+}
+
+// AirplaneModel class implementation
+AirplaneModel::AirplaneModel() : name(""), firstClassCabin(), businessClassCabin(), economyClassCabin() {}
+
+AirplaneModel::AirplaneModel(const String &name, int capacity) : name(name) {
+    // Capacity can be used to initialize cabins if needed
 }
 
 const String& AirplaneModel::getName() const {
     return name;
 }
 
-int AirplaneModel::getPassengerCapacity() const {
-    return passengerCapacity;
+void AirplaneModel::setName(const String& name) {
+    this->name = name;
 }
 
-void AirplaneModel::setCabin(CabinType type, int rows, int columns) {
-    if (type >= FirstClass && type <= EconomyClass) {
-        cabins[type] = Cabin(rows, columns);
+int AirplaneModel::getPassengerCapacity() const {
+    return firstClassCabin.getPassengerCapacity() +
+           businessClassCabin.getPassengerCapacity() +
+           economyClassCabin.getPassengerCapacity();
+}
+
+Cabin& AirplaneModel::getCabin(CabinType type) {
+    switch (type) {
+        case FirstClass: return firstClassCabin;
+        case BusinessClass: return businessClassCabin;
+        case EconomyClass: return economyClassCabin;
     }
+    throw std::out_of_range("Invalid cabin type");
 }
 
 const Cabin& AirplaneModel::getCabin(CabinType type) const {
-    return cabins[type];
+    switch (type) {
+        case FirstClass: return firstClassCabin;
+        case BusinessClass: return businessClassCabin;
+        case EconomyClass: return economyClassCabin;
+    }
+    throw std::out_of_range("Invalid cabin type");
 }
 
-// 重载输出运算符
-std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
-    out << airplane.name << " " << airplane.passengerCapacity << "\n";
-    for (const auto& cabin : airplane.cabins) {
-        out << cabin.rows << " " << cabin.columns << "\n";
+void AirplaneModel::setCabin(CabinType type, const Cabin& cabin) {
+    switch (type) {
+        case FirstClass: firstClassCabin = cabin; break;
+        case BusinessClass: businessClassCabin = cabin; break;
+        case EconomyClass: economyClassCabin = cabin; break;
     }
+}
+
+std::ostream& operator<<(std::ostream& out, const AirplaneModel& airplane) {
+    out << "Airplane Model: " << airplane.name << "\n"
+        << "First Class Cabin: " << airplane.firstClassCabin.getPassengerCapacity() << " passengers\n"
+        << "Business Class Cabin: " << airplane.businessClassCabin.getPassengerCapacity() << " passengers\n"
+        << "Economy Class Cabin: " << airplane.economyClassCabin.getPassengerCapacity() << " passengers";
     return out;
 }
 
-// 重载输入运算符
 std::istream& operator>>(std::istream& in, AirplaneModel& airplane) {
-    in >> airplane.name >> airplane.passengerCapacity;
-    for (auto& cabin : airplane.cabins) {
-        in >> cabin.rows >> cabin.columns;
-    }
+    std::string name;
+    int firstRows, firstCols, businessRows, businessCols, economyRows, economyCols;
+
+    in >> name >> firstRows >> firstCols >> businessRows >> businessCols >> economyRows >> economyCols;
+
+    airplane.name = name.c_str();
+    airplane.firstClassCabin = Cabin(firstRows, firstCols);
+    airplane.businessClassCabin = Cabin(businessRows, businessCols);
+    airplane.economyClassCabin = Cabin(economyRows, economyCols);
+
     return in;
 }

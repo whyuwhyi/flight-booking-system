@@ -16,7 +16,7 @@
 
 typedef Map<String, User> UserMap;
 typedef Map<String, Airport> AirportMap;
-typedef Map<String, Airline> AirlineMap; 
+typedef Map<String, Airline> AirlineMap;
 
 extern User current_login_user;
 extern UserMap user_map;

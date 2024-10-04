@@ -32,8 +32,8 @@ private:
 public:
     Map(std::function<Key(const Value&)> getKeyFunc);
     ~Map();
-    bool insert(const Value &value);
-    Value* get(const Key &key) const;
+    bool insert(const Value& value);
+    Value* get(const Key& key) const;
     bool erase(const Key& key);
     void traverse(std::function<void(const Value&)> func) const;
     void traverse(std::function<void(Value*)> func) const;

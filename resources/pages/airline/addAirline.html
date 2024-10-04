@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>添加航线</title>
+    
+    <!-- 引入 Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="addAirline.css" />
+</head>
+<body>
+
+<div class="search-container">
+    <input type="text" id="citySearch" placeholder="添加沿途城市..." />
+    <div id="suggestions" class="suggestions"></div>
+</div>
+
+<div id="map"></div>
+
+<div class="info-container">
+    <div class="airport-info">
+        <label for="airport1">机场 1:</label>
+        <input type="text" id="airport1" readonly />
+        <label for="airport2">机场 2:</label>
+        <input type="text" id="airport2" readonly />
+    </div>
+</div>
+
+<div class="action-container">
+    <button id="confirmRouteButton">确认航线</button>
+</div>
+
+<!-- 确保 Leaflet.js 在前，Leaflet.curve.js 在后 -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="../plugins/leaflet.curve.js"></script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script src="addAirline.js"></script>
+
+</body>
+</html>

@@ -47,13 +47,13 @@ void AirportManagementWindow::openMapSearchWindow() {
     QWebEngineView *webView = new QWebEngineView(mapDialog);
     QWebChannel *channel = new QWebChannel(this);
 
-    Backend *backend = new Backend(this);
-    connect(backend, &Backend::airportDataReceived, this, &AirportManagementWindow::handleAirportData);
+    AirportManagementBackend *backend = new AirportManagementBackend(this);
+    connect(backend, &AirportManagementBackend::airportDataReceived, this, &AirportManagementWindow::handleAirportData);
 
     webView->page()->setWebChannel(channel);
-    channel->registerObject(QStringLiteral("qt"), backend);
+    channel->registerObject(QStringLiteral("qt_addAirport"), backend);
 
-    webView->load(QUrl("qrc:/pages/addAirport.html"));
+    webView->load(QUrl("qrc:/pages/airport/addAirport.html"));
     layout->addWidget(webView);
     mapDialog->setLayout(layout);
     mapDialog->exec();
@@ -61,7 +61,7 @@ void AirportManagementWindow::openMapSearchWindow() {
 
 
 void AirportManagementWindow::handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
-    Airport newAirport(name.toStdString().c_str(), country.toStdString().c_str(), city.toStdString().c_str(), Point(latitude, longitude));
+    Airport newAirport(name.toStdString().c_str(), country.toStdString().c_str(), city.toStdString().c_str(), Point(longitude, latitude));
     if (addAirport(newAirport)) {
         addAirportItem(newAirport);
     } else {

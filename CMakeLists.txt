@@ -29,6 +29,8 @@ set(PROJECT_SOURCES
     ${UI_SRC}
     "src/ui/server/ServerWindow.cpp"
     "src/ui/server/AirportManagementWindow.cpp"
+    "src/ui/server/AirlineManagementWindow.cpp"
+    "src/ui/server/AirplaneModelManagementWindow.cpp"
     ${FLIGHTSYSTEM_SRC}
     "src/String/String.cpp"
     "src/User/User.cpp"
@@ -40,6 +42,8 @@ set(PROJECT_SOURCES
     "include/ui/WindowManager.h"
     "include/ui/server/ServerWindow.h"
     "include/ui/server/AirportManagementWindow.h"
+    "include/ui/server/AirlineManagementWindow.h"
+    "include/ui/server/AirplaneModelManagementWindow.h"
     "include/FlightSystem/AirplaneModel.h"
     "include/FlightSystem/Airport.h"
     "include/FlightSystem/Flight.h"
