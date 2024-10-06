@@ -1,9 +1,5 @@
 var map = L.map('map').setView([39.9, 116.4], 5);
 
-new QWebChannel(qt.webChannelTransport, function(channel) {
-    window.qt_addAirline = channel.objects.qt_addAirline;
-});
-
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
 }).addTo(map);

@@ -1,6 +1,6 @@
-#include <ui/LoginWindow.h>
-#include <ui/MainWindow.h>
-#include <ui/RegisterWindow.h>
+#include <ui/client/LoginWindow.h>
+#include <ui/client/MainWindow.h>
+#include <ui/client/RegisterWindow.h>
 #include <data/datamanage.h>
 #include <QLabel>
 #include <QLineEdit>
@@ -100,7 +100,7 @@ void LoginWindow::onLoginClicked() {
     String phoneNumber = phoneNumberLineEdit->text().toStdString().c_str();
     String password = passwordLineEdit->text().toStdString().c_str();
 
-    User* user_node = user_map.get(phoneNumber);
+    User* user_node = user_map.find(phoneNumber);
 
     if(user_node != nullptr&&password == user_node->getPassword()){
         std::cout << "Login Success!" << std::endl;

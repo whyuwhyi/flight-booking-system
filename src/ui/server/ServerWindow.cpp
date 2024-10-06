@@ -7,6 +7,7 @@
 #include <ui/server/AirportManageWindow.h>
 #include <ui/server/AirlineManageWindow.h>
 #include <ui/server/AirplaneModelManageWindow.h>
+#include <ui/server/FlightManageWindow.h>
 #include <data/datamanage.h>
 
 ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
@@ -14,6 +15,7 @@ ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
     loadAirportFromFile(airport_map);
     loadAirlineFromFile(airline_map);
     loadAirplaneModelFromFile(airplane_model_map);
+    loadFlightFromFile(flight_map);
     setupUI();
     setupConnections();
 }
@@ -39,27 +41,23 @@ void ServerWindow::setupUI() {
     menuList->setDropIndicatorShown(false);
     menuList->setDragDropMode(QAbstractItemView::NoDragDrop);
 
-    menuList->addItem(new QListWidgetItem(QIcon(":/icons/airport.svg"), "机场管理"));
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/airplane.svg"), "机型管理"));
-    menuList->addItem(new QListWidgetItem(QIcon(":/icons/flight.svg"), "航班管理"));
+    menuList->addItem(new QListWidgetItem(QIcon(":/icons/airport.svg"), "机场管理"));
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/airline.svg"), "航线管理"));
+    menuList->addItem(new QListWidgetItem(QIcon(":/icons/flight.svg"), "航班管理"));
 
     stackedWidget = new QStackedWidget(this);
 
     airportManageWidget = new AirportManageWindow(this); // 使用AirportManagementWindow类
     airlineManageWidget = new AirlineManageWindow(this);
     airplaneModelManageWidget = new AirplaneModelManageWindow(this);
+    flightManageWidget = new FlightManageWindow(this);
 
-    // 航班管理界面
-    flightManagementWidget = new QWidget(this);
-    QLabel *flightLabel = new QLabel("航班管理内容", flightManagementWidget);
-    QVBoxLayout *flightLayout = new QVBoxLayout(flightManagementWidget);
-    flightLayout->addWidget(flightLabel);
 
-    stackedWidget->addWidget(airportManageWidget);
     stackedWidget->addWidget(airplaneModelManageWidget);
-    stackedWidget->addWidget(flightManagementWidget);
+    stackedWidget->addWidget(airportManageWidget);
     stackedWidget->addWidget(airlineManageWidget);
+    stackedWidget->addWidget(flightManageWidget);
 
     layout->addWidget(menuList);
     layout->addWidget(stackedWidget);

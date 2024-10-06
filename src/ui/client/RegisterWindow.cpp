@@ -1,4 +1,4 @@
-#include <ui/RegisterWindow.h>
+#include <ui//client/RegisterWindow.h>
 #include <data/datamanage.h>
 #include <QLabel>
 #include <QLineEdit>
@@ -124,7 +124,7 @@ void RegisterWindow::onRegisterClicked() {
     QRegularExpression phoneRegex("^1[3-9]\\d{9}$");
     QRegularExpression passwordRegex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,16}$");
 
-    if(user_map.get(phoneNumber) != NULL) {
+    if(user_map.find(phoneNumber) != NULL) {
         QMessageBox::warning(this, "注册失败", "该手机号已被注册。");
             return;
     }

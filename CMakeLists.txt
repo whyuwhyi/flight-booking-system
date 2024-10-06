@@ -21,37 +21,12 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools WebEngineWidgets)
 include_directories(include)
 
 # 定义源文件
-aux_source_directory(src/ui UI_SRC)
-aux_source_directory(src/FlightSystem FLIGHTSYSTEM_SRC)
+file(GLOB_RECURSE SOURCE_CODE "src/*.cpp")
+file(GLOB_RECURSE INCLUDE_CODE "include/*.h")
 
 set(PROJECT_SOURCES
-    "src/main.cpp"
-    ${UI_SRC}
-    "src/ui/server/ServerWindow.cpp"
-    "src/ui/server/AirportManageWindow.cpp"
-    "src/ui/server/AirlineManageWindow.cpp"
-    "src/ui/server/AirplaneModelManageWindow.cpp"
-    ${FLIGHTSYSTEM_SRC}
-    "src/String/String.cpp"
-    "src/User/User.cpp"
-    "src/data/datamanage.cpp"
-
-    "include/ui/LoginWindow.h"
-    "include/ui/RegisterWindow.h"
-    "include/ui/MainWindow.h"
-    "include/ui/WindowManager.h"
-    "include/ui/server/ServerWindow.h"
-    "include/ui/server/AirportManageWindow.h"
-    "include/ui/server/AirlineManageWindow.h"
-    "include/ui/server/AirplaneModelManageWindow.h"
-    "include/FlightSystem/AirplaneModel.h"
-    "include/FlightSystem/Airport.h"
-    "include/FlightSystem/Flight.h"
-    "include/FlightSystem/Point.h"
-    "include/String/String.h"
-    "include/User/User.h"
-    "include/data/datamanage.h"
-    
+    ${SOURCE_CODE}
+    ${INCLUDE_CODE}
     "resources/resources.qrc"
 )
 

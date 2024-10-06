@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QWidget>
 
 class QStackedWidget;
 class LoginWindow;

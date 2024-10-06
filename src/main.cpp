@@ -1,6 +1,6 @@
 #include <QApplication>
-#include <ui/WindowManager.h>
-#include <ui/MainWindow.h>
+#include <ui/client/WindowManager.h>
+#include <ui/client/MainWindow.h>
 #include <ui/server/ServerWindow.h>
 #include <QIcon>
 #include <cstring>

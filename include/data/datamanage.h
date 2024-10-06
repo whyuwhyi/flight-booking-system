@@ -6,6 +6,7 @@
 #include <FlightSystem/Airport.h>
 #include <FlightSystem/Airline.h>
 #include <FlightSystem/AirplaneModel.h>
+#include <FlightSystem/Flight.h>
 
 #ifndef DATA_PATH
 #define DATA_PATH  "/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/"
@@ -19,12 +20,14 @@ typedef Map<String, User> UserMap;
 typedef Map<String, Airport> AirportMap;
 typedef Map<String, Airline> AirlineMap;
 typedef Map<String, AirplaneModel> AirplaneModelMap;
+typedef Map<String, Flight> FlightMap;
 
 extern User current_login_user;
 extern UserMap user_map;
 extern AirportMap airport_map;
 extern AirlineMap airline_map;
 extern AirplaneModelMap airplane_model_map;
+extern FlightMap flight_map;
 
 char* myStrcat(const char* str1, const char* str2);
 
@@ -57,3 +60,10 @@ bool writeAirplaneModelToFile(const AirplaneModelMap &airplane_model_map);
 bool addAirplaneModel(const AirplaneModel &airplane_model);
 bool modifyAirplaneModel(const String &modelName, const AirplaneModel &updatedAirplaneModel);
 bool deleteAirplaneModel(const String &modelName);
+
+// Flight management functions
+bool loadFlightFromFile(FlightMap &flight_map);
+bool writeFlightToFile(const FlightMap &flight_map);
+bool addFlight(const Flight &flight);
+bool modifyFlight(const String &flightName, const Flight &updatedFlight);
+bool deleteFlight(const String &flightName);

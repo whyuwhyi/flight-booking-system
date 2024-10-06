@@ -6,8 +6,8 @@
 
 class Cabin {
 public:
-    int rows;    // 行数
-    int columns; // 列数
+    int rows;
+    int columns;
 
     Cabin(int r = 0, int c = 0);
 

@@ -81,8 +81,8 @@ void AirlineManageWindow::handleRouteData(const QVariantList &routePoints, doubl
 
 void AirlineManageWindow::openMapSearchWindow(const QString &airport1, const QString &airport2) {
     QDialog *mapDialog = new QDialog(this);
-    Airport* airport_p1 = airport_map.get(airport1.toStdString().c_str());
-    Airport* airport_p2 = airport_map.get(airport2.toStdString().c_str());
+    Airport* airport_p1 = airport_map.find(airport1.toStdString().c_str());
+    Airport* airport_p2 = airport_map.find(airport2.toStdString().c_str());
     mapDialog->setWindowTitle("绘制航线");
     mapDialog->resize(900, 900);
     QVBoxLayout *layout = new QVBoxLayout(mapDialog);

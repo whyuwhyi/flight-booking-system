@@ -7,6 +7,7 @@ class QStackedWidget;
 class AirportManageWindow;
 class AirlineManageWindow;
 class AirplaneModelManageWindow;
+class FlightManageWindow;
 
 class ServerWindow : public QMainWindow {
     Q_OBJECT
@@ -20,10 +21,10 @@ private:
     QListWidget *menuList;
     QStackedWidget *stackedWidget;
 
+    AirplaneModelManageWindow *airplaneModelManageWidget;
     AirportManageWindow *airportManageWidget;
     AirlineManageWindow *airlineManageWidget;
-    QWidget *flightManagementWidget;
-    AirplaneModelManageWindow *airplaneModelManageWidget;
+    FlightManageWindow *flightManageWidget;
 
     void setupUI();
     void setupConnections();

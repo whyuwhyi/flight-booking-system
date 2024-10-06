@@ -7,6 +7,7 @@ UserMap user_map([] (const User &user) { return user.getPhoneNumber(); });
 AirportMap airport_map([] (const Airport &airport) { return airport.getName(); });
 AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
 AirplaneModelMap airplane_model_map([] (const AirplaneModel &model) { return model.getName(); });
+FlightMap flight_map([] (const Flight &flight) { return flight.getFlightName(); });
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);
@@ -30,10 +31,17 @@ bool loadUserFromFile(UserMap &user_map) {
         return false;
     }
 
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        user_map.clear();
+        delete[] filename;
+        return true;
+    }
+
     inFile >> user_map;
     delete[] filename;
     return true;
 }
+
 
 bool writeUserToFile(const UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
@@ -111,6 +119,12 @@ bool loadAirportFromFile(AirportMap &airport_map) {
         return false;
     }
 
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        airport_map.clear();
+        delete[] filename;
+        return true;
+    }
+
     inFile >> airport_map;
     delete[] filename;
     return true;
@@ -162,6 +176,12 @@ bool loadAirlineFromFile(AirlineMap &airline_map) {
         std::cout << "File open failed!" << std::endl;
         delete[] filename;
         return false;
+    }
+
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        airline_map.clear();
+        delete[] filename;
+        return true;
     }
 
     inFile >> airline_map;
@@ -217,6 +237,12 @@ bool loadAirplaneModelFromFile(AirplaneModelMap &airplane_model_map) {
         return false;
     }
 
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        airplane_model_map.clear();
+        delete[] filename;
+        return true;
+    }
+
     inFile >> airplane_model_map;
     delete[] filename;
     return true;
@@ -255,6 +281,65 @@ bool modifyAirplaneModel(const String &modelName, const AirplaneModel &updatedAi
 bool deleteAirplaneModel(const String &modelName) {
     if (airplane_model_map.erase(modelName)) {
         return writeAirplaneModelToFile(airplane_model_map);
+    }
+    return false;
+}
+
+// Flight management functions
+bool loadFlightFromFile(FlightMap &flight_map) {
+    char* filename = myStrcat(DATA_PATH, "flight/flights.txt");
+    std::ifstream inFile(filename, std::ios::in);
+
+    if (!inFile.is_open()) {
+        std::cout << "File open failed!" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        flight_map.clear();
+        delete[] filename;
+        return true;
+    }
+
+    inFile >> flight_map;
+    delete[] filename;
+    return true;
+}
+
+bool writeFlightToFile(const FlightMap &flight_map) {
+    char* filename = myStrcat(DATA_PATH, "flight/flights.txt");
+    std::ofstream outFile(filename, std::ios::out);
+
+    if (!outFile.is_open()) {
+        std::cout << "File open failed" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    outFile << flight_map;
+    delete[] filename;
+    return true;
+}
+
+bool addFlight(const Flight &flight) {
+    if (flight_map.insert(flight)) {
+        return writeFlightToFile(flight_map);
+    }
+    return false;
+}
+
+bool modifyFlight(const String &flightName, const Flight &updatedFlight) {
+    if (flight_map.erase(flightName)) {
+        flight_map.insert(updatedFlight);
+        return writeFlightToFile(flight_map);
+    }
+    return false;
+}
+
+bool deleteFlight(const String &flightName) {
+    if (flight_map.erase(flightName)) {
+        return writeFlightToFile(flight_map);
     }
     return false;
 }

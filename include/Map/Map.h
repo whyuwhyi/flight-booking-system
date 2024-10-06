@@ -16,6 +16,7 @@ private:
     };
 
     Node *root;
+    int nodeCount;
     std::function<Key(const Value&)> getKey;
 
     Node* insert(Node* node, const Value &value);
@@ -32,11 +33,14 @@ private:
 public:
     Map(std::function<Key(const Value&)> getKeyFunc);
     ~Map();
-    bool insert(const Value& value);
-    Value* get(const Key& key) const;
-    bool erase(const Key& key);
+    bool insert(const Value &value);
+    Value* find(const Key &key) const;
+    Value& get(const Key &key) const;
+    bool erase(const Key &key);
+    void clear();
     void traverse(std::function<void(const Value&)> func) const;
     void traverse(std::function<void(Value*)> func) const;
+    int getNodeCount() const;
 
     template<typename K, typename V>
     friend std::ostream& operator<<(std::ostream& out, const Map<K, V>& map);
@@ -47,7 +51,7 @@ public:
 
 
 template<typename Key, typename Value>
-Map<Key, Value>::Map(std::function<Key(const Value&)> getKeyFunc) : root(nullptr), getKey(getKeyFunc) {}
+Map<Key, Value>::Map(std::function<Key(const Value&)> getKeyFunc) : root(nullptr), nodeCount(0), getKey(getKeyFunc) {}
 
 template<typename Key, typename Value>
 Map<Key, Value>::~Map() {
@@ -69,6 +73,7 @@ bool Map<Key, Value>::insert(const Value &value) {
         return false;
     }
     root = insert(root, value);
+    nodeCount++;
     return true;
 }
 
@@ -100,9 +105,25 @@ typename Map<Key, Value>::Node* Map<Key, Value>::find(Node* node, const Key &key
 }
 
 template<typename Key, typename Value>
-Value* Map<Key, Value>::get(const Key &key) const {
+Value* Map<Key, Value>::find(const Key &key) const {
     Node *node = find(root, key);
     return node ? &node->value : nullptr;
+}
+
+template<typename Key, typename Value>
+Value& Map<Key, Value>::get(const Key &key) const {
+    Node *node = find(root, key);
+    if (!node) {
+        throw std::out_of_range("Key not found");
+    }
+    return node->value;
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::clear() {
+    destroy(root);
+    nodeCount = 0;
+    root = nullptr;
 }
 
 template<typename Key, typename Value>
@@ -157,6 +178,7 @@ template<typename Key, typename Value>
 bool Map<Key, Value>::erase(const Key& key) {
     if (find(root, key)) {
         root = erase(root, key);
+        nodeCount--;
         return true;
     }
     return false;
@@ -208,18 +230,27 @@ void Map<Key, Value>::traverseNode(Node* node, std::function<void(Value*)> func)
     }
 }
 
+template<typename Key, typename Value>
+int Map<Key, Value>::getNodeCount() const {
+    return nodeCount;
+}
+
 template<typename K, typename V>
 std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
+    out << map.nodeCount << "\n";
     map.traverse([&out](const V& value) {
-        out << value << std::endl;
+        out << value << "\n";
     });
     return out;
 }
 
 template<typename K, typename V>
 std::istream& operator>>(std::istream& in, Map<K, V>& map) {
+    int count;
+    in >> count;
+    map.clear();
     V value;
-    while (in >> value) {
+    while (count-- > 0 && in >> value) {
         map.insert(value);
     }
     return in;

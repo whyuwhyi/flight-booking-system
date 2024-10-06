@@ -1,8 +1,8 @@
 #include <QStackedWidget>
-#include <ui/LoginWindow.h>
-#include <ui/RegisterWindow.h>
-#include <ui/MainWindow.h>
-#include <ui/WindowManager.h>
+#include <ui/client/LoginWindow.h>
+#include <ui/client/RegisterWindow.h>
+#include <ui/client/MainWindow.h>
+#include <ui/client/WindowManager.h>
 #include <data/datamanage.h>
 #include <iostream>
 
@@ -57,7 +57,7 @@ bool WindowManager::localLogin() {
     User temp_user;
     loadUserFromFile(user_map);
     if(loadLocalUserFromFile(temp_user)) {
-        User* user_node = user_map.get(temp_user.getPhoneNumber());
+        User* user_node = user_map.find(temp_user.getPhoneNumber());
         if(user_node != NULL && user_node->getPassword() == temp_user.getPassword()) {
             std::cout << "Local Login Success!" << std::endl;
                 return true;

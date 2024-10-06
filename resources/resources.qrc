@@ -12,9 +12,11 @@
         <file>icons/personal.svg</file>
         <file>pages/plugins/leaflet.curve.js</file>
         <file>pages/map.html</file>
+        <file>pages/map.css</file>
         <file>pages/airport/addAirport.css</file>
         <file>pages/airport/addAirport.html</file>
         <file>pages/airport/addAirport.js</file>
+        <file>pages/map.js</file>
         <file>pages/airline/addAirline.css</file>
         <file>pages/airline/addAirline.js</file>
         <file>pages/airline/addAirline.html</file>
