@@ -32,41 +32,45 @@ signals:
     void airlineDataRequested();
 };
 
+class AirlineItem;
+
 class AirlineManageWindow : public QWidget {
     Q_OBJECT
 
-private slots:
-    void handleAirlineData(const QString &name, const QString &airport1, const QString &airport2);
-    void handleRouteData(const QVariantList &routePoints, double routeLengthInKm);
+public:
+    explicit AirlineManageWindow(QWidget *parent = nullptr);
 
 private:
+    void setupUI();
+    void setupConnections();
+    void openAddAirlineWindow();
+    QDialog* createAddAirlineDialog();
+    QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);
+    void populateAirportComboBoxes();
+    void openMapSearchWindow(const QString &airport1, const QString &airport2);
+    QDialog* createMapSearchDialog(const QString &airport1, const QString &airport2);
+    void setupBackendConnections(class AirlineManageBackend* backend, const QString &airport1, const QString &airport2);
+    void handleRouteData(const QVariantList &routePoints, double routeLengthInKm);
+    void addAirlineItem(const Airline& airline);
+    void onDeleteAirline(AirlineItem *item);
+
+    QVBoxLayout *mainLayout;
+    QListWidget *airlineListWidget;
+    QPushButton *addAirlineButton;
     QLineEdit *airlineNameLineEdit;
     QComboBox *airport1ComboBox;
     QComboBox *airport2ComboBox;
-    QPushButton *confirmAddAirlineButton;
-    QPushButton *addAirlineButton;
-    QListWidget *airlineListWidget;
-    QVBoxLayout *mainLayout;
+};
 
-    class AirlineItem : public QListWidgetItem {
-    private:
-        QLabel *nameLabel;
-        QLabel *airport1Label;
-        QLabel *airport2Label;
-        QPushButton *deleteButton;
-    public:
-        AirlineItem(const Airline &airline, QListWidget *parent = nullptr);
-        QPushButton* getDeleteButton();
-        QString getAirlineName();
-    };
-
-    void onDeleteAirline(AirlineItem* item);
-    void addAirlineItem(const Airline &airline);
-    void openAddAirlineWindow();
-    void openMapSearchWindow(const QString &airport1, const QString &airport2);
-
+class AirlineItem : public QListWidgetItem {
 public:
-    AirlineManageWindow(QWidget *parent = nullptr);
-    void setupUI();
-    void setupConnections();
+    AirlineItem(const Airline &airline, QListWidget *parent = nullptr);
+    QPushButton* getDeleteButton();
+    QString getAirlineName();
+
+private:
+    QLabel *nameLabel;
+    QLabel *airport1Label;
+    QLabel *airport2Label;
+    QPushButton *deleteButton;
 };

@@ -6,7 +6,6 @@
 AirplaneModelManageWindow::AirplaneModelManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
-    std::cout << airplane_model_map;
     airplane_model_map.traverse([this](const AirplaneModel& model){ addModelItem(model); });
 }
 
@@ -23,74 +22,72 @@ void AirplaneModelManageWindow::setupUI() {
 }
 
 void AirplaneModelManageWindow::setupConnections() {
-    connect(addModelButton, &QPushButton::clicked, this, [this]() {
-        QDialog *addModelDialog = new QDialog(this);
-        addModelDialog->setWindowTitle("添加机型");
+    connect(addModelButton, &QPushButton::clicked, this, &AirplaneModelManageWindow::openAddModelDialog);
+}
 
-        modelNameLineEdit = new QLineEdit(addModelDialog);
-        modelNameLineEdit->setPlaceholderText("请输入机型名称");
+void AirplaneModelManageWindow::openAddModelDialog() {
+    QDialog *addModelDialog = new QDialog(this);
+    addModelDialog->setWindowTitle("添加机型");
 
-        firstClassRowsLineEdit = new QLineEdit(addModelDialog);
-        firstClassRowsLineEdit->setPlaceholderText("头等舱行数");
+    QVBoxLayout *layout = new QVBoxLayout(addModelDialog);
+    modelNameLineEdit = createLineEdit(addModelDialog, "请输入机型名称");
+    firstClassRowsLineEdit = createLineEdit(addModelDialog, "头等舱行数");
+    firstClassColumnsLineEdit = createLineEdit(addModelDialog, "头等舱列数");
+    businessClassRowsLineEdit = createLineEdit(addModelDialog, "商务舱行数");
+    businessClassColumnsLineEdit = createLineEdit(addModelDialog, "商务舱列数");
+    economyClassRowsLineEdit = createLineEdit(addModelDialog, "经济舱行数");
+    economyClassColumnsLineEdit = createLineEdit(addModelDialog, "经济舱列数");
 
-        firstClassColumnsLineEdit = new QLineEdit(addModelDialog);
-        firstClassColumnsLineEdit->setPlaceholderText("头等舱列数");
+    layout->addWidget(modelNameLineEdit);
+    layout->addWidget(firstClassRowsLineEdit);
+    layout->addWidget(firstClassColumnsLineEdit);
+    layout->addWidget(businessClassRowsLineEdit);
+    layout->addWidget(businessClassColumnsLineEdit);
+    layout->addWidget(economyClassRowsLineEdit);
+    layout->addWidget(economyClassColumnsLineEdit);
 
-        businessClassRowsLineEdit = new QLineEdit(addModelDialog);
-        businessClassRowsLineEdit->setPlaceholderText("商务舱行数");
+    QPushButton *confirmAddModelButton = new QPushButton("确认添加机型", addModelDialog);
+    layout->addWidget(confirmAddModelButton);
+    addModelDialog->setLayout(layout);
+    addModelDialog->resize(400, 300);
 
-        businessClassColumnsLineEdit = new QLineEdit(addModelDialog);
-        businessClassColumnsLineEdit->setPlaceholderText("商务舱列数");
-
-        economyClassRowsLineEdit = new QLineEdit(addModelDialog);
-        economyClassRowsLineEdit->setPlaceholderText("经济舱行数");
-
-        economyClassColumnsLineEdit = new QLineEdit(addModelDialog);
-        economyClassColumnsLineEdit->setPlaceholderText("经济舱列数");
-
-        QPushButton *confirmAddModelButton = new QPushButton("确认添加机型", addModelDialog);
-
-        QVBoxLayout *layout = new QVBoxLayout(addModelDialog);
-        layout->addWidget(modelNameLineEdit);
-        layout->addWidget(firstClassRowsLineEdit);
-        layout->addWidget(firstClassColumnsLineEdit);
-        layout->addWidget(businessClassRowsLineEdit);
-        layout->addWidget(businessClassColumnsLineEdit);
-        layout->addWidget(economyClassRowsLineEdit);
-        layout->addWidget(economyClassColumnsLineEdit);
-        layout->addWidget(confirmAddModelButton);
-        addModelDialog->setLayout(layout);
-        addModelDialog->resize(400, 300);
-
-        connect(confirmAddModelButton, &QPushButton::clicked, this, [this, addModelDialog]() {
-            QString name = modelNameLineEdit->text();
-            int firstRows = firstClassRowsLineEdit->text().toInt();
-            int firstColumns = firstClassColumnsLineEdit->text().toInt();
-            int businessRows = businessClassRowsLineEdit->text().toInt();
-            int businessColumns = businessClassColumnsLineEdit->text().toInt();
-            int economyRows = economyClassRowsLineEdit->text().toInt();
-            int economyColumns = economyClassColumnsLineEdit->text().toInt();
-
-            if (name.isEmpty() || firstRows <= 0 || firstColumns <= 0 || businessRows <= 0 || businessColumns <= 0 || economyRows <= 0 || economyColumns <= 0) {
-                QMessageBox::warning(this, "错误", "所有字段都必须填写且大于零！");
-                return;
-            }
-
-            AirplaneModel model(name.toStdString().c_str());
-            model.setCabin(AirplaneModel::FirstClass, Cabin(firstRows, firstColumns));
-            model.setCabin(AirplaneModel::BusinessClass, Cabin(businessRows, businessColumns));
-            model.setCabin(AirplaneModel::EconomyClass, Cabin(economyRows, economyColumns));
+    connect(confirmAddModelButton, &QPushButton::clicked, this, [this, addModelDialog]() {
+        if (validateModelInput()) {
+            AirplaneModel model(modelNameLineEdit->text().toStdString().c_str());
+            model.setCabin(AirplaneModel::FirstClass, Cabin(firstClassRowsLineEdit->text().toInt(), firstClassColumnsLineEdit->text().toInt()));
+            model.setCabin(AirplaneModel::BusinessClass, Cabin(businessClassRowsLineEdit->text().toInt(), businessClassColumnsLineEdit->text().toInt()));
+            model.setCabin(AirplaneModel::EconomyClass, Cabin(economyClassRowsLineEdit->text().toInt(), economyClassColumnsLineEdit->text().toInt()));
 
             if (addAirplaneModel(model)) {
                 addModelItem(model);
                 addModelDialog->accept();
             } else {
-                QMessageBox::warning(this, "错误", "此机型已存在！！");
+                QMessageBox::warning(this, "错误", "此机型已存在！");
             }
-        });
-
-        addModelDialog->exec();
+        }
     });
+
+    addModelDialog->exec();
+}
+
+QLineEdit* AirplaneModelManageWindow::createLineEdit(QWidget* parent, const QString& placeholder) {
+    QLineEdit *lineEdit = new QLineEdit(parent);
+    lineEdit->setPlaceholderText(placeholder);
+    return lineEdit;
+}
+
+bool AirplaneModelManageWindow::validateModelInput() {
+    if (modelNameLineEdit->text().isEmpty() ||
+        firstClassRowsLineEdit->text().toInt() <= 0 ||
+        firstClassColumnsLineEdit->text().toInt() <= 0 ||
+        businessClassRowsLineEdit->text().toInt() <= 0 ||
+        businessClassColumnsLineEdit->text().toInt() <= 0 ||
+        economyClassRowsLineEdit->text().toInt() <= 0 ||
+        economyClassColumnsLineEdit->text().toInt() <= 0) {
+        QMessageBox::warning(this, "错误", "所有字段都必须填写且大于零！");
+        return false;
+    }
+    return true;
 }
 
 void AirplaneModelManageWindow::addModelItem(const AirplaneModel &model) {
@@ -102,8 +99,7 @@ void AirplaneModelManageWindow::addModelItem(const AirplaneModel &model) {
 }
 
 void AirplaneModelManageWindow::onDeleteModel(AirplaneModelItem *item) {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "确认删除", "确定要删除这个机型吗？", QMessageBox::Yes | QMessageBox::No);
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "确认删除", "确定要删除这个机型吗？", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
         int row = modelListWidget->row(item);
         if (row != -1) {
@@ -113,7 +109,7 @@ void AirplaneModelManageWindow::onDeleteModel(AirplaneModelItem *item) {
     }
 }
 
-AirplaneModelManageWindow::AirplaneModelItem::AirplaneModelItem(const AirplaneModel &model, QListWidget *parent)
+AirplaneModelItem::AirplaneModelItem(const AirplaneModel &model, QListWidget *parent)
     : QListWidgetItem(parent) {
     deleteButton = new QPushButton("删除", parent);
 
@@ -135,10 +131,10 @@ AirplaneModelManageWindow::AirplaneModelItem::AirplaneModelItem(const AirplaneMo
     parent->setItemWidget(this, itemWidget);
 }
 
-QPushButton* AirplaneModelManageWindow::AirplaneModelItem::getDeleteButton() {
+QPushButton* AirplaneModelItem::getDeleteButton() {
     return deleteButton;
 }
 
-String AirplaneModelManageWindow::AirplaneModelItem::getModelName() {
+String AirplaneModelItem::getModelName() {
     return nameLabel->text().toStdString().c_str();
 }
