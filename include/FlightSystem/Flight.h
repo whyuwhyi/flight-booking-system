@@ -98,8 +98,9 @@ public:
     void setCabin(CabinType type, const Cabin& cabin);
 
     bool hasFlightOnDate(const Date& date) const;
-    void addFlightDate(const Date& date, const FlightTicketDetail& ticketInfo);
-    void removeFlightDate(const Date& date);
+    bool addFlightSchedule(const FlightTicketDetail& ticketInfo);
+    // bool modifyFlightSchedule(const Flight);
+    bool removeFlightSchedule(const Date& date);
 
     const FlightScheduleMap& getFlightSchedule() const;
 

@@ -1,4 +1,5 @@
 #include <FlightSystem/Flight.h>
+#include <data/datamanage.h>
 
 // FlightTicketDetail class implementation
 FlightTicketDetail::FlightTicketDetail() : firstClassPrice(0.0), businessClassPrice(0.0), economyClassPrice(0.0),
@@ -175,16 +176,18 @@ bool Flight::hasFlightOnDate(const Date& date) const {
     return flightScheduleMap.find(date) != nullptr;
 }
 
-void Flight::addFlightDate(const Date& date, const FlightTicketDetail& ticketInfo) {
-    if (!hasFlightOnDate(date)) {
-        flightScheduleMap.insert(ticketInfo);
+bool Flight::addFlightSchedule(const FlightTicketDetail& ticketInfo) {
+    if (flightScheduleMap.insert(ticketInfo)) {
+        return writeFlightToFile(flight_map);
     }
+    return false;
 }
 
-void Flight::removeFlightDate(const Date& date) {
-    if (hasFlightOnDate(date)) {
-        flightScheduleMap.erase(date);
+bool Flight::removeFlightSchedule(const Date& date) {
+    if (flightScheduleMap.erase(date)) {
+        return writeFlightToFile(flight_map);
     }
+    return false;
 }
 
 const FlightScheduleMap& Flight::getFlightSchedule() const {
@@ -195,8 +198,8 @@ std::ostream& operator<<(std::ostream& out, const Flight& flight) {
     out << flight.flightName << "\n"
         << flight.airline << "\n"
         << flight.airplaneModel << "\n"
-        << flight.departureAirport << "\n"
-        << flight.arrivalAirport << "\n"
+        << flight.departureAirport
+        << flight.arrivalAirport
         << flight.flightRouteName << "\n"
         << flight.departureTime << " " << flight.costTime << "\n"
         << flight.firstClassCabin << "\n"

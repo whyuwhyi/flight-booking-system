@@ -55,7 +55,6 @@ Time Time::operator-(const Time& other) const {
     return Time(totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
 }
 
-// Date class implementation
 Date::Date(int year, int month, int day) : year(year), month(month), day(day) {}
 
 int Date::getYear() const { return year; }
@@ -114,13 +113,11 @@ bool Date::operator>(const Date& other) const {
 Date Date::operator+(int days) const {
     Date result = *this;
     result.day += days;
-    // Simplified logic for adding days, not accounting for different month lengths
     return result;
 }
 
 Date Date::operator-(int days) const {
     Date result = *this;
     result.day -= days;
-    // Simplified logic for subtracting days, not accounting for different month lengths
     return result;
 }

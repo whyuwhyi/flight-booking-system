@@ -5,6 +5,8 @@
 #include <QStackedWidget>
 #include <QWebEngineView>
 #include <QWebChannel>
+#include <ui/client/LoginWindow.h>
+#include <ui/client/RegisterWindow.h>
 
 class MapBackend : public QObject {
     Q_OBJECT
@@ -17,7 +19,6 @@ signals:
     void sendRoutesData(const QString &routesData);
 };
 
-
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -25,20 +26,25 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void showLoginWindow();
+    void showRegisterWindow();
+    void showMainContent();
+
 private:
-    QWidget *centralWidget;
+    void setupUI();
+    void setupConnections();
+
     QListWidget *menuList;
     QStackedWidget *stackedWidget;
+
+    LoginWindow *loginWindow;
+    RegisterWindow *registerWindow;
 
     QWidget *routeMapWidget;
     QWidget *serviceHallWidget;
     QWidget *personalCenterWidget;
     QWebEngineView *mapView;
-
-    QWebChannel *webChannel;   // QWebChannel 对象
-    MapBackend *mapBackend;    // MapBackend 类对象
-
-    void setupUI();
-    void setupConnections();
-    void createMapRoute();     // 创建地图航线
+    QWebChannel *webChannel;
+    MapBackend *mapBackend;
 };

@@ -23,10 +23,10 @@ public:
 
 class AirplaneModel {
 private:
-    String name;                   // 机型名称
-    Cabin firstClassCabin;         // 头等舱
-    Cabin businessClassCabin;      // 商务舱
-    Cabin economyClassCabin;       // 经济舱
+    String name;
+    Cabin firstClassCabin;
+    Cabin businessClassCabin;
+    Cabin economyClassCabin;
 
 public:
     enum CabinType { FirstClass, BusinessClass, EconomyClass };

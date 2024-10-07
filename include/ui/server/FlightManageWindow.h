@@ -11,7 +11,6 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QTimeEdit>
-#include <QPushButton>
 #include <FlightSystem/Flight.h>
 
 class FlightManageWindow : public QWidget {
@@ -35,9 +34,11 @@ private:
     QLabel *departureAirportLabel;
     QLabel *arrivalAirportLabel;
     QListWidget *flightListWidget;
+    QListWidget *FlightScheduleWidget;
     QVBoxLayout *mainLayout;
     Airport *departureAirport = nullptr;
     Airport *arrivalAirport = nullptr;
+    Flight * flight = nullptr;
 
     class FlightItem : public QListWidgetItem {
     private:
@@ -75,11 +76,21 @@ private:
         QLabel *economyClassTicketsLabel;
         QPushButton *deleteButton;
         QPushButton *editButton;
+
     public:
         FlightScheduleItem(const FlightTicketDetail &detail, QListWidget *parent = nullptr);
+
         QPushButton* getDeleteButton();
         QPushButton* getEditButton();
+        QLabel* getFirstClassPriceLabel();
+        QLabel* getBusinessClassPriceLabel();
+        QLabel* getEconomyClassPriceLabel();
+
         Date getFlightDate();
         void setFlightDetails(const FlightTicketDetail &detail);
+
     };
-};;
+        void addFlightScheduleItem(const FlightTicketDetail &detail);
+        void onManageFlightScheduleItem(FlightScheduleItem* item);
+        void onDeleteFlightScheduleItem(FlightScheduleItem* item);
+};

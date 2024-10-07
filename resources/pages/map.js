@@ -37,7 +37,6 @@ function loadRoutesData(routesData) {
         return line.length > 0;
     });
 
-    console.error(lines);
     var routes = [];
     var i = 0;
 

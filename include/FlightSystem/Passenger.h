@@ -5,8 +5,8 @@
 
 class Passenger {
 private:
-    String name;     // 乘客姓名
-    String idNumber; // 身份证号
+    String name;
+    String idNumber;
 
 public:
     Passenger(const String& name, const String& idNumber);

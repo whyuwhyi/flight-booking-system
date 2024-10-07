@@ -7,11 +7,11 @@
 #include <QDateEdit>
 #include <QDateTime>
 #include <QDateTimeEdit>
+#include <QScrollArea>
 
 FlightManageWindow::FlightManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
-    // Traverse flight map and add items to list
     flight_map.traverse([this](const Flight& flight){ addFlightItem(flight); });
 }
 
@@ -75,11 +75,11 @@ void FlightManageWindow::setupConnections() {
         });
 
         QTimeEdit *departureTimeEdit = new QTimeEdit(addFlightDialog);
-        departureTimeEdit->setDisplayFormat("HH:mm:ss");
+        departureTimeEdit->setDisplayFormat("HH:MM:SS");
         departureTimeEdit->setTime(QTime::currentTime());
 
         QTimeEdit *costTimeEdit = new QTimeEdit(addFlightDialog);
-        costTimeEdit->setDisplayFormat("HH:mm:ss");
+        costTimeEdit->setDisplayFormat("HH:MM:SS");
         costTimeEdit->setTime(QTime(0, 0, 0));
 
         QPushButton *confirmAddFlightButton = new QPushButton("确认添加航班", addFlightDialog);
@@ -110,8 +110,6 @@ void FlightManageWindow::setupConnections() {
                 QMessageBox::warning(this, "错误", "所有字段都必须填写。");
                 return;
             }
-
-            // Create flight object and add it
 
             Time departureTimeObj(departureTime.hour(), departureTime.minute(), departureTime.second());
             Time costTimeObj(costTime.hour(), costTime.minute(), costTime.second());
@@ -155,48 +153,33 @@ void FlightManageWindow::onDeleteFlight(FlightItem *item) {
 }
 
 void FlightManageWindow::onManageFlight(FlightItem *item) {
-    // Open flight management dialog for adding/removing flight dates
     QDialog *manageFlightDialog = new QDialog(this);
     manageFlightDialog->setWindowTitle("航班管理");
 
     QVBoxLayout *layout = new QVBoxLayout(manageFlightDialog);
-    QListWidget *dateListWidget = new QListWidget(manageFlightDialog);
-    layout->addWidget(dateListWidget);
+
+    QScrollArea *scrollArea = new QScrollArea(manageFlightDialog);
+    scrollArea->setWidgetResizable(true);
+    QWidget *contentWidget = new QWidget();
+    QVBoxLayout *contentLayout = new QVBoxLayout(contentWidget);
+    scrollArea->setWidget(contentWidget);
+
+    FlightScheduleWidget = new QListWidget(contentWidget);
+    contentLayout->addWidget(FlightScheduleWidget);
 
     QPushButton *addDateButton = new QPushButton("添加出行计划", manageFlightDialog);
+    layout->addWidget(scrollArea);
     layout->addWidget(addDateButton);
 
     manageFlightDialog->setLayout(layout);
-    manageFlightDialog->resize(400, 300);
+    manageFlightDialog->resize(800, 800);
 
-    // Populate list with existing flight schedules
-    Flight* flight = flight_map.find(item->getFlightName());
-    flight->getFlightSchedule().traverse([&dateListWidget, flight](const FlightTicketDetail &ticketInfo) {
-        QListWidgetItem *scheduleItem = new QListWidgetItem(dateListWidget);
-        QWidget *itemWidget = new QWidget(dateListWidget);
-        QHBoxLayout *itemLayout = new QHBoxLayout(itemWidget);
-
-        QLabel *dateLabel = new QLabel(QString::fromStdString(ticketInfo.getFlightDate().toString().c_str()), itemWidget);
-        QPushButton *manageButton = new QPushButton("管理", itemWidget);
-        QPushButton *deleteButton = new QPushButton("删除", itemWidget);
-
-        itemLayout->addWidget(dateLabel);
-        itemLayout->addWidget(manageButton);
-        itemLayout->addWidget(deleteButton);
-        itemWidget->setLayout(itemLayout);
-        dateListWidget->setItemWidget(scheduleItem, itemWidget);
-
-        connect(deleteButton, &QPushButton::clicked, [dateListWidget, scheduleItem, flight, ticketInfo]() {
-            flight->removeFlightDate(ticketInfo.getFlightDate());
-            delete dateListWidget->takeItem(dateListWidget->row(scheduleItem));
-        });
-
-        connect(manageButton, &QPushButton::clicked, [ticketInfo]() {
-            // Logic for managing individual flight schedule details can be implemented here
-        });
+    flight = flight_map.find(item->getFlightName());
+    flight->getFlightSchedule().traverse([this](const FlightTicketDetail &ticketInfo) {
+        addFlightScheduleItem(ticketInfo);
     });
 
-    connect(addDateButton, &QPushButton::clicked, this, [dateListWidget, flight]() {
+    connect(addDateButton, &QPushButton::clicked, this, [this]() {
         QDialog *addDateDialog = new QDialog();
         addDateDialog->setWindowTitle("添加出行计划");
         QVBoxLayout *layout = new QVBoxLayout(addDateDialog);
@@ -217,46 +200,106 @@ void FlightManageWindow::onManageFlight(FlightItem *item) {
         layout->addWidget(confirmButton);
         addDateDialog->setLayout(layout);
 
-        connect(confirmButton, &QPushButton::clicked, addDateDialog, [addDateDialog, dateEdit, firstClassPriceEdit, businessClassPriceEdit, economyClassPriceEdit, dateListWidget, flight]() {
+        connect(confirmButton, &QPushButton::clicked, addDateDialog, [addDateDialog, dateEdit, firstClassPriceEdit, businessClassPriceEdit, economyClassPriceEdit, this]() {
             Date date(dateEdit->date().year(), dateEdit->date().month(), dateEdit->date().day());
             double firstClassPrice = firstClassPriceEdit->text().toDouble();
             double businessClassPrice = businessClassPriceEdit->text().toDouble();
             double economyClassPrice = economyClassPriceEdit->text().toDouble();
 
             FlightTicketDetail ticketDetail(firstClassPrice, businessClassPrice, economyClassPrice, 0, 0, 0, date);
-            flight->addFlightDate(date, ticketDetail);
+            ticketDetail.setRemainingTickets(FlightTicketDetail::FirstClass, flight->getCabin(Flight::FirstClass).getPassengerCapacity());
+            ticketDetail.setRemainingTickets(FlightTicketDetail::BusinessClass, flight->getCabin(Flight::BusinessClass).getPassengerCapacity());
+            ticketDetail.setRemainingTickets(FlightTicketDetail::EconomyClass, flight->getCabin(Flight::EconomyClass).getPassengerCapacity());
 
-            QListWidgetItem *scheduleItem = new QListWidgetItem(dateListWidget);
-            QWidget *itemWidget = new QWidget(dateListWidget);
-            QHBoxLayout *itemLayout = new QHBoxLayout(itemWidget);
-
-            QLabel *dateLabel = new QLabel(QString::fromStdString(date.toString().c_str()), itemWidget);
-            QPushButton *manageButton = new QPushButton("管理", itemWidget);
-            QPushButton *deleteButton = new QPushButton("删除", itemWidget);
-
-            itemLayout->addWidget(dateLabel);
-            itemLayout->addWidget(manageButton);
-            itemLayout->addWidget(deleteButton);
-            itemWidget->setLayout(itemLayout);
-            dateListWidget->setItemWidget(scheduleItem, itemWidget);
-
-            connect(deleteButton, &QPushButton::clicked, [dateListWidget, scheduleItem, flight, date]() {
-                flight->removeFlightDate(date);
-                delete dateListWidget->takeItem(dateListWidget->row(scheduleItem));
-            });
-
-            connect(manageButton, &QPushButton::clicked, [ticketDetail]() {
-                // Logic for managing individual flight schedule details can be implemented here
-            });
-
-            addDateDialog->accept();
+            if (flight->addFlightSchedule(ticketDetail)) {
+                addFlightScheduleItem(ticketDetail);
+                addDateDialog->accept();
+            } else {
+                QMessageBox::warning(this, "错误", "该日期的航班计划已存在，无法重复添加。");
+            }
         });
-
         addDateDialog->exec();
     });
-
     manageFlightDialog->exec();
 }
+
+void FlightManageWindow::addFlightScheduleItem(const FlightTicketDetail &detail) {
+    FlightScheduleItem *scheduleItem = new FlightScheduleItem(detail, FlightScheduleWidget);
+    FlightScheduleWidget->addItem(scheduleItem);
+    connect(scheduleItem->getDeleteButton(), &QPushButton::clicked, this, [this, scheduleItem]() {
+        onDeleteFlightScheduleItem(scheduleItem);
+    });
+    connect(scheduleItem->getEditButton(), &QPushButton::clicked, this, [this, scheduleItem, detail]() {
+        onManageFlightScheduleItem(scheduleItem);
+    });
+}
+
+void FlightManageWindow::onManageFlightScheduleItem(FlightScheduleItem* item) {
+    QDialog *editScheduleDialog = new QDialog(this);
+    editScheduleDialog->setWindowTitle("管理航班计划");
+
+    QVBoxLayout *layout = new QVBoxLayout(editScheduleDialog);
+
+    QLabel *dateLabel = new QLabel(QString("航班日期: %1").arg(QString::fromStdString(item->getFlightDate().toString().c_str())), editScheduleDialog);
+    layout->addWidget(dateLabel);
+
+    QLineEdit *firstClassPriceEdit = new QLineEdit(editScheduleDialog);
+    firstClassPriceEdit->setPlaceholderText("头等舱票价");
+    firstClassPriceEdit->setText(item->getFirstClassPriceLabel()->text());
+
+    QLineEdit *businessClassPriceEdit = new QLineEdit(editScheduleDialog);
+    businessClassPriceEdit->setPlaceholderText("商务舱票价");
+    businessClassPriceEdit->setText(item->getBusinessClassPriceLabel()->text());
+
+    QLineEdit *economyClassPriceEdit = new QLineEdit(editScheduleDialog);
+    economyClassPriceEdit->setPlaceholderText("经济舱票价");
+    economyClassPriceEdit->setText(item->getEconomyClassPriceLabel()->text());
+
+    layout->addWidget(new QLabel("头等舱票价: ", editScheduleDialog));
+    layout->addWidget(firstClassPriceEdit);
+    layout->addWidget(new QLabel("商务舱票价: ", editScheduleDialog));
+    layout->addWidget(businessClassPriceEdit);
+    layout->addWidget(new QLabel("经济舱票价: ", editScheduleDialog));
+    layout->addWidget(economyClassPriceEdit);
+
+    QPushButton *saveButton = new QPushButton("保存", editScheduleDialog);
+    layout->addWidget(saveButton);
+
+    editScheduleDialog->setLayout(layout);
+
+    connect(saveButton, &QPushButton::clicked, [this, item, firstClassPriceEdit, businessClassPriceEdit, economyClassPriceEdit, editScheduleDialog]() {
+        // double firstClassPrice = firstClassPriceEdit->text().toDouble();
+        // double businessClassPrice = businessClassPriceEdit->text().toDouble();
+        // double economyClassPrice = economyClassPriceEdit->text().toDouble();
+
+        // FlightTicketDetail updatedDetail = item->getFlightDetails();
+        // updatedDetail.setCabinPrice(FlightTicketDetail::FirstClass, firstClassPrice);
+        // updatedDetail.setCabinPrice(FlightTicketDetail::BusinessClass, businessClassPrice);
+        // updatedDetail.setCabinPrice(FlightTicketDetail::EconomyClass, economyClassPrice);
+
+        // if (flight) {
+        //     flight->updateFlightSchedule(updatedDetail);
+        // }
+        // item->setFlightDetails(updatedDetail);
+        // editScheduleDialog->accept();
+    });
+
+    editScheduleDialog->exec();
+}
+
+
+void FlightManageWindow::onDeleteFlightScheduleItem(FlightScheduleItem* item) {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "确认删除", "确实要删除此航班计划吗？", QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        if (flight) {
+            flight->removeFlightSchedule(item->getFlightDate());
+        }
+        delete FlightScheduleWidget->takeItem(FlightScheduleWidget->row(item));
+    }
+}
+
 
 FlightManageWindow::FlightItem::FlightItem(const Flight &flight, QListWidget *parent)
     : QListWidgetItem(parent) {
@@ -302,7 +345,8 @@ String FlightManageWindow::FlightItem::getFlightName() {
 
 FlightManageWindow::FlightScheduleItem::FlightScheduleItem(const FlightTicketDetail &detail, QListWidget *parent)
     : QListWidgetItem(parent) {
-    dateLabel = new QLabel(detail.getFlightDate().toString().c_str(), parent);
+    std::cout << detail;
+    dateLabel = new QLabel(QString::fromStdString(detail.getFlightDate().toString().c_str()), parent);
     firstClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::FirstClass)), parent);
     firstClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::FirstClass)), parent);
     businessClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::BusinessClass)), parent);
@@ -315,6 +359,7 @@ FlightManageWindow::FlightScheduleItem::FlightScheduleItem(const FlightTicketDet
     QWidget *itemWidget = new QWidget(parent);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(5);
 
     layout->addWidget(dateLabel);
     layout->addWidget(firstClassPriceLabel);
@@ -331,6 +376,18 @@ FlightManageWindow::FlightScheduleItem::FlightScheduleItem(const FlightTicketDet
 
     setSizeHint(itemWidget->sizeHint());
     parent->setItemWidget(this, itemWidget);
+}
+
+QLabel* FlightManageWindow::FlightScheduleItem::getFirstClassPriceLabel() {
+    return firstClassPriceLabel;
+}
+
+QLabel* FlightManageWindow::FlightScheduleItem::getBusinessClassPriceLabel() {
+    return businessClassPriceLabel;
+}
+
+QLabel* FlightManageWindow::FlightScheduleItem::getEconomyClassPriceLabel() {
+    return economyClassPriceLabel;
 }
 
 QPushButton* FlightManageWindow::FlightScheduleItem::getDeleteButton() {

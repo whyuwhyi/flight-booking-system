@@ -6,20 +6,22 @@ template<typename T>
 class LinkedList {
 private:
     Link<T>* head;
-    int nodeCount; // 记录节点个数
+    int nodeCount;
 
     void destory();
 public:
     LinkedList();
-    LinkedList(const LinkedList<T>& other);               // 拷贝构造函数
-    LinkedList<T>& operator=(const LinkedList<T>& other); // 拷贝赋值运算符
+    LinkedList(const LinkedList<T>& other);
     ~LinkedList();
 
-    int size() const; // 返回节点个数
+    int size() const;
     Link<T>* getHead() const;
     void setHead(Link<T>* head);
     void append(const T& element);
     void clear();
+    
+    LinkedList<T>& operator=(const LinkedList<T>& other);
+
 
     template<typename U>
     friend std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list);
@@ -123,7 +125,7 @@ void LinkedList<T>::clear() {
 
 template<typename U>
 std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list) {
-    out << list.nodeCount << "\n"; // 输出节点个数
+    out << list.nodeCount << "\n";
     Link<U>* current = list.getHead();
     while (current != nullptr) {
         out << *current << "\n";
