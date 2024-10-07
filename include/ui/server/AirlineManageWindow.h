@@ -46,6 +46,7 @@ private:
     void openAddAirlineWindow();
     QDialog* createAddAirlineDialog();
     QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);
+    QComboBox* createComboBox(QWidget* parent, const QString& defaultText);
     void populateAirportComboBoxes();
     void openMapSearchWindow(const QString &airport1, const QString &airport2);
     QDialog* createMapSearchDialog(const QString &airport1, const QString &airport2);

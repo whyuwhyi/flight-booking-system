@@ -77,6 +77,20 @@ void FlightManageWindow::setupAddFlightDialog(QDialog *addFlightDialog) {
     addFlightDialog->setLayout(formLayout);
     addFlightDialog->resize(400, 600);
 
+    connect(routeComboBox, &QComboBox::currentIndexChanged, this, [=](int index) {
+        if (index >= 1) {
+            QString routeName = routeComboBox->itemText(index);
+            Airline* airline = airline_map.find(routeName.toStdString().c_str());
+            if (airline) {
+                departureAirportLineEdit->setText(QString::fromStdString(airline->getAirport1().c_str()));
+                arrivalAirportLineEdit->setText(QString::fromStdString(airline->getAirport2().c_str()));
+            }
+        }
+        else {
+            departureAirportLineEdit->clear();
+            arrivalAirportLineEdit->clear();
+        }
+    });
     connect(confirmAddFlightButton, &QPushButton::clicked, this, [=]() {
         confirmAddFlight(flightNameLineEdit->text(), airlineLineEdit->text(), airplaneModelComboBox->currentText(), routeComboBox->currentText(), departureTimeEdit->time(), costTimeEdit->time(), addFlightDialog);
     });

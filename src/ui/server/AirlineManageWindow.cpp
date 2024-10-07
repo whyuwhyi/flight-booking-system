@@ -34,8 +34,8 @@ QDialog* AirlineManageWindow::createAddAirlineDialog() {
     QVBoxLayout *layout = new QVBoxLayout(dialog);
 
     airlineNameLineEdit = createLineEdit(dialog, "请输入航线名称");
-    airport1ComboBox = new QComboBox(dialog);
-    airport2ComboBox = new QComboBox(dialog);
+    airport1ComboBox = createComboBox(dialog, "选择出发机场");
+    airport2ComboBox = createComboBox(dialog, "选择到达机场");
 
     populateAirportComboBoxes();
 
@@ -51,7 +51,7 @@ QDialog* AirlineManageWindow::createAddAirlineDialog() {
         QString airlineName = airlineNameLineEdit->text();
         QString airport1 = airport1ComboBox->currentText();
         QString airport2 = airport2ComboBox->currentText();
-        if (airlineName.isEmpty() || airport1.isEmpty() || airport2.isEmpty()) {
+        if (airlineName.isEmpty() || !airport1ComboBox->currentIndex() || !airport2ComboBox->currentIndex()) {
             QMessageBox::warning(this, "错误", "航线名称和机场信息不能为空！");
             return;
         }
@@ -66,6 +66,12 @@ QLineEdit* AirlineManageWindow::createLineEdit(QWidget* parent, const QString& p
     QLineEdit *lineEdit = new QLineEdit(parent);
     lineEdit->setPlaceholderText(placeholder);
     return lineEdit;
+}
+
+QComboBox* AirlineManageWindow::createComboBox(QWidget* parent, const QString& defaultText) {
+    QComboBox *comboBox = new QComboBox(parent);
+    comboBox->addItem(defaultText);
+    return comboBox;
 }
 
 void AirlineManageWindow::populateAirportComboBoxes() {
