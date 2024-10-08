@@ -1,32 +1,36 @@
-// #pragma once
+#pragma once
 
-// #include <FlightSystem/Flight.h>
-// #include <String/String.h>
-// #include <Map/Map.h>
-// #include <Map/HashMap.h>
-// #include <functional>
+#include <FlightSystem/Flight.h>
+#include <String/String.h>
+#include <Map/Map.h>
+#include <Map/HashMap.h>
+#include <functional>
+#include <stdexcept>
 
-// typedef String City;
+class FlightNetwork {
+private:
+    HashMap<String, int> cityIndexMap; // 存储城市名到索引的映射
+    Map<Flight*, Flight*>** flightNetwork; // 二维Map，用于存储每对城市之间的航班
 
-// class FlightNetwork {
-// private:
-//     HashMap<City*, int> cityIndexMap;
-    
-//     Map<Flight*, Flight*>** flightNetwork;
-//     int cityCount;
+    // 内部方法：分配和释放网络内存
+    void allocateNetwork(int cityCount);
+    void deallocateNetwork();
 
-// public:
-//     FlightNetwork(int maxCities);
+public:
+    // 构造和析构
+    FlightNetwork(int cityCount);
+    ~FlightNetwork();
 
-//     bool addCity(City* city);
+    // 城市管理
+    void addCity(const String& city);
+    bool cityExists(const String& city) const;
+    int getCityIndex(const String& city) const;
 
-//     bool addFlight(City* departure, City* arrival, Flight* flight);
+    // 航班管理
+    void addFlight(const String& departureCity, const String& arrivalCity, Flight* flight);
+    Map<Flight*, Flight*>* getFlightsBetween(const String& departureCity, const String& arrivalCity);
 
-//     Map<Flight*, Flight*>* findFlights(City* departure, City* arrival) const;
-
-//     bool removeFlight(City* departure, City* arrival, Flight* flight);
-
-//     void traverseFlights(City* departure, City* arrival, std::function<void(Flight*)> func) const;
-
-//     ~FlightNetwork();
-// };
+    // 其他功能
+    void traverseCities(std::function<void(const String&)> func) const;
+    void traverseFlights(std::function<void(const Flight&)> func) const;
+};

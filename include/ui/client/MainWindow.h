@@ -1,22 +1,25 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QListWidget>
 #include <QStackedWidget>
+#include <QListWidget>
 #include <QWebEngineView>
 #include <QWebChannel>
 #include <ui/client/LoginWindow.h>
 #include <ui/client/RegisterWindow.h>
+#include <ui/client/TicketBookingWindow.h>
 
 class MapBackend : public QObject {
     Q_OBJECT
-public:
-    explicit MapBackend(QObject *parent = nullptr);
 
-    Q_INVOKABLE void requestRoutesData();
+public:
+    MapBackend(QObject *parent = nullptr);
 
 signals:
     void sendRoutesData(const QString &routesData);
+
+public slots:
+    void requestRoutesData();
 };
 
 class MainWindow : public QMainWindow {
@@ -26,25 +29,22 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    void showLoginWindow();
-    void showRegisterWindow();
-    void showMainContent();
-
 private:
-    void setupUI();
-    void setupConnections();
-
-    QListWidget *menuList;
     QStackedWidget *stackedWidget;
-
-    LoginWindow *loginWindow;
-    RegisterWindow *registerWindow;
-
-    QWidget *routeMapWidget;
-    QWidget *serviceHallWidget;
-    QWidget *personalCenterWidget;
+    QListWidget *menuList;
     QWebEngineView *mapView;
     QWebChannel *webChannel;
     MapBackend *mapBackend;
+    LoginWindow *loginWindow;
+    RegisterWindow *registerWindow;
+    TicketBookingWindow *ticketBookingWindow;
+    QWidget *routeMapWidget;
+    QWidget *serviceHallWidget;
+    QWidget *personalCenterWidget;
+
+    void setupUI();
+    void setupConnections();
+    void showLoginWindow();
+    void showRegisterWindow();
+    void showMainContent();
 };

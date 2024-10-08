@@ -55,6 +55,28 @@ Time Time::operator-(const Time& other) const {
     return Time(totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
 }
 
+bool Time::operator<(const Time& other) const {
+    if (hours != other.hours) {
+        return hours < other.hours;
+    }
+    if (minutes != other.minutes) {
+        return minutes < other.minutes;
+    }
+    return seconds < other.seconds;
+}
+
+bool Time::operator<=(const Time& other) const {
+    return *this < other || *this == other;
+}
+
+bool Time::operator>(const Time& other) const {
+    return !(*this <= other);
+}
+
+bool Time::operator>=(const Time& other) const {
+    return !(*this < other);
+}
+
 Date::Date(int year, int month, int day) : year(year), month(month), day(day) {}
 
 int Date::getYear() const { return year; }
@@ -106,8 +128,16 @@ bool Date::operator<(const Date& other) const {
     return day < other.day;
 }
 
+bool Date::operator<=(const Date& other) const {
+    return *this < other || *this == other;
+}
+
 bool Date::operator>(const Date& other) const {
     return other < *this;
+}
+
+bool Date::operator>=(const Date& other) const {
+    return !(*this < other);
 }
 
 Date Date::operator+(int days) const {
@@ -120,4 +150,104 @@ Date Date::operator-(int days) const {
     Date result = *this;
     result.day -= days;
     return result;
+}
+
+DateTime::DateTime() : date(), time() {}
+
+DateTime::DateTime(const Date& date, const Time& time) : date(date), time(time) {}
+
+DateTime::DateTime(int year, int month, int day, int hours, int minutes, int seconds)
+    : date(year, month, day), time(hours, minutes, seconds) {}
+
+Date DateTime::getDate() const {
+    return date;
+}
+
+void DateTime::setDate(const Date& date) {
+    this->date = date;
+}
+
+Time DateTime::getTime() const {
+    return time;
+}
+
+void DateTime::setTime(const Time& time) {
+    this->time = time;
+}
+
+DateTime DateTime::operator+(int seconds) const {
+    DateTime result(*this);
+    result.time = result.time + Time(0, 0, seconds);
+
+    if (result.time.getHours() >= 24) {
+        result.date = result.date + (result.time.getHours() / 24);
+        result.time.setHours(result.time.getHours() % 24);
+    }
+    return result;
+}
+
+DateTime DateTime::operator-(int seconds) const {
+    DateTime result(*this);
+    result.time = result.time - Time(0, 0, seconds);
+
+    if (result.time.getHours() < 0) {
+        result.date = result.date - 1;
+        result.time.setHours(24 + result.time.getHours());
+    }
+    return result;
+}
+
+DateTime DateTime::operator+(const Time& duration) const {
+    return *this + (duration.getHours() * 3600 + duration.getMinutes() * 60 + duration.getSeconds());
+}
+
+DateTime DateTime::operator-(const Time& duration) const {
+    return *this - (duration.getHours() * 3600 + duration.getMinutes() * 60 + duration.getSeconds());
+}
+
+bool DateTime::operator==(const DateTime& other) const {
+    return date == other.date && time == other.time;
+}
+
+bool DateTime::operator!=(const DateTime& other) const {
+    return !(*this == other);
+}
+
+bool DateTime::operator<(const DateTime& other) const {
+    if (date == other.date) {
+        return time < other.time;
+    }
+    return date < other.date;
+}
+
+bool DateTime::operator>(const DateTime& other) const {
+    return other < *this;
+}
+
+String DateTime::toString() const {
+    std::ostringstream oss;
+    oss << date.toString() << " " << time.toString();
+    return String(oss.str().c_str());
+}
+
+DateTime DateTime::fromString(const String& str) {
+    std::istringstream iss(str.c_str());
+    Date date;
+    Time time;
+    char space;
+    iss >> date >> space >> time;
+    if (!iss) {
+        throw std::runtime_error("Invalid DateTime format");
+    }
+    return DateTime(date, time);
+}
+
+std::ostream& operator<<(std::ostream& out, const DateTime& dateTime) {
+    out << dateTime.date << " " << dateTime.time;
+    return out;
+}
+
+std::istream& operator>>(std::istream& in, DateTime& dateTime) {
+    in >> dateTime.date >> dateTime.time;
+    return in;
 }

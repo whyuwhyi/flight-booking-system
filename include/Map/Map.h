@@ -47,9 +47,18 @@ public:
     void traverse(std::function<void(const Value&)> func) const;
     void traverse(std::function<void(Value*)> func) const;
     int getNodeCount() const;
+    void sort(std::function<bool(const Key&, const Key&)> newCompare);
 
     Map& operator=(const Map& other);
     Map& operator=(Map&& other) noexcept;
+
+    bool operator==(const Map& other) const;
+    bool operator!=(const Map& other) const;
+    Value& operator[](const Key& key);
+    const Value& operator[](const Key& key) const;
+
+    void* operator new(size_t size);
+    void operator delete(void* ptr);
 
     template<typename K, typename V>
     friend std::ostream& operator<<(std::ostream& out, const Map<K, V>& map);
@@ -105,6 +114,47 @@ Map<Key, Value>& Map<Key, Value>::operator=(Map&& other) noexcept {
         other.nodeCount = 0;
     }
     return *this;
+}
+
+template<typename Key, typename Value>
+bool Map<Key, Value>::operator==(const Map& other) const {
+    if (nodeCount != other.nodeCount) return false;
+
+    bool isEqual = true;
+    traverse([&](const Value& value) {
+        if (!isEqual) return;
+        auto otherValue = other.get(getKey(value));
+        if (!otherValue || *otherValue != value) {
+            isEqual = false;
+        }
+    });
+    return isEqual;
+}
+
+template<typename Key, typename Value>
+bool Map<Key, Value>::operator!=(const Map& other) const {
+    return !(*this == other);
+}
+
+template<typename Key, typename Value>
+Value& Map<Key, Value>::operator[](const Key& key) {
+    Node* node = find(root, key);
+    if (node) {
+        return node->value;
+    } else {
+        Value defaultValue{};
+        insert(defaultValue);
+        return *find(key);
+    }
+}
+
+template<typename Key, typename Value>
+const Value& Map<Key, Value>::operator[](const Key& key) const {
+    Node* node = find(root, key);
+    if (!node) {
+        throw std::out_of_range("Key not found");
+    }
+    return node->value;
 }
 
 template<typename Key, typename Value>
@@ -294,6 +344,16 @@ int Map<Key, Value>::getNodeCount() const {
     return nodeCount;
 }
 
+template<typename Key, typename Value>
+void Map<Key, Value>::sort(std::function<bool(const Key&, const Key&)> newCompare) {
+    Map<Key, Value> newMap(getKey, newCompare);
+    traverse([&](const Value& value) {
+        newMap.insert(value);
+    });
+    *this = std::move(newMap);
+}
+
+
 template<typename K, typename V>
 std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
     out << map.nodeCount << "\n";
@@ -313,4 +373,16 @@ std::istream& operator>>(std::istream& in, Map<K, V>& map) {
         map.insert(value);
     }
     return in;
+}
+
+template<typename Key, typename Value>
+void* Map<Key, Value>::operator new(size_t size) {
+    std::cout << "Allocating memory for Map of size " << size << " bytes." << std::endl;
+    return ::operator new(size);
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::operator delete(void* ptr) {
+    std::cout << "Freeing memory for Map." << std::endl;
+    ::operator delete(ptr);
 }

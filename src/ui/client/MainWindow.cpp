@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete loginWindow;
     delete registerWindow;
+    delete ticketBookingWindow;
     delete webChannel;
     delete mapBackend;
     delete mapView;
@@ -43,9 +44,11 @@ void MainWindow::setupUI() {
     stackedWidget = new QStackedWidget(this);
     loginWindow = new LoginWindow(this);
     registerWindow = new RegisterWindow(this);
+    ticketBookingWindow = new TicketBookingWindow(this);
 
     stackedWidget->addWidget(loginWindow);
     stackedWidget->addWidget(registerWindow);
+    stackedWidget->addWidget(ticketBookingWindow);
 
     routeMapWidget = new QWidget(this);
     serviceHallWidget = new QWidget(this);
@@ -74,10 +77,10 @@ void MainWindow::setupUI() {
     menuList->setMovement(QListView::Static);
     menuList->setSelectionMode(QAbstractItemView::SingleSelection);
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/route.svg"), "航线图"));
-    menuList->addItem(new QListWidgetItem(QIcon(":/icons/service.svg"), "服务大厅"));
+    menuList->addItem(new QListWidgetItem(QIcon(":/icons/service.svg"), "查/订票"));
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/personal.svg"), "个人中心"));
 
-    QHBoxLayout *mainLayout = new QHBoxLayout;
+    QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addWidget(menuList);
     mainLayout->addWidget(stackedWidget);
 
@@ -93,8 +96,10 @@ void MainWindow::setupConnections() {
     connect(loginWindow, &LoginWindow::loginSuccess, this, &MainWindow::showMainContent);
     connect(registerWindow, &RegisterWindow::loginRequested, this, &MainWindow::showLoginWindow);
     connect(menuList, &QListWidget::currentRowChanged, this, [this](int index) {
-        if (stackedWidget->currentIndex() >= 2) {
-            stackedWidget->setCurrentIndex(index + 2);
+        if (index == 1) {
+            stackedWidget->setCurrentWidget(ticketBookingWindow);
+        } else if (stackedWidget->currentIndex() >= 3) {
+            stackedWidget->setCurrentIndex(index + 3);
         }
     });
 }
@@ -111,7 +116,7 @@ void MainWindow::showRegisterWindow() {
 }
 
 void MainWindow::showMainContent() {
-    stackedWidget->setCurrentIndex(2);
+    stackedWidget->setCurrentIndex(3);
     menuList->setCurrentRow(0);
     menuList->setVisible(true);
 }
