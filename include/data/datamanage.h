@@ -3,10 +3,12 @@
 #include <cstring>
 #include <Map/Map.h>
 #include <User/User.h>
+#include <LinkedList/LinkedList.h>
 #include <FlightSystem/Airport.h>
 #include <FlightSystem/Airline.h>
 #include <FlightSystem/AirplaneModel.h>
 #include <FlightSystem/Flight.h>
+#include <FlightSystem/FlightNetwork.h>
 
 #ifndef DATA_PATH
 #define DATA_PATH  "/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/"
@@ -21,6 +23,7 @@ typedef Map<String, Airport> AirportMap;
 typedef Map<String, Airline> AirlineMap;
 typedef Map<String, AirplaneModel> AirplaneModelMap;
 typedef Map<String, Flight> FlightMap;
+typedef LinkedList<Flight> FlightList;
 
 extern User current_login_user;
 extern UserMap user_map;
@@ -28,6 +31,8 @@ extern AirportMap airport_map;
 extern AirlineMap airline_map;
 extern AirplaneModelMap airplane_model_map;
 extern FlightMap flight_map;
+extern FlightNetwork flight_network;
+extern FlightList flight_list;
 
 char* myStrcat(const char* str1, const char* str2);
 
@@ -67,3 +72,7 @@ bool writeFlightToFile(const FlightMap &flight_map);
 bool addFlight(const Flight &flight);
 bool modifyFlight(const String &flightName, const Flight &updatedFlight);
 bool deleteFlight(const String &flightName);
+
+
+bool loadFlightFromFile(FlightList &flight_list);
+bool loadFlightNetworkFromFile(FlightNetwork &flight_network);

@@ -4,33 +4,30 @@
 #include <String/String.h>
 #include <Map/Map.h>
 #include <Map/HashMap.h>
+#include <LinkedList/LinkedList.h>
 #include <functional>
 #include <stdexcept>
+#include <FlightSystem/Time.h>
+#include <FlightSystem/Ticket.h>
 
 class FlightNetwork {
 private:
-    HashMap<String, int> cityIndexMap; // 存储城市名到索引的映射
-    Map<Flight*, Flight*>** flightNetwork; // 二维Map，用于存储每对城市之间的航班
-
-    // 内部方法：分配和释放网络内存
-    void allocateNetwork(int cityCount);
-    void deallocateNetwork();
+    HashMap<String, int> cityIndexMap;
+    LinkedList<Flight*>** flightNetwork;
 
 public:
-    // 构造和析构
-    FlightNetwork(int cityCount);
+    FlightNetwork(int maxCityCount);
     ~FlightNetwork();
 
-    // 城市管理
     void addCity(const String& city);
     bool cityExists(const String& city) const;
     int getCityIndex(const String& city) const;
 
-    // 航班管理
     void addFlight(const String& departureCity, const String& arrivalCity, Flight* flight);
-    Map<Flight*, Flight*>* getFlightsBetween(const String& departureCity, const String& arrivalCity);
 
-    // 其他功能
+    Map<Ticket, Ticket> findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const;
+    Map<ConnectingTicket, ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
+
     void traverseCities(std::function<void(const String&)> func) const;
     void traverseFlights(std::function<void(const Flight&)> func) const;
 };

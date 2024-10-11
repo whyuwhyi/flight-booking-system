@@ -8,6 +8,7 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <QScrollArea>
+#include <QDoubleSpinBox>
 
 FlightManageWindow::FlightManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
@@ -62,6 +63,21 @@ void FlightManageWindow::setupAddFlightDialog(QDialog *addFlightDialog) {
     QTimeEdit *departureTimeEdit = createTimeEdit(addFlightDialog, QTime::currentTime());
     QTimeEdit *costTimeEdit = createTimeEdit(addFlightDialog, QTime(0, 0, 0));
 
+    QDoubleSpinBox *initialFirstClassPriceSpinBox = new QDoubleSpinBox(addFlightDialog);
+    initialFirstClassPriceSpinBox->setRange(0, 1000000);
+    initialFirstClassPriceSpinBox->setPrefix("¥");
+    initialFirstClassPriceSpinBox->setDecimals(2);
+
+    QDoubleSpinBox *initialBusinessClassPriceSpinBox = new QDoubleSpinBox(addFlightDialog);
+    initialBusinessClassPriceSpinBox->setRange(0, 1000000);
+    initialBusinessClassPriceSpinBox->setPrefix("¥");
+    initialBusinessClassPriceSpinBox->setDecimals(2);
+
+    QDoubleSpinBox *initialEconomyClassPriceSpinBox = new QDoubleSpinBox(addFlightDialog);
+    initialEconomyClassPriceSpinBox->setRange(0, 1000000);
+    initialEconomyClassPriceSpinBox->setPrefix("¥");
+    initialEconomyClassPriceSpinBox->setDecimals(2);
+
     QPushButton *confirmAddFlightButton = new QPushButton("确认添加航班", addFlightDialog);
     formLayout->addRow("航班名称", flightNameLineEdit);
     formLayout->addRow("航空公司", airlineLineEdit);
@@ -72,10 +88,13 @@ void FlightManageWindow::setupAddFlightDialog(QDialog *addFlightDialog) {
     formLayout->addRow("交换机场", swapAirportsButton);
     formLayout->addRow("出发时间", departureTimeEdit);
     formLayout->addRow("飞行时长", costTimeEdit);
+    formLayout->addRow("头等舱初始价格", initialFirstClassPriceSpinBox);
+    formLayout->addRow("商务舱初始价格", initialBusinessClassPriceSpinBox);
+    formLayout->addRow("经济舱初始价格", initialEconomyClassPriceSpinBox);
     formLayout->addWidget(confirmAddFlightButton);
 
     addFlightDialog->setLayout(formLayout);
-    addFlightDialog->resize(400, 600);
+    addFlightDialog->resize(400, 700);
 
     connect(routeComboBox, &QComboBox::currentIndexChanged, this, [=](int index) {
         if (index >= 1) {
@@ -92,13 +111,13 @@ void FlightManageWindow::setupAddFlightDialog(QDialog *addFlightDialog) {
         }
     });
     connect(confirmAddFlightButton, &QPushButton::clicked, this, [=]() {
-        confirmAddFlight(flightNameLineEdit->text(), airlineLineEdit->text(), airplaneModelComboBox->currentText(), routeComboBox->currentText(), departureTimeEdit->time(), costTimeEdit->time(), addFlightDialog);
+        confirmAddFlight(flightNameLineEdit->text(), airlineLineEdit->text(), airplaneModelComboBox->currentText(), routeComboBox->currentText(), departureAirportLineEdit->text(), arrivalAirportLineEdit->text(), departureTimeEdit->time(), costTimeEdit->time(), initialFirstClassPriceSpinBox->value(), initialBusinessClassPriceSpinBox->value(), initialEconomyClassPriceSpinBox->value(), addFlightDialog);
     });
 }
 
-void FlightManageWindow::confirmAddFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QTime& departureTime, const QTime& costTime, QDialog* dialog) {
-    if (validateFlightInput(flightName, airline, airplaneModel, routeName)) {
-        Flight flight = createFlight(flightName, airline, airplaneModel, routeName, departureTime, costTime);
+void FlightManageWindow::confirmAddFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice, QDialog* dialog) {
+    if (validateFlightInput(flightName, airline, airplaneModel, routeName, departureAirport, arrivalAirport, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice)) {
+        Flight flight = createFlight(flightName, airline, airplaneModel, routeName, departureAirport, arrivalAirport, departureTime, costTime, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice);
         addFlight(flight);
         addFlightItem(flight);
         dialog->accept();
@@ -107,11 +126,13 @@ void FlightManageWindow::confirmAddFlight(const QString& flightName, const QStri
     }
 }
 
-bool FlightManageWindow::validateFlightInput(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName) const {
-    return !flightName.isEmpty() && !airline.isEmpty() && airplaneModel != "选择机型" && routeName != "选择航线" && departureAirport && arrivalAirport;
+bool FlightManageWindow::validateFlightInput(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) const {
+    return !flightName.isEmpty() && !airline.isEmpty() && airplaneModel != "选择机型" && routeName != "选择航线" && !departureAirport.isEmpty() && !arrivalAirport.isEmpty() && initialFirstClassPrice > 0 && initialBusinessClassPrice > 0 && initialEconomyClassPrice > 0;
 }
 
-Flight FlightManageWindow::createFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QTime& departureTime, const QTime& costTime) const {
+Flight FlightManageWindow::createFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirportName, const QString& arrivalAirportName, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) {
+    Airport* departureAirport = airport_map.find(departureAirportName.toStdString().c_str());
+    Airport* arrivalAirport = airport_map.find(arrivalAirportName.toStdString().c_str());
     Time departureTimeObj(departureTime.hour(), departureTime.minute(), departureTime.second());
     Time costTimeObj(costTime.hour(), costTime.minute(), costTime.second());
     AirplaneModel* airplane_model = airplane_model_map.find(airplaneModel.toStdString().c_str());
@@ -120,6 +141,9 @@ Flight FlightManageWindow::createFlight(const QString& flightName, const QString
     flight.setCabin(Flight::FirstClass, airplane_model->getCabin(AirplaneModel::FirstClass));
     flight.setCabin(Flight::BusinessClass, airplane_model->getCabin(AirplaneModel::BusinessClass));
     flight.setCabin(Flight::EconomyClass, airplane_model->getCabin(AirplaneModel::EconomyClass));
+    flight.setInitialPrice(Flight::FirstClass, initialFirstClassPrice);
+    flight.setInitialPrice(Flight::BusinessClass, initialBusinessClassPrice);
+    flight.setInitialPrice(Flight::EconomyClass, initialEconomyClassPrice);
 
     return flight;
 }
@@ -336,8 +360,6 @@ QPushButton* FlightManageWindow::createSwapButton(QWidget* parent, QLineEdit* de
         QString temp = departureAirportLineEdit->text();
         departureAirportLineEdit->setText(arrivalAirportLineEdit->text());
         arrivalAirportLineEdit->setText(temp);
-
-        std::swap(departureAirport, arrivalAirport);
     });
     return swapButton;
 }

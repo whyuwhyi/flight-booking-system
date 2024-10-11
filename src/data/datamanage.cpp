@@ -8,6 +8,8 @@ AirportMap airport_map([] (const Airport &airport) { return airport.getName(); }
 AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
 AirplaneModelMap airplane_model_map([] (const AirplaneModel &model) { return model.getName(); });
 FlightMap flight_map([] (const Flight &flight) { return flight.getFlightName(); });
+FlightList flight_list;
+FlightNetwork flight_network(10);
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);
@@ -331,6 +333,37 @@ bool modifyFlight(const String &flightName, const Flight &updatedFlight) {
 bool deleteFlight(const String &flightName) {
     if (flight_map.erase(flightName)) {
         return writeFlightToFile(flight_map);
+    }
+    return false;
+}
+
+bool loadFlightFromFile(FlightList &flight_list) {
+    char* filename = myStrcat(DATA_PATH, "flight/flights.txt");
+    std::ifstream inFile(filename, std::ios::in);
+
+    if (!inFile.is_open()) {
+        std::cout << "File open failed!" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        flight_list.clear();
+        delete[] filename;
+        return true;
+    }
+
+    inFile >> flight_list;
+    delete[] filename;
+    return true;
+}
+
+bool loadFlightNetworkFromFile(FlightNetwork &flight_network) {
+    if(loadFlightFromFile(flight_list)){
+        flight_list.traverse([&](Flight *flight) {
+            flight_network.addFlight(flight->getDepartureAirport().getCity(), flight->getArrivalAirport().getCity(), flight);
+        });
+        return true;
     }
     return false;
 }

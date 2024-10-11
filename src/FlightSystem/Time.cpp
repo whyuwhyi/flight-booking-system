@@ -15,7 +15,9 @@ int Time::getSeconds() const { return seconds; }
 void Time::setSeconds(int seconds) { this->seconds = seconds; }
 
 String Time::toString() const {
-    return (std::to_string(hours) + ":" + std::to_string(minutes) + ":" + std::to_string(seconds)).c_str();
+    char buffer[9];
+    std::snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", hours, minutes, seconds);
+    return String(buffer);
 }
 
 Time Time::fromString(const String& timeStr) {
@@ -89,8 +91,11 @@ int Date::getDay() const { return day; }
 void Date::setDay(int day) { this->day = day; }
 
 String Date::toString() const {
-    return (std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day)).c_str();
+    char buffer[11];
+    std::snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d", year, month, day);
+    return String(buffer);
 }
+
 
 Date Date::fromString(const String& dateStr) {
     int year, month, day;

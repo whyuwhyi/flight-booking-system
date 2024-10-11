@@ -29,3 +29,5 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const String& str);
     friend std::istream& operator>>(std::istream& in, String& str);
 };
+
+String operator+(const char* lhs, const String& rhs);

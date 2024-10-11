@@ -77,7 +77,7 @@ private:
     void openAddFlightDialog();
     void openAddDateDialog();
     void setupAddFlightDialog(QDialog *addFlightDialog);
-    void confirmAddFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QTime& departureTime, const QTime& costTime, QDialog* dialog);
+    void confirmAddFlight(const QString& flightName, const QString& airline, const QString& airplaneModel,const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, const QTime& departureTime,const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice, QDialog* dialog);
 
     // Flight management
     void setupManageFlightDialog(QDialog *dialog, FlightItem *item);
@@ -94,8 +94,8 @@ private:
     void updateFlightSchedule(FlightScheduleItem* item, QLineEdit* firstClassPriceEdit, QLineEdit* businessClassPriceEdit, QLineEdit* economyClassPriceEdit);
 
     // Utility functions
-    bool validateFlightInput(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName) const;
-    Flight createFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QTime& departureTime, const QTime& costTime) const;
+    bool validateFlightInput(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) const;
+    Flight createFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirportName, const QString& arrivalAirportName, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice);
     bool confirmDelete(const QString &title, const QString &message);
     void deleteFlightItem(FlightItem* item);
     void deleteFlightScheduleItem(FlightScheduleItem* item);
@@ -123,7 +123,5 @@ private:
     QLabel *departureAirportLabel;
     QLabel *arrivalAirportLabel;
 
-    Airport *departureAirport = nullptr;
-    Airport *arrivalAirport = nullptr;
     Flight *flight = nullptr;
 };

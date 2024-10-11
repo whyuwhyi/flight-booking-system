@@ -1,4 +1,5 @@
 #include <ui/client/MainWindow.h>
+#include <data/datamanage.h>
 #include <QFile>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -23,6 +24,7 @@ void MapBackend::requestRoutesData() {
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), webChannel(nullptr), mapBackend(nullptr) {
+    loadFlightNetworkFromFile(flight_network);
     setupUI();
     setupConnections();
     showLoginWindow();

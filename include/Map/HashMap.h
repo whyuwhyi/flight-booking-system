@@ -1,71 +1,18 @@
 #pragma once
+
 #include <optional>
 #include <stdexcept>
 #include <functional>
 #include <iostream>
 
-// 自定义动态数组替代 std::vector
-template<typename T>
-class DynamicArray {
-private:
-    T* data;
-    size_t capacity;
-    size_t size;
-
-    void resize(size_t new_capacity) {
-        T* new_data = new T[new_capacity];
-        for (size_t i = 0; i < size; ++i) {
-            new_data[i] = data[i];
-        }
-        delete[] data;
-        data = new_data;
-        capacity = new_capacity;
-    }
-
-public:
-    DynamicArray(size_t initial_capacity = 16) : capacity(initial_capacity), size(0) {
-        data = new T[capacity];
-    }
-
-    ~DynamicArray() {
-        delete[] data;
-    }
-
-    void push_back(const T& value) {
-        if (size == capacity) {
-            resize(capacity * 2);
-        }
-        data[size++] = value;
-    }
-
-    T& operator[](size_t index) {
-        if (index >= size) {
-            throw std::out_of_range("Index out of range");
-        }
-        return data[index];
-    }
-
-    const T& operator[](size_t index) const {
-        if (index >= size) {
-            throw std::out_of_range("Index out of range");
-        }
-        return data[index];
-    }
-
-    size_t getSize() const {
-        return size;
-    }
-
-    void clear() {
-        size = 0;
-    }
-};
+// 自定义常数组替代动态数组
+constexpr size_t MAX_CAPACITY = 1000;
 
 // HashMap 类定义
 template<typename Key, typename Value>
 class HashMap {
 public:
-    HashMap(size_t capacity = 101, double max_load_factor = 0.75);
+    HashMap(size_t capacity = MAX_CAPACITY, double max_load_factor = 0.75);
     bool insert(const Key& key, const Value& value);
     std::optional<Value> get(const Key& key) const;
     bool erase(const Key& key);
@@ -102,7 +49,7 @@ private:
     size_t find_position(const Key& key) const;
     size_t find_insert_position(const Key& key) const;
 
-    DynamicArray<std::optional<HashNode>> table;
+    std::optional<HashNode> table[MAX_CAPACITY];
     size_t capacity;
     size_t size;
     double max_load_factor;
@@ -111,7 +58,7 @@ private:
 // Implementation
 template<typename Key, typename Value>
 HashMap<Key, Value>::HashMap(size_t capacity, double max_load_factor)
-    : table(capacity), capacity(capacity), size(0), max_load_factor(max_load_factor) {}
+    : capacity(capacity), size(0), max_load_factor(max_load_factor) {}
 
 template<typename Key, typename Value>
 size_t HashMap<Key, Value>::hash(const Key& key) const {
@@ -132,7 +79,7 @@ size_t HashMap<Key, Value>::find_position(const Key& key) const {
             break;
         }
     }
-    return capacity; // Indicates not found
+    return capacity;
 }
 
 template<typename Key, typename Value>
@@ -155,7 +102,7 @@ bool HashMap<Key, Value>::insert(const Key& key, const Value& value) {
     }
     size_t index = find_position(key);
     if (index != capacity && table[index] && !table[index]->is_deleted && table[index]->key == key) {
-        return false; // Key already exists
+        return false;
     }
     index = find_insert_position(key);
     table[index] = HashNode(key, value);
@@ -191,9 +138,9 @@ bool HashMap<Key, Value>::contains(const Key& key) const {
 template<typename Key, typename Value>
 void HashMap<Key, Value>::rehash() {
     size_t new_capacity = capacity * 2;
-    DynamicArray<std::optional<HashNode>> new_table(new_capacity);
+    std::optional<HashNode> new_table[MAX_CAPACITY];
 
-    for (size_t i = 0; i < table.getSize(); ++i) {
+    for (size_t i = 0; i < capacity; ++i) {
         if (table[i] && !table[i]->is_deleted) {
             std::hash<std::string> str_hash;
             size_t index = str_hash(table[i]->key.c_str()) % new_capacity;
@@ -204,7 +151,9 @@ void HashMap<Key, Value>::rehash() {
         }
     }
 
-    table = std::move(new_table);
+    for (size_t i = 0; i < new_capacity; ++i) {
+        table[i] = new_table[i];
+    }
     capacity = new_capacity;
 }
 
@@ -250,7 +199,7 @@ bool HashMap<Key, Value>::operator==(const HashMap& other) const {
     if (size != other.size) {
         return false;
     }
-    for (size_t i = 0; i < table.getSize(); ++i) {
+    for (size_t i = 0; i < capacity; ++i) {
         if (table[i] && !table[i]->is_deleted) {
             auto other_value = other.get(table[i]->key);
             if (!other_value.has_value() || other_value.value() != table[i]->value) {
@@ -268,7 +217,7 @@ bool HashMap<Key, Value>::operator!=(const HashMap& other) const {
 
 template<typename Key, typename Value>
 void HashMap<Key, Value>::traverse(std::function<void(const Key&, const Value&)> func) const {
-    for (size_t i = 0; i < table.getSize(); ++i) {
+    for (size_t i = 0; i < capacity; ++i) {
         if (table[i] && !table[i]->is_deleted) {
             func(table[i]->key, table[i]->value);
         }

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <LinkedList/Link.h>
+#include <functional>
+#include <iostream>
+#include <stdexcept>
 
 template<typename T>
 class LinkedList {
@@ -19,7 +22,19 @@ public:
     void setHead(Link<T>* head);
     void append(const T& element);
     void clear();
-    
+
+    bool isEmpty() const;
+    T& getElementAt(int index) const;
+    void insert(int index, const T& element);
+    bool remove(const T& element);
+    void popBack();
+    void popFront();
+    Link<T>* find(const T& element) const;
+    Link<T>* getLast() const;
+    T removeLast();
+    void traverse(std::function<void(const T&)> func) const;
+    void traverse(std::function<void(T*)> func) const;
+
     LinkedList<T>& operator=(const LinkedList<T>& other);
 
 
@@ -121,6 +136,157 @@ void LinkedList<T>::clear() {
     destory();
     head = nullptr;
     nodeCount = 0;
+}
+
+template<typename T>
+bool LinkedList<T>::isEmpty() const {
+    return head == nullptr;
+}
+
+template<typename T>
+T& LinkedList<T>::getElementAt(int index) const {
+    if (index < 0 || index >= nodeCount) {
+        throw std::out_of_range("Index out of range");
+    }
+    Link<T>* current = head;
+    for (int i = 0; i < index; ++i) {
+        current = current->getNext();
+    }
+    return current->getElement();
+}
+
+template<typename T>
+void LinkedList<T>::insert(int index, const T& element) {
+    if (index < 0 || index > nodeCount) {
+        throw std::out_of_range("Index out of range");
+    }
+    Link<T>* newLink = new Link<T>(element);
+    if (index == 0) {
+        newLink->setNext(head);
+        head = newLink;
+    } else {
+        Link<T>* current = head;
+        for (int i = 0; i < index - 1; ++i) {
+            current = current->getNext();
+        }
+        newLink->setNext(current->getNext());
+        current->setNext(newLink);
+    }
+    nodeCount++;
+}
+
+template<typename T>
+bool LinkedList<T>::remove(const T& element) {
+    Link<T>* current = head;
+    Link<T>* previous = nullptr;
+    while (current != nullptr) {
+        if (current->getElement() == element) {
+            if (previous == nullptr) {
+                head = current->getNext();
+            } else {
+                previous->setNext(current->getNext());
+            }
+            delete current;
+            nodeCount--;
+            return true;
+        }
+        previous = current;
+        current = current->getNext();
+    }
+    return false;
+}
+
+template<typename T>
+void LinkedList<T>::popBack() {
+    if (head == nullptr) return;
+    if (head->getNext() == nullptr) {
+        delete head;
+        head = nullptr;
+    } else {
+        Link<T>* current = head;
+        Link<T>* previous = nullptr;
+        while (current->getNext() != nullptr) {
+            previous = current;
+            current = current->getNext();
+        }
+        previous->setNext(nullptr);
+        delete current;
+    }
+    nodeCount--;
+}
+
+template<typename T>
+void LinkedList<T>::popFront() {
+    if (head == nullptr) return;
+    Link<T>* temp = head;
+    head = head->getNext();
+    delete temp;
+    nodeCount--;
+}
+
+template<typename T>
+Link<T>* LinkedList<T>::find(const T& element) const {
+    Link<T>* current = head;
+    while (current != nullptr) {
+        if (current->getElement() == element) {
+            return current;
+        }
+        current = current->getNext();
+    }
+    return nullptr;
+}
+
+template<typename T>
+Link<T>* LinkedList<T>::getLast() const {
+    if (head == nullptr) return nullptr;
+    Link<T>* current = head;
+    while (current->getNext() != nullptr) {
+        current = current->getNext();
+    }
+    return current;
+}
+
+template<typename T>
+T LinkedList<T>::removeLast() {
+    if (head == nullptr) {
+        throw std::out_of_range("List is empty");
+    }
+    if (head->getNext() == nullptr) {
+        T element = head->getElement();
+        delete head;
+        head = nullptr;
+        nodeCount--;
+        return element;
+    }
+    Link<T>* current = head;
+    Link<T>* previous = nullptr;
+    while (current->getNext() != nullptr) {
+        previous = current;
+        current = current->getNext();
+    }
+    T element = current->getElement();
+    delete current;
+    previous->setNext(nullptr);
+    nodeCount--;
+    return element;
+}
+
+template <typename T>
+void LinkedList<T>::traverse(std::function<void(const T&)> func) const {
+    Link<T>* current = head;
+    while (current != nullptr) {
+        func(current->getElement());
+        current = current->getNext();
+    }
+}
+
+template <typename T>
+void LinkedList<T>::traverse(std::function<void(T*)> func) const {
+    Link<T>* current = head;
+    while (current != nullptr) {
+        func(&current->getElement());
+        current = current->getNext();
+    }
 }
 
 template<typename U>

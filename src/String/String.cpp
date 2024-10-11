@@ -29,6 +29,7 @@ String::String(String&& other) noexcept : data(other.data), length(other.length)
 
 String::~String() {
     delete[] data;
+    data = nullptr;
 }
 
 String& String::operator=(const String& other) {
@@ -134,4 +135,21 @@ std::istream& operator>>(std::istream& in, String& str) {
     in >> buffer;
     str = String(buffer);
     return in;
+}
+
+String operator+(const char* lhs, const String& rhs) {
+    if (!lhs) {
+        return rhs;
+    }
+    
+    size_t lhsLength = std::strlen(lhs);
+    size_t totalLength = lhsLength + rhs.size();
+
+    char* result = new char[totalLength + 1];
+    std::strcpy(result, lhs);
+    std::strcat(result, rhs.c_str());
+
+    String newString(result);
+    delete[] result;
+    return newString;
 }
