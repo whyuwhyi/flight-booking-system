@@ -91,6 +91,7 @@ private:
     void connectFlightScheduleItemActions(FlightScheduleItem* item);
     void onDeleteFlightScheduleItem(FlightScheduleItem* item);
     void onManageFlightScheduleItem(FlightScheduleItem* item);
+    void addDate(const QDate &date, double firstClassPrice, double businessClassPrice, double economyClassPrice);
     void updateFlightSchedule(FlightScheduleItem* item, QLineEdit* firstClassPriceEdit, QLineEdit* businessClassPriceEdit, QLineEdit* economyClassPriceEdit);
 
     // Utility functions
