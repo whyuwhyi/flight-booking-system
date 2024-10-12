@@ -146,10 +146,9 @@
    cd flight-booking-system
    git checkout v1.0
    ```
-2. **创建构建目录**：
+2. **创建构建目录**(可选)：
    ```sh
    mkdir build
-   cd build
    ```
 3. **运行 CMake**：
    ```sh
