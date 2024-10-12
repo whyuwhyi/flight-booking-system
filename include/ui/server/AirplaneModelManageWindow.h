@@ -8,19 +8,40 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QComboBox>
 #include <QMessageBox>
 #include <FlightSystem/AirplaneModel.h>
+
+class AirplaneModelItem : public QListWidgetItem {
+public:
+    AirplaneModelItem(const AirplaneModel &model, QListWidget *parent = nullptr);
+    QPushButton* getDeleteButton();
+    String getModelName();
+
+private:
+    QLabel *nameLabel;
+    QLabel *capacityLabel;
+    QPushButton *deleteButton;
+};
 
 class AirplaneModelManageWindow : public QWidget {
     Q_OBJECT
 
 public:
-    AirplaneModelManageWindow(QWidget *parent = nullptr);
+    explicit AirplaneModelManageWindow(QWidget *parent = nullptr);
 
 private:
     void setupUI();
     void setupConnections();
+    void openAddModelDialog();
+    QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);
+    bool validateModelInput();
+    void addModelItem(const AirplaneModel &model);
+    void onDeleteModel(AirplaneModelItem *item);
 
+    QVBoxLayout *mainLayout;
+    QListWidget *modelListWidget;
+    QPushButton *addModelButton;
     QLineEdit *modelNameLineEdit;
     QLineEdit *firstClassRowsLineEdit;
     QLineEdit *firstClassColumnsLineEdit;
@@ -28,21 +49,5 @@ private:
     QLineEdit *businessClassColumnsLineEdit;
     QLineEdit *economyClassRowsLineEdit;
     QLineEdit *economyClassColumnsLineEdit;
-    QPushButton *addModelButton;
-    QListWidget *modelListWidget;
-    QVBoxLayout *mainLayout;
-
-    class AirplaneModelItem : public QListWidgetItem {
-    private:
-        QLabel *nameLabel;
-        QLabel *capacityLabel;
-        QPushButton *deleteButton;
-    public:
-        AirplaneModelItem(const AirplaneModel &model, QListWidget *parent = nullptr);
-        QPushButton* getDeleteButton();
-        String getModelName();
-    };
-
-    void addModelItem(const AirplaneModel &model);
-    void onDeleteModel(AirplaneModelItem* item);
 };
+

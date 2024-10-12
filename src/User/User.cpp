@@ -30,7 +30,7 @@ bool User::operator==(const User& other) const {
 }
 
 std::ostream& operator<<(std::ostream &out, const User &user) {
-    out << user.phoneNumber << " " << user.password << std::endl;
+    out << user.phoneNumber << " " << user.password << "\n";
     return out;
 }
 

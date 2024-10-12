@@ -1,22 +1,26 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QListWidget>
 #include <QStackedWidget>
+#include <QListWidget>
 #include <QWebEngineView>
 #include <QWebChannel>
+#include <ui/client/LoginWindow.h>
+#include <ui/client/RegisterWindow.h>
+#include <ui/client/TicketBookingWindow.h>
 
 class MapBackend : public QObject {
     Q_OBJECT
-public:
-    explicit MapBackend(QObject *parent = nullptr);
 
-    Q_INVOKABLE void requestRoutesData();
+public:
+    MapBackend(QObject *parent = nullptr);
 
 signals:
     void sendRoutesData(const QString &routesData);
-};
 
+public slots:
+    void requestRoutesData();
+};
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -26,19 +30,21 @@ public:
     ~MainWindow();
 
 private:
-    QWidget *centralWidget;
-    QListWidget *menuList;
     QStackedWidget *stackedWidget;
-
+    QListWidget *menuList;
+    QWebEngineView *mapView;
+    QWebChannel *webChannel;
+    MapBackend *mapBackend;
+    LoginWindow *loginWindow;
+    RegisterWindow *registerWindow;
+    TicketBookingWindow *ticketBookingWindow;
     QWidget *routeMapWidget;
     QWidget *serviceHallWidget;
     QWidget *personalCenterWidget;
-    QWebEngineView *mapView;
-
-    QWebChannel *webChannel;   // QWebChannel 对象
-    MapBackend *mapBackend;    // MapBackend 类对象
 
     void setupUI();
     void setupConnections();
-    void createMapRoute();     // 创建地图航线
+    void showLoginWindow();
+    void showRegisterWindow();
+    void showMainContent();
 };

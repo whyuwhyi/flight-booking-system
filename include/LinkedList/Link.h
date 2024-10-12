@@ -1,5 +1,4 @@
 #pragma once
-
 #include <iostream>
 
 
@@ -13,7 +12,7 @@ public:
     Link(Link<T>* next = nullptr);
     ~Link();
     void setElement(const T& element);
-    const T& getElement() const;
+    T& getElement();
     void setNext(Link<T>* next);
     Link<T>* getNext();
 
@@ -44,7 +43,7 @@ void Link<T>::setElement(const T& element){
 }
 
 template<typename T>
-const T& Link<T>::getElement() const {
+T& Link<T>::getElement() {
     return element;
 }
 
@@ -69,4 +68,3 @@ std::istream& operator>>(std::istream& in, Link<U>& link) {
     in >> link.element;
     return in;
 }
-

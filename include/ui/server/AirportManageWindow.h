@@ -23,35 +23,35 @@ signals:
     void airportDataReceived(const QString &name, const QString &country, const QString &city, double latitude, double longitude);
 };
 
+class AirportItem : public QListWidgetItem {
+public:
+    AirportItem(const Airport &airport, QListWidget *parent = nullptr);
+    QPushButton* getDeleteButton();
+    String getAirportName();
+
+private:
+    QLabel *nameLabel;
+    QLabel *countryLabel;
+    QLabel *cityLabel;
+    QPushButton *deleteButton;
+};
+
 class AirportManageWindow : public QWidget {
     Q_OBJECT
 
-private slots:
-    void handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude);
+public:
+    explicit AirportManageWindow(QWidget *parent = nullptr);
 
 private:
-    QLineEdit *searchLineEdit;
-    QPushButton *addAirportButton;
-    QListWidget *airportListWidget;
-    QVBoxLayout *mainLayout;
-
-    class AirportItem : public QListWidgetItem {
-    private:
-        QLabel *nameLabel;
-        QLabel *countryLabel;
-        QLabel *cityLabel;
-        QPushButton *deleteButton;
-    public:
-        AirportItem(const Airport &airport, QListWidget *parent = nullptr);
-        QPushButton* getDeleteButton();
-        String getAirportName();
-    };
-
-    void onDeleteAirport(AirportItem* item);
-    void addAirportItem(const Airport &airport);
-    void openMapSearchWindow();
-public:
-    AirportManageWindow(QWidget *parent = nullptr);
     void setupUI();
     void setupConnections();
+    void openMapSearchWindow();
+    void handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude);
+    void addAirportItem(const Airport& airport);
+    void onDeleteAirport(AirportItem *item);
+
+    QVBoxLayout *mainLayout;
+    QListWidget *airportListWidget;
+    QPushButton *addAirportButton;
 };
+

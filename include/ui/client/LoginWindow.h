@@ -1,17 +1,16 @@
 #pragma once
 
 #include <QWidget>
-
-
-class QLineEdit;
-class QPushButton;
-class QCheckBox;
+#include <QLineEdit>
+#include <QPushButton>
+#include <QCheckBox>
 
 class LoginWindow : public QWidget {
     Q_OBJECT
 
 public:
     LoginWindow(QWidget *parent = nullptr);
+    void checkAutoLogin();
 
 signals:
     void registerRequested();
@@ -19,15 +18,16 @@ signals:
 
 private slots:
     void onLoginClicked();
+    void togglePasswordVisibility();
 
 private:
+    void setupUI();
+    void setupConnections();
+
     QLineEdit *phoneNumberLineEdit;
     QLineEdit *passwordLineEdit;
     QPushButton *loginButton;
     QPushButton *registerButton;
-    QPushButton *togglePasswordVisibility;
+    QPushButton *togglePasswordVisibilityButton;
     QCheckBox *autoLoginCheckBox;
-
-    void setupUI();
-    void setupConnections();
 };

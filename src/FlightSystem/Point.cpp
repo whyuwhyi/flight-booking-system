@@ -22,7 +22,6 @@ bool Point::operator==(const Point& other) const {
     return (longitude == other.longitude) && (latitude == other.latitude);
 }
 
-// 流操作符重载
 std::ostream& operator<<(std::ostream& out, const Point& point) {
     out << point.longitude << ' ' << point.latitude;
     return out;

@@ -1,4 +1,5 @@
 #include <FlightSystem/Flight.h>
+#include <data/datamanage.h>
 
 // FlightTicketDetail class implementation
 FlightTicketDetail::FlightTicketDetail() : firstClassPrice(0.0), businessClassPrice(0.0), economyClassPrice(0.0),
@@ -70,14 +71,18 @@ std::istream& operator>>(std::istream& in, FlightTicketDetail& ticketInfo) {
 Flight::Flight() : flightName(), airline(), airplaneModel(), departureAirport(), arrivalAirport(),
                    flightRouteName(), departureTime(), costTime(), firstClassCabin(),
                    businessClassCabin(), economyClassCabin(),
+                   initialFirstClassPrice(0.0), initialBusinessClassPrice(0.0), initialEconomyClassPrice(0.0),
                    flightScheduleMap([] (const FlightTicketDetail& ticketInfo) { return ticketInfo.getFlightDate(); }) {}
 
 Flight::Flight(const String& flightName, const String& airline, const String& airplaneModel,
                const Airport& departureAirport, const Airport& arrivalAirport, const String& flightRouteName,
-               const Time& departureTime, const Time& costTime)
+               const Time& departureTime, const Time& costTime, double initialFirstClassPrice,
+               double initialBusinessClassPrice, double initialEconomyClassPrice)
     : flightName(flightName), airline(airline), airplaneModel(airplaneModel), departureAirport(departureAirport),
       arrivalAirport(arrivalAirport), flightRouteName(flightRouteName), departureTime(departureTime),
       costTime(costTime), firstClassCabin(), businessClassCabin(), economyClassCabin(),
+      initialFirstClassPrice(initialFirstClassPrice), initialBusinessClassPrice(initialBusinessClassPrice),
+      initialEconomyClassPrice(initialEconomyClassPrice),
       flightScheduleMap([] (const FlightTicketDetail& ticketInfo) { return ticketInfo.getFlightDate(); }) {}
 
 const String& Flight::getFlightName() const {
@@ -175,33 +180,65 @@ bool Flight::hasFlightOnDate(const Date& date) const {
     return flightScheduleMap.find(date) != nullptr;
 }
 
-void Flight::addFlightDate(const Date& date, const FlightTicketDetail& ticketInfo) {
-    if (!hasFlightOnDate(date)) {
-        flightScheduleMap.insert(ticketInfo);
+bool Flight::addFlightSchedule(const FlightTicketDetail& ticketInfo) {
+    if (flightScheduleMap.insert(ticketInfo)) {
+        return writeFlightToFile(flight_map);
     }
+    return false;
 }
 
-void Flight::removeFlightDate(const Date& date) {
-    if (hasFlightOnDate(date)) {
-        flightScheduleMap.erase(date);
+bool Flight::removeFlightSchedule(const Date& date) {
+    if (flightScheduleMap.erase(date)) {
+        return writeFlightToFile(flight_map);
     }
+    return false;
 }
 
 const FlightScheduleMap& Flight::getFlightSchedule() const {
     return flightScheduleMap;
 }
 
+double Flight::getInitialPrice(CabinType type) const {
+    switch (type) {
+        case FirstClass:
+            return initialFirstClassPrice;
+        case BusinessClass:
+            return initialBusinessClassPrice;
+        case EconomyClass:
+            return initialEconomyClassPrice;
+        default:
+            throw std::invalid_argument("Invalid cabin type");
+    }
+}
+
+void Flight::setInitialPrice(CabinType type, double price) {
+    switch (type) {
+        case FirstClass:
+            initialFirstClassPrice = price;
+            break;
+        case BusinessClass:
+            initialBusinessClassPrice = price;
+            break;
+        case EconomyClass:
+            initialEconomyClassPrice = price;
+            break;
+        default:
+            throw std::invalid_argument("Invalid cabin type");
+    }
+}
+
 std::ostream& operator<<(std::ostream& out, const Flight& flight) {
     out << flight.flightName << "\n"
         << flight.airline << "\n"
         << flight.airplaneModel << "\n"
-        << flight.departureAirport << "\n"
-        << flight.arrivalAirport << "\n"
+        << flight.departureAirport
+        << flight.arrivalAirport
         << flight.flightRouteName << "\n"
         << flight.departureTime << " " << flight.costTime << "\n"
         << flight.firstClassCabin << "\n"
         << flight.businessClassCabin << "\n"
         << flight.economyClassCabin << "\n"
+        << flight.initialFirstClassPrice << " " << flight.initialBusinessClassPrice << " " << flight.initialEconomyClassPrice << "\n"
         << flight.flightScheduleMap;
     return out;
 }
@@ -209,6 +246,8 @@ std::ostream& operator<<(std::ostream& out, const Flight& flight) {
 std::istream& operator>>(std::istream& in, Flight& flight) {
     in >> flight.flightName >> flight.airline >> flight.airplaneModel >> flight.departureAirport >> flight.arrivalAirport
        >> flight.flightRouteName >> flight.departureTime >> flight.costTime >> flight.firstClassCabin
-       >> flight.businessClassCabin >> flight.economyClassCabin >> flight.flightScheduleMap;
+       >> flight.businessClassCabin >> flight.economyClassCabin
+       >> flight.initialFirstClassPrice >> flight.initialBusinessClassPrice >> flight.initialEconomyClassPrice
+       >> flight.flightScheduleMap;
     return in;
 }

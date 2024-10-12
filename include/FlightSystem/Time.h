@@ -29,6 +29,10 @@ public:
     bool operator!=(const Time& other) const;
     Time operator+(const Time& other) const;
     Time operator-(const Time& other) const;
+    bool operator<(const Time& other) const;
+    bool operator<=(const Time& other) const;
+    bool operator>(const Time& other) const;
+    bool operator>=(const Time& other) const;
 };
 
 class Date {
@@ -56,7 +60,46 @@ public:
     bool operator==(const Date& other) const;
     bool operator!=(const Date& other) const;
     bool operator<(const Date& other) const;
+    bool operator<=(const Date& other) const;
     bool operator>(const Date& other) const;
+    bool operator>=(const Date& other) const;
     Date operator+(int days) const;
     Date operator-(int days) const;
+};
+
+class DateTime {
+private:
+    Date date;
+    Time time;
+
+public:
+    DateTime();
+    DateTime(const Date& date, const Time& time);
+    DateTime(int year, int month, int day, int hours, int minutes, int seconds);
+
+    // Getters and Setters
+    Date getDate() const;
+    void setDate(const Date& date);
+    Time getTime() const;
+    void setTime(const Time& time);
+
+    // Arithmetic operations
+    DateTime operator+(int seconds) const;  // Add seconds to the DateTime
+    DateTime operator-(int seconds) const;  // Subtract seconds from the DateTime
+    DateTime operator+(const Time& duration) const;
+    DateTime operator-(const Time& duration) const;
+
+    // Comparison operators
+    bool operator==(const DateTime& other) const;
+    bool operator!=(const DateTime& other) const;
+    bool operator<(const DateTime& other) const;
+    bool operator>(const DateTime& other) const;
+
+    // Conversion to/from string
+    String toString() const;
+    static DateTime fromString(const String& str);
+
+    // I/O operators
+    friend std::ostream& operator<<(std::ostream& out, const DateTime& dateTime);
+    friend std::istream& operator>>(std::istream& in, DateTime& dateTime);
 };

@@ -1,9 +1,8 @@
 #pragma once
 
 #include <QWidget>
-
-class QLineEdit;
-class QPushButton;
+#include <QLineEdit>
+#include <QPushButton>
 
 class RegisterWindow : public QWidget {
     Q_OBJECT
@@ -16,16 +15,18 @@ signals:
 
 private slots:
     void onRegisterClicked();
+    void togglePasswordVisibility();
+    void toggleConfirmPasswordVisibility();
 
 private:
+    void setupUI();
+    void setupConnections();
+
     QLineEdit *phoneNumberLineEdit;
     QLineEdit *passwordLineEdit;
     QLineEdit *confirmPasswordLineEdit;
     QPushButton *registerButton;
-    QPushButton *togglePasswordVisibility;
-    QPushButton *toggleConfirmPasswordVisibility;
+    QPushButton *togglePasswordVisibilityButton;
+    QPushButton *toggleConfirmPasswordVisibilityButton;
     QPushButton *backButton;
-
-    void setupUI();
-    void setupConnections();
 };

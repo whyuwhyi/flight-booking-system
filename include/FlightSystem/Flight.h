@@ -15,8 +15,6 @@ typedef Map<Date, FlightTicketDetail> FlightScheduleMap;
 
 class FlightTicketDetail {
 public:
-    enum CabinType { FirstClass, BusinessClass, EconomyClass };
-
 private:
     double firstClassPrice;
     double businessClassPrice;
@@ -46,9 +44,6 @@ public:
 };
 
 class Flight {
-public:
-    enum CabinType { FirstClass, BusinessClass, EconomyClass };
-
 private:
     String flightName;
     String airline;
@@ -61,46 +56,42 @@ private:
     Cabin firstClassCabin;
     Cabin businessClassCabin;
     Cabin economyClassCabin;
+    double initialFirstClassPrice;
+    double initialBusinessClassPrice;
+    double initialEconomyClassPrice;
     FlightScheduleMap flightScheduleMap;
 
 public:
     Flight();
     Flight(const String& flightName, const String& airline, const String& airplaneModel,
            const Airport& departureAirport, const Airport& arrivalAirport, const String& flightRouteName,
-           const Time& departureTime = Time(), const Time& costTime = Time());
+           const Time& departureTime = Time(), const Time& costTime = Time(),
+           double initialFirstClassPrice = 0.0, double initialBusinessClassPrice = 0.0, double initialEconomyClassPrice = 0.0);
 
     const String& getFlightName() const;
     void setFlightName(const String& flightName);
-
     const String& getAirline() const;
     void setAirline(const String& airline);
-
     const String& getAirplaneModel() const;
     void setAirplaneModel(const String& airplaneModel);
-
     const Airport& getDepartureAirport() const;
     void setDepartureAirport(const Airport& departureAirport);
-
     const Airport& getArrivalAirport() const;
     void setArrivalAirport(const Airport& arrivalAirport);
-
     const String& getFlightRouteName() const;
     void setFlightRouteName(const String& flightRouteName);
-
     const Time& getDepartureTime() const;
     void setDepartureTime(const Time& departureTime);
-
     const Time& getCostTime() const;
     void setCostTime(const Time& costTime);
-
+    double getInitialPrice(CabinType type) const;
+    void setInitialPrice(CabinType type, double price);
     Cabin& getCabin(CabinType type);
     const Cabin& getCabin(CabinType type) const;
     void setCabin(CabinType type, const Cabin& cabin);
-
     bool hasFlightOnDate(const Date& date) const;
-    void addFlightDate(const Date& date, const FlightTicketDetail& ticketInfo);
-    void removeFlightDate(const Date& date);
-
+    bool addFlightSchedule(const FlightTicketDetail& ticketInfo);
+    bool removeFlightSchedule(const Date& date);
     const FlightScheduleMap& getFlightSchedule() const;
 
     friend std::ostream& operator<<(std::ostream& out, const Flight& flight);

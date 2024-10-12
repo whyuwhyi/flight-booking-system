@@ -8,6 +8,8 @@ AirportMap airport_map([] (const Airport &airport) { return airport.getName(); }
 AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
 AirplaneModelMap airplane_model_map([] (const AirplaneModel &model) { return model.getName(); });
 FlightMap flight_map([] (const Flight &flight) { return flight.getFlightName(); });
+FlightList flight_list;
+FlightNetwork flight_network(10);
 
 char* myStrcat(const char* str1, const char* str2) {
     size_t len1 = strlen(str1);
@@ -20,7 +22,6 @@ char* myStrcat(const char* str1, const char* str2) {
     return result;
 }
 
-// User management functions
 bool loadUserFromFile(UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -41,7 +42,6 @@ bool loadUserFromFile(UserMap &user_map) {
     delete[] filename;
     return true;
 }
-
 
 bool writeUserToFile(const UserMap &user_map) {
     char* filename = myStrcat(DATA_PATH, "user/users.txt");
@@ -89,14 +89,15 @@ bool writeLocalUserToFile(User &local_user) {
 }
 
 bool addUser(const User &user) {
-    user_map.insert(user);
-    return writeUserToFile(user_map);
+    if (user_map.insert(user)) {
+        return writeUserToFile(user_map);
+    }
+    return false;
 }
 
 bool modifyUser(const String &username, const User &updatedUser) {
     if (user_map.erase(username)) {
-        user_map.insert(updatedUser);
-        return writeUserToFile(user_map);
+        return addUser(updatedUser);
     }
     return false;
 }
@@ -108,7 +109,6 @@ bool deleteUser(const String &username) {
     return false;
 }
 
-// Airport management functions
 bool loadAirportFromFile(AirportMap &airport_map) {
     char* filename = myStrcat(DATA_PATH, "airport/airports.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -154,8 +154,7 @@ bool addAirport(const Airport &airport) {
 
 bool modifyAirport(const String &airportName, const Airport &updatedAirport) {
     if (airport_map.erase(airportName)) {
-        airport_map.insert(updatedAirport);
-        return writeAirportToFile(airport_map);
+        return addAirport(updatedAirport);
     }
     return false;
 }
@@ -167,7 +166,6 @@ bool deleteAirport(const String &airportName) {
     return false;
 }
 
-// Airline management functions
 bool loadAirlineFromFile(AirlineMap &airline_map) {
     char* filename = myStrcat(DATA_PATH, "airline/airlines.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -213,8 +211,7 @@ bool addAirline(const Airline &airline) {
 
 bool modifyAirline(const String &airlineName, const Airline &updatedAirline) {
     if (airline_map.erase(airlineName)) {
-        airline_map.insert(updatedAirline);
-        return writeAirlineToFile(airline_map);
+        return addAirline(updatedAirline);
     }
     return false;
 }
@@ -226,7 +223,6 @@ bool deleteAirline(const String &airlineName) {
     return false;
 }
 
-// AirplaneModel management functions
 bool loadAirplaneModelFromFile(AirplaneModelMap &airplane_model_map) {
     char* filename = myStrcat(DATA_PATH, "airplanemodel/models.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -272,8 +268,7 @@ bool addAirplaneModel(const AirplaneModel &airplane_model) {
 
 bool modifyAirplaneModel(const String &modelName, const AirplaneModel &updatedAirplaneModel) {
     if (airplane_model_map.erase(modelName)) {
-        airplane_model_map.insert(updatedAirplaneModel);
-        return writeAirplaneModelToFile(airplane_model_map);
+        return addAirplaneModel(updatedAirplaneModel);
     }
     return false;
 }
@@ -285,7 +280,6 @@ bool deleteAirplaneModel(const String &modelName) {
     return false;
 }
 
-// Flight management functions
 bool loadFlightFromFile(FlightMap &flight_map) {
     char* filename = myStrcat(DATA_PATH, "flight/flights.txt");
     std::ifstream inFile(filename, std::ios::in);
@@ -331,8 +325,7 @@ bool addFlight(const Flight &flight) {
 
 bool modifyFlight(const String &flightName, const Flight &updatedFlight) {
     if (flight_map.erase(flightName)) {
-        flight_map.insert(updatedFlight);
-        return writeFlightToFile(flight_map);
+        return addFlight(updatedFlight);
     }
     return false;
 }
@@ -340,6 +333,37 @@ bool modifyFlight(const String &flightName, const Flight &updatedFlight) {
 bool deleteFlight(const String &flightName) {
     if (flight_map.erase(flightName)) {
         return writeFlightToFile(flight_map);
+    }
+    return false;
+}
+
+bool loadFlightFromFile(FlightList &flight_list) {
+    char* filename = myStrcat(DATA_PATH, "flight/flights.txt");
+    std::ifstream inFile(filename, std::ios::in);
+
+    if (!inFile.is_open()) {
+        std::cout << "File open failed!" << std::endl;
+        delete[] filename;
+        return false;
+    }
+
+    if (inFile.peek() == std::ifstream::traits_type::eof()) {
+        flight_list.clear();
+        delete[] filename;
+        return true;
+    }
+
+    inFile >> flight_list;
+    delete[] filename;
+    return true;
+}
+
+bool loadFlightNetworkFromFile(FlightNetwork &flight_network) {
+    if(loadFlightFromFile(flight_list)){
+        flight_list.traverse([&](Flight *flight) {
+            flight_network.addFlight(flight->getDepartureAirport().getCity(), flight->getArrivalAirport().getCity(), flight);
+        });
+        return true;
     }
     return false;
 }

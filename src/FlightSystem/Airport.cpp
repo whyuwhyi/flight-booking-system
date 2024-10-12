@@ -2,11 +2,9 @@
 
 Airport::Airport(){}
 
-// 构造函数
 Airport::Airport(const String& name, const String& country, const String& city, const Point& position)
     : name(name), country(country), city(city), position(position) {}
 
-// Getter 方法
 const String& Airport::getCountry() const {
     return country;
 }
@@ -23,7 +21,6 @@ const Point& Airport::getPosition() const {
     return position;
 }
 
-// Setter 方法
 void Airport::setCountry(const String& country) {
     this->country = country;
 }
@@ -41,10 +38,10 @@ void Airport::setPosition(const Point& position) {
 }
 
 std::ostream& operator<<(std::ostream& out, const Airport& airport) {
-    out << airport.name<< std::endl
-        << airport.country << std::endl
-        << airport.city << std::endl
-        << airport.position << std::endl;
+    out << airport.name << "\n"
+        << airport.country << "\n"
+        << airport.city << "\n"
+        << airport.position << "\n";
     return out;
 }
 

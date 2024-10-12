@@ -11,7 +11,6 @@
 #include <data/datamanage.h>
 
 ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
-    loadUserFromFile(user_map);
     loadAirportFromFile(airport_map);
     loadAirlineFromFile(airline_map);
     loadAirplaneModelFromFile(airplane_model_map);
