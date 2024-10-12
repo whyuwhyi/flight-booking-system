@@ -142,8 +142,9 @@
 
 1. **克隆仓库**：
    ```sh
-   git clone https://github.com/yourusername/flight-booking-system.git
+   git clone https://github.com/whyuwhyi/flight-booking-system.git
    cd flight-booking-system
+   git checkout v1.0
    ```
 2. **创建构建目录**：
    ```sh
@@ -152,19 +153,23 @@
    ```
 3. **运行 CMake**：
    ```sh
-   cmake ..
+   cmake -Bbuild
    ```
 4. **编译项目**：
    ```sh
-   cmake --build .
+   cmake --build build
    ```
 
 ### 运行应用程序
 
-- 构建完成后，可以在 `build` 目录中找到可执行文件。使用以下命令运行：
+- 构建完成后，使用以下命令运行客户端：
   ```sh
-  ./flight-booking-system
+  ./build/bin/flight-booking
   ```
+- 使用以下命令运行服务端：
+  ```sh
+  ./build/bin/flight-booking --server
+-在Windows下，请加上.exe后缀
 
 ## 使用说明
 
