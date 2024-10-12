@@ -159,6 +159,10 @@
    ```sh
    cmake --build build
    ```
+   ps:可以使用cmake的-j选项指定多线程构建。
+   ```sh
+   cmake --build -j$(nproc) build
+   ```
 
 ### 运行应用程序
 
@@ -169,7 +173,7 @@
 - 使用以下命令运行服务端：
   ```sh
   ./build/bin/flight-booking --server
--在Windows下，请加上.exe后缀
+- 在Windows下，请在可执行文件后加上.exe后缀
 
 ## 使用说明
 
