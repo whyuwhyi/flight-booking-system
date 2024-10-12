@@ -34,7 +34,6 @@
 │   │   └── flights.txt
 │   └── user
 │       └── users.txt
-├── generate_qrc.sh
 ├── include
 │   ├── data
 │   │   └── datamanage.h
@@ -77,7 +76,6 @@
 │   │       └── ServerWindow.h
 │   └── User
 │       └── User.h
-├── Makefile
 ├── README.md
 ├── resources
 │   ├── icons
@@ -183,7 +181,7 @@
 
 以下是主要类的 UML 类图，展示了类之间的关系：
 
-![UML Class Diagram](uml_class_diagram.png)
+![UML 类图](./FlightBookingUML.svg)
 
 
 ### 主要类设计
@@ -202,6 +200,17 @@
 
    - 管理联程航班的多个 `Ticket` 对象。
    - 提供了计算总价、总时长、获取出发和到达时间的方法。
+
+4. **FlightNetwork 类**
+
+   - 管理整个航班网络，储存多个城市之间的航班信息。
+   - 提供了添加城市、添加航班、查找直达和联程航班的方法。
+   - 航班网络使用 `LinkedList<Flight*>**` 的矩阵结构来存储不同城市之间的航班列表。
+   - **主要方法**：
+     - `addCity(const String& city)`：添加新的城市节点。
+     - `addFlight(const String& departureCity, const String& arrivalCity, Flight* flight)`：添加航班连接。
+     - `findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date)`：查找两个城市之间的直达航班。
+     - `findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops)`：查找联程航班，支持设定最大中转次数。
 
 ### 用户界面设计
 
