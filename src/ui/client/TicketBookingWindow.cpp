@@ -194,7 +194,7 @@ void ConnectingTicketItem::setupUI() {
     mainLayout = new QVBoxLayout(this);
     ticketsLayout = new QVBoxLayout();
     
-    totalPriceLabel = new QLabel("总价格 " + QString::number(connectingTicket.getTotalPrice(FlightTicketDetail::EconomyClass)), this);
+    totalPriceLabel = new QLabel("总价格 " + QString::number(connectingTicket.getTotalPrice(EconomyClass)), this);
     totalDurationLabel = new QLabel("总时长: " + QString(connectingTicket.getTotalDuration().toString().c_str()), this);
     departureDateLabel = new QLabel("出发: " + QString(connectingTicket.getDepartureDateTime().toString().c_str()), this);
     arrivalDateLabel = new QLabel("到达: " + QString(connectingTicket.getArrivalDateTime().toString().c_str()), this);

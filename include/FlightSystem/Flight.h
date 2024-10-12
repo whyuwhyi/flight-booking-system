@@ -15,8 +15,6 @@ typedef Map<Date, FlightTicketDetail> FlightScheduleMap;
 
 class FlightTicketDetail {
 public:
-    enum CabinType { FirstClass, BusinessClass, EconomyClass };
-
 private:
     double firstClassPrice;
     double businessClassPrice;
@@ -46,9 +44,6 @@ public:
 };
 
 class Flight {
-public:
-    enum CabinType { FirstClass, BusinessClass, EconomyClass };
-
 private:
     String flightName;
     String airline;

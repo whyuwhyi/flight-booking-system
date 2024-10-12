@@ -138,12 +138,12 @@ Flight FlightManageWindow::createFlight(const QString& flightName, const QString
     AirplaneModel* airplane_model = airplane_model_map.find(airplaneModel.toStdString().c_str());
 
     Flight flight(flightName.toStdString().c_str(), airline.toStdString().c_str(), airplane_model->getName(), *departureAirport, *arrivalAirport, routeName.toStdString().c_str(), departureTimeObj, costTimeObj);
-    flight.setCabin(Flight::FirstClass, airplane_model->getCabin(AirplaneModel::FirstClass));
-    flight.setCabin(Flight::BusinessClass, airplane_model->getCabin(AirplaneModel::BusinessClass));
-    flight.setCabin(Flight::EconomyClass, airplane_model->getCabin(AirplaneModel::EconomyClass));
-    flight.setInitialPrice(Flight::FirstClass, initialFirstClassPrice);
-    flight.setInitialPrice(Flight::BusinessClass, initialBusinessClassPrice);
-    flight.setInitialPrice(Flight::EconomyClass, initialEconomyClassPrice);
+    flight.setCabin(FirstClass, airplane_model->getCabin(FirstClass));
+    flight.setCabin(BusinessClass, airplane_model->getCabin(BusinessClass));
+    flight.setCabin(EconomyClass, airplane_model->getCabin(EconomyClass));
+    flight.setInitialPrice(FirstClass, initialFirstClassPrice);
+    flight.setInitialPrice(BusinessClass, initialBusinessClassPrice);
+    flight.setInitialPrice(EconomyClass, initialEconomyClassPrice);
 
     return flight;
 }
@@ -292,9 +292,24 @@ void FlightManageWindow::openAddDateDialog() {
         double firstClassPrice = firstClassPriceEdit->text().toDouble();
         double businessClassPrice = businessClassPriceEdit->text().toDouble();
         double economyClassPrice = economyClassPriceEdit->text().toDouble();
+        addDate(selectedDate, firstClassPrice, businessClassPrice, economyClassPrice);
         addDateDialog->accept();
     });
     addDateDialog->exec();
+}
+
+void FlightManageWindow::addDate(const QDate &date, double firstClassPrice, double businessClassPrice, double economyClassPrice) {
+    Date flightDate = Date::fromString(date.toString("yyyy-MM-dd").toStdString().c_str());
+    FlightTicketDetail detail(firstClassPrice, businessClassPrice, economyClassPrice, flight->getCabin(FirstClass).getPassengerCapacity(),
+                            flight->getCabin(BusinessClass).getPassengerCapacity(), flight->getCabin(EconomyClass).getPassengerCapacity(), flightDate);
+    if (flight) {
+        if (flight->addFlightSchedule(detail)) {
+            addFlightScheduleItem(detail);
+        }
+        else {
+            QMessageBox::warning(this, "错误", "此航班计划已存在。");
+        }
+    }
 }
 
 
@@ -306,9 +321,9 @@ void FlightManageWindow::updateFlightSchedule(FlightScheduleItem* item, QLineEdi
     if (flight) {
         FlightTicketDetail* detail = flight->getFlightSchedule().find(item->getFlightDate());
         if (detail) {
-            detail->setCabinPrice(FlightTicketDetail::FirstClass, firstClassPrice);
-            detail->setCabinPrice(FlightTicketDetail::BusinessClass, businessClassPrice);
-            detail->setCabinPrice(FlightTicketDetail::EconomyClass, economyClassPrice);
+            detail->setCabinPrice(FirstClass, firstClassPrice);
+            detail->setCabinPrice(BusinessClass, businessClassPrice);
+            detail->setCabinPrice(EconomyClass, economyClassPrice);
             item->setFlightDetails(*detail);
             return ;
         }
@@ -425,12 +440,12 @@ FlightScheduleItem::FlightScheduleItem(const FlightTicketDetail &detail, QListWi
 
 void FlightScheduleItem::setupFlightScheduleItemUI(const FlightTicketDetail &detail, QListWidget *parent) {
     dateLabel = new QLabel(QString::fromStdString(detail.getFlightDate().toString().c_str()), parent);
-    firstClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::FirstClass)), parent);
-    firstClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::FirstClass)), parent);
-    businessClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::BusinessClass)), parent);
-    businessClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::BusinessClass)), parent);
-    economyClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::EconomyClass)), parent);
-    economyClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::EconomyClass)), parent);
+    firstClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(FirstClass)), parent);
+    firstClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(FirstClass)), parent);
+    businessClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(BusinessClass)), parent);
+    businessClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(BusinessClass)), parent);
+    economyClassPriceLabel = new QLabel(QString("价格: %1").arg(detail.getCabinPrice(EconomyClass)), parent);
+    economyClassTicketsLabel = new QLabel(QString("余票: %1").arg(detail.getRemainingTickets(EconomyClass)), parent);
 
     deleteButton = new QPushButton("删除", parent);
     editButton = new QPushButton("管理", parent);
@@ -482,10 +497,10 @@ Date FlightScheduleItem::getFlightDate() {
 }
 
 void FlightScheduleItem::setFlightDetails(const FlightTicketDetail &detail) {
-    firstClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::FirstClass)));
-    firstClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::FirstClass)));
-    businessClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::BusinessClass)));
-    businessClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::BusinessClass)));
-    economyClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(FlightTicketDetail::EconomyClass)));
-    economyClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(FlightTicketDetail::EconomyClass)));
+    firstClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(FirstClass)));
+    firstClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(FirstClass)));
+    businessClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(BusinessClass)));
+    businessClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(BusinessClass)));
+    economyClassPriceLabel->setText(QString("价格: %1").arg(detail.getCabinPrice(EconomyClass)));
+    economyClassTicketsLabel->setText(QString("余票: %1").arg(detail.getRemainingTickets(EconomyClass)));
 }

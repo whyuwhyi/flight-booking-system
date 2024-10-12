@@ -1,107 +1,219 @@
+# Flight Booking System
 
-### 1. **用户界面模块 (UI Module)**
-负责与用户交互的图形界面，允许用户进行查询、订票、退改签等操作。
+## 概述
 
-- **主要功能**：
-  - 显示主窗口及各类对话框（查询、订票、退票等）。
-  - 处理用户输入（起飞城市、目的地、出行日期、查询条件等）。
-  - 展示航班查询结果、订单详情、客户飞行记录和航线图。
+航班查询和机票订购系统是使用 C++、Qt 和 CMake 开发的跨平台应用程序。它提供了管理航班、订购机票、以及维护航班、机场和航空公司信息的功能。
 
-- **实现方式**：
-  - 使用 Qt 的 `QMainWindow`、`QDialog`、`QWidget` 等类来创建窗口和对话框。
-  - 使用 Qt Designer 设计 `.ui` 文件，并在代码中加载和使用这些文件。
+## 特性
 
-### 2. **航班管理模块 (Flight Management Module)**
-负责管理和维护航班信息，包括航班的创建、修改和删除等操作。
+- **航班管理**：添加、修改或删除系统中的航班，定义航班时刻表和票价。
+- **机票预订**：支持预订直达和联程航班，用户可选择经济舱、公务舱和头等舱。
+- **机场和航空公司管理**：管理机场和航空公司信息，添加新机场和航空公司，支持与地图交互查找机场位置。
+- **跨平台支持**：使用 Qt 开发，保证在 Windows、macOS 和 Linux 上的兼容性。
 
-- **主要功能**：
-  - 从文件或数据库加载航班信息（航班号、起降时间、城市、票价、票价折扣等）。
-  - 提供添加、修改和删除航班信息的接口。
-  - 维护航班信息的持久性（保存到文件或数据库）。
+## 先决条件
 
-- **实现方式**：
-  - 使用 C++ 类（如 `Flight`、`FlightManager`）来表示航班和管理航班数据。
-  - 使用数据结构（如 `std::vector` 或 `std::map`）存储航班信息。
+- **Qt 6.7.2**
+- **CMake**
+- **VS Code** 或其他支持 CMake 项目的 IDE
+- **C++ 编译器** (Linux 上使用 GCC/Clang，Windows 上使用 MSVC)
 
-### 3. **航线管理模块 (Route Management Module)**
-负责构建和管理航线网络，包括城市之间的航线和相关数据。
+## 项目结构
 
-- **主要功能**：
-  - 建立航线图网络，城市作为节点，航班作为边，边的权重可以是距离、票价或时间。
-  - 提供最短路径、最便宜路径等查询功能。
-  - 图形化展示航线网络。
+```
+.
+├── CMakeLists.txt
+├── data
+│   ├── airline
+│   │   └── airlines.txt
+│   ├── airplanemodel
+│   │   └── models.txt
+│   ├── airport
+│   │   └── airports.txt
+│   ├── flight
+│   │   └── flights.txt
+│   └── user
+│       └── users.txt
+├── generate_qrc.sh
+├── include
+│   ├── data
+│   │   └── datamanage.h
+│   ├── FlightSystem
+│   │   ├── Airline.h
+│   │   ├── AirplaneModel.h
+│   │   ├── Airport.h
+│   │   ├── Flight.h
+│   │   ├── FlightNetwork.h
+│   │   ├── Passenger.h
+│   │   ├── Point.h
+│   │   ├── Ticket.h
+│   │   └── Time.h
+│   ├── Graph
+│   │   ├── Edge.h
+│   │   ├── Graph.h
+│   │   ├── ListGraph.h
+│   │   └── MatrixGraph.h
+│   ├── LinkedList
+│   │   ├── LinkedList.h
+│   │   └── Link.h
+│   ├── Map
+│   │   ├── HashMap.h
+│   │   └── Map.h
+│   ├── Sorter.h
+│   ├── String
+│   │   └── String.h
+│   ├── ui
+│   │   ├── client
+│   │   │   ├── LoginWindow.h
+│   │   │   ├── MainWindow.h
+│   │   │   ├── RegisterWindow.h
+│   │   │   ├── TicketBookingWindow.h
+│   │   │   └── WindowManager.h
+│   │   └── server
+│   │       ├── AirlineManageWindow.h
+│   │       ├── AirplaneModelManageWindow.h
+│   │       ├── AirportManageWindow.h
+│   │       ├── FlightManageWindow.h
+│   │       └── ServerWindow.h
+│   └── User
+│       └── User.h
+├── Makefile
+├── README.md
+├── resources
+│   ├── icons
+│   │   ├── airline.svg
+│   │   ├── airplane.svg
+│   │   ├── airport.svg
+│   │   ├── app.svg
+│   │   ├── eye_closed.svg
+│   │   ├── eye_open.svg
+│   │   ├── flight.svg
+│   │   ├── personal.svg
+│   │   ├── route.svg
+│   │   └── service.svg
+│   ├── pages
+│   │   ├── airline
+│   │   │   ├── addAirline.css
+│   │   │   ├── addAirline.html
+│   │   │   └── addAirline.js
+│   │   ├── airport
+│   │   │   ├── addAirport.css
+│   │   │   ├── addAirport.html
+│   │   │   └── addAirport.js
+│   │   ├── map.css
+│   │   ├── map.html
+│   │   ├── map.js
+│   │   └── plugins
+│   │       └── leaflet.curve.js
+│   └── resources.qrc
+└── src
+    ├── data
+    │   └── datamanage.cpp
+    ├── FlightSystem
+    │   ├── Airline.cpp
+    │   ├── AirplaneModel.cpp
+    │   ├── Airport.cpp
+    │   ├── Flight.cpp
+    │   ├── FlightNetwork.cpp
+    │   ├── Point.cpp
+    │   ├── Ticket.cpp
+    │   └── Time.cpp
+    ├── main.cpp
+    ├── String
+    │   └── String.cpp
+    ├── ui
+    │   ├── client
+    │   │   ├── LoginWindow.cpp
+    │   │   ├── MainWindow.cpp
+    │   │   ├── RegisterWindow.cpp
+    │   │   ├── TicketBookingWindow.cpp
+    │   │   └── WindowManager.cpp
+    │   └── server
+    │       ├── AirlineManageWindow.cpp
+    │       ├── AirplaneModelManageWindow.cpp
+    │       ├── AirportManageWindow.cpp
+    │       ├── FlightManageWindow.cpp
+    │       └── ServerWindow.cpp
+    └── User
+        └── User.cpp
+```
 
-- **实现方式**：
-  - 使用图的数据结构（如邻接表或邻接矩阵）存储城市和航线信息。
-  - 实现图算法（如 Dijkstra 算法）来计算最优路径。
-  - 使用 Qt 的图形库（如 `QGraphicsView`）进行可视化展示。
+## 构建和运行
 
-### 4. **查询模块 (Query Module)**
-负责处理用户的航班查询请求，根据条件（如费用最少、时间最短）筛选航班信息。
+### 使用 CMake 构建
 
-- **主要功能**：
-  - 接受用户输入的查询条件（起飞城市、目的地、出发时间、排序条件等）。
-  - 根据条件筛选航班数据，返回匹配的结果。
-  - 支持多种查询方式，如直飞和转机查询。
+1. **克隆仓库**：
+   ```sh
+   git clone https://github.com/yourusername/flight-booking-system.git
+   cd flight-booking-system
+   ```
+2. **创建构建目录**：
+   ```sh
+   mkdir build
+   cd build
+   ```
+3. **运行 CMake**：
+   ```sh
+   cmake ..
+   ```
+4. **编译项目**：
+   ```sh
+   cmake --build .
+   ```
 
-- **实现方式**：
-  - 使用 C++ 类（如 `FlightQuery`）来封装查询逻辑。
-  - 使用标准库算法（如 `std::sort`）对航班结果进行排序。
+### 运行应用程序
 
-### 5. **订单管理模块 (Order Management Module)**
-负责管理客户的订票、退票和改签操作。
+- 构建完成后，可以在 `build` 目录中找到可执行文件。使用以下命令运行：
+  ```sh
+  ./flight-booking-system
+  ```
 
-- **主要功能**：
-  - 处理用户订票请求，生成订单信息（订单编号、航班信息、乘客信息、价格等）。
-  - 允许用户查询和修改订单信息。
-  - 处理退票和改签请求，更新订单和航班信息。
+## 使用说明
 
-- **实现方式**：
-  - 使用 C++ 类（如 `Order` 和 `OrderManager`）来表示订单和管理订单数据。
-  - 将订单数据保存到文件或数据库，实现持久化存储。
+- **航班管理**：导航到应用程序中的“航班管理”部分添加新航班，可以设置航班的出发和到达机场、时间以及不同舱位的初始票价。
+- **机票预订**：使用“机票预订”部分来搜索可用航班，选择直达或联程航班，并在所需日期预订机票。
 
-### 6. **用户管理模块 (User Management Module)**
-负责管理客户信息，包括客户的基本信息和飞行记录等。
+## 实现细节
 
-- **主要功能**：
-  - 维护用户数据（如姓名、联系方式、会员信息等）。
-  - 记录和统计客户的飞行信息。
-  - 根据客户的喜好和飞行历史提供个性化推荐。
+- **航班时刻表管理**：`Flight` 类管理航班信息，而 `FlightTicketDetail` 则存储每个航班日期的票务信息。
+- **自定义容器**：项目使用了自定义实现的数据结构，如 `LinkedList` 和 `Map`，而非 C++ STL，从而在特定使用场景下提供了更多控制和优化的性能。
+- **用户界面**：UI 使用 Qt Widgets 构建，并集成了 Web 技术用于地图交互界面。
 
-- **实现方式**：
-  - 使用 C++ 类（如 `User` 和 `UserManager`）表示用户信息和管理用户数据。
-  - 使用文件或数据库存储用户信息，实现数据持久化。
+## UML 类图
 
-### 7. **数据存储模块 (Data Storage Module)**
-负责数据的持久化存储和加载，包括航班信息、订单信息、用户信息等。
+以下是主要类的 UML 类图，展示了类之间的关系：
 
-- **主要功能**：
-  - 从文件或数据库中加载和保存数据。
-  - 提供数据的读写接口，供其他模块使用。
-  - 处理数据的导入导出。
+![UML Class Diagram](uml_class_diagram.png)
 
-- **实现方式**：
-  - 使用文件读写（如 CSV、JSON、XML）或数据库（如 SQLite）实现数据存储。
-  - 提供数据存储和读取的通用接口（如 `DataManager` 类）。
 
-### 8. **通知和日志模块 (Notification and Logging Module)**
-负责系统日志记录和用户通知。
+### 主要类设计
 
-- **主要功能**：
-  - 记录系统操作日志（如查询、订票、退票等）。
-  - 向用户发送通知（如订单确认、退票成功等）。
+1. **Flight 类**
 
-- **实现方式**：
-  - 使用 Qt 的 `QMessageBox` 进行简单的用户通知。
-  - 使用文件或日志库（如 `spdlog`）记录系统日志。
+   - 管理航班信息，包括航班名称、航空公司、机型、出发和到达机场、航线名称、起飞时间、飞行时间、以及舱位和票价信息。
+   - 提供了添加和移除航班时刻表的方法。
 
-### 模块间的关系
+2. **Ticket 类**
 
-- **UI 模块** 与所有其他模块交互，负责显示和用户输入。
-- **航班管理模块** 和 **航线管理模块** 提供基础数据，供 **查询模块** 使用。
-- **订单管理模块** 调用 **航班管理模块** 更新航班信息，并与 **用户管理模块** 交互更新用户飞行记录。
-- **数据存储模块** 为所有模块提供持久化支持。
+   - 储存航班指针 (`Flight*`) 和航班票务详情 (`FlightTicketDetail*`)。
+   - 提供获取出发和到达时间的方法，以及操作符重载来进行比较。
 
-### 结论
+3. **ConnectingTicket 类**
 
-这些模块划分能够有效地将系统的功能需求分解为多个部分，每个模块关注不同的核心功能，使得系统结构清晰、易于维护和扩展。你可以根据具体的需求和项目规模，进一步细化或简化模块设计。如果需要更详细的帮助或具体的实现建议，请告诉我！
+   - 管理联程航班的多个 `Ticket` 对象。
+   - 提供了计算总价、总时长、获取出发和到达时间的方法。
+
+### 用户界面设计
+
+1. **MainWindow 类**
+
+   - 应用程序的主窗口，负责管理登录、注册、航班管理等功能模块的切换。
+
+2. **TicketBookingWindow 类**
+
+   - 负责机票预订界面的实现，允许用户搜索航班并预订机票。
+   - 支持搜索直达和联程航班，显示航班详细信息（如出发到达时间、价格等）。
+
+3. **管理界面**
+
+   - 包括机场管理、航班管理、机型管理等模块，每个模块都有专门的窗口类，如 `AirportManageWindow`、`FlightManageWindow`，用于管理相关信息。

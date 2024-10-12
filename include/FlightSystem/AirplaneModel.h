@@ -4,6 +4,10 @@
 #include <iostream>
 #include <stdexcept>
 
+
+
+enum CabinType { FirstClass, BusinessClass, EconomyClass };
+
 class Cabin {
 public:
     int rows;
@@ -29,7 +33,6 @@ private:
     Cabin economyClassCabin;
 
 public:
-    enum CabinType { FirstClass, BusinessClass, EconomyClass };
 
     AirplaneModel();
     AirplaneModel(const String &name, int capacity = 0);

@@ -50,7 +50,7 @@ public:
     int getNumberOfTickets() const;
     LinkedList<Ticket> getTickets() const;
 
-    double getTotalPrice(FlightTicketDetail::CabinType cabinType) const;
+    double getTotalPrice(CabinType cabinType) const;
     Time getTotalDuration() const;
     DateTime getDepartureDateTime() const;
     DateTime getArrivalDateTime() const;

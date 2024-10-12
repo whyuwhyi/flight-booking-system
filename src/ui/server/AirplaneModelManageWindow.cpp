@@ -54,9 +54,9 @@ void AirplaneModelManageWindow::openAddModelDialog() {
     connect(confirmAddModelButton, &QPushButton::clicked, this, [this, addModelDialog]() {
         if (validateModelInput()) {
             AirplaneModel model(modelNameLineEdit->text().toStdString().c_str());
-            model.setCabin(AirplaneModel::FirstClass, Cabin(firstClassRowsLineEdit->text().toInt(), firstClassColumnsLineEdit->text().toInt()));
-            model.setCabin(AirplaneModel::BusinessClass, Cabin(businessClassRowsLineEdit->text().toInt(), businessClassColumnsLineEdit->text().toInt()));
-            model.setCabin(AirplaneModel::EconomyClass, Cabin(economyClassRowsLineEdit->text().toInt(), economyClassColumnsLineEdit->text().toInt()));
+            model.setCabin(FirstClass, Cabin(firstClassRowsLineEdit->text().toInt(), firstClassColumnsLineEdit->text().toInt()));
+            model.setCabin(BusinessClass, Cabin(businessClassRowsLineEdit->text().toInt(), businessClassColumnsLineEdit->text().toInt()));
+            model.setCabin(EconomyClass, Cabin(economyClassRowsLineEdit->text().toInt(), economyClassColumnsLineEdit->text().toInt()));
 
             if (addAirplaneModel(model)) {
                 addModelItem(model);

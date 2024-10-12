@@ -95,7 +95,7 @@ DateTime ConnectingTicket::getArrivalDateTime() const {
     return current->getElement().getArrivalDateTime();
 }
 
-double ConnectingTicket::getTotalPrice(FlightTicketDetail::CabinType cabinType) const {
+double ConnectingTicket::getTotalPrice(CabinType cabinType) const {
     double total = 0.0;
     Link<Ticket>* current = tickets.getHead();
     while (current != nullptr) {
