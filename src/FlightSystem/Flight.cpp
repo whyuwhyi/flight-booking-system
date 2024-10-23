@@ -1,5 +1,5 @@
 #include <FlightSystem/Flight.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 
 // FlightTicketDetail class implementation
 FlightTicketDetail::FlightTicketDetail() : firstClassPrice(0.0), businessClassPrice(0.0), economyClassPrice(0.0),
@@ -182,14 +182,16 @@ bool Flight::hasFlightOnDate(const Date& date) const {
 
 bool Flight::addFlightSchedule(const FlightTicketDetail& ticketInfo) {
     if (flightScheduleMap.insert(ticketInfo)) {
-        return writeFlightToFile(flight_map);
+        String fileName = FLIGHTS_DIR + flightName + "/" + ticketInfo.getFlightDate().toString() + ".txt";
+        return writeMapToFile(flight_map, FLIGHTS_PATH.c_str()) && createFile(fileName.c_str());
     }
     return false;
 }
 
 bool Flight::removeFlightSchedule(const Date& date) {
     if (flightScheduleMap.erase(date)) {
-        return writeFlightToFile(flight_map);
+        String fileName = FLIGHTS_DIR + flightName + "/" + date.toString() + ".txt";
+        return writeMapToFile(flight_map, FLIGHTS_PATH.c_str()) && removeFile(fileName.c_str());
     }
     return false;
 }

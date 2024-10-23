@@ -2,26 +2,22 @@
 #include <iostream>
 
 FlightNetwork::FlightNetwork(int maxCityCount) {
-    cityIndexMap = HashMap<String, int>(maxCityCount * 1.5);
-    flightNetwork = new LinkedList<Flight*>*[maxCityCount];
+    cityIndexMap = HashMap<String, CityInfo>(maxCityCount * 1.5);
+    internationalFlight = new LinkedList<Flight*>*[maxCityCount];
     for (int i = 0; i < maxCityCount; ++i) {
-        flightNetwork[i] = new LinkedList<Flight*>[maxCityCount];
+        internationalFlight[i] = new LinkedList<Flight*>[maxCityCount];
     }
 }
 
 FlightNetwork::~FlightNetwork() {
     for (int i = 0; i < cityIndexMap.getSize(); ++i) {
-        delete[] flightNetwork[i];
+        delete[] internationalFlight[i];
     }
-    delete[] flightNetwork;
+    delete[] internationalFlight;
 }
 
-void FlightNetwork::addCity(const String& city) {
-    if (cityIndexMap.contains(city)) {
-        throw std::invalid_argument("City already exists: " );
-    }
-    int index = cityIndexMap.getSize();
-    cityIndexMap.insert(city, index);
+void FlightNetwork::addCity(const Airport& airport) {
+    cityIndexMap.insert(airport.getCity(), {!(airport.getCity() == "中国") ,(int)cityIndexMap.getSize()});
 }
 
 bool FlightNetwork::cityExists(const String& city) const {
@@ -33,20 +29,34 @@ int FlightNetwork::getCityIndex(const String& city) const {
     if (!cityIndexOpt.has_value()) {
         throw std::invalid_argument("City not found: ");
     }
+    return cityIndexOpt.value().index;
+}
+
+CityInfo FlightNetwork::getCityInfo(const String& city) const {
+    auto cityIndexOpt = cityIndexMap.get(city);
+    if (!cityIndexOpt.has_value()) {
+        throw std::invalid_argument("City not found: ");
+    }
     return cityIndexOpt.value();
 }
 
-void FlightNetwork::addFlight(const String& departureCity, const String& arrivalCity, Flight* flight) {
-    if (!cityExists(departureCity)) {
-        addCity(departureCity);
+void FlightNetwork::addFlight(Flight* flight) {
+    if (!cityExists(flight->getDepartureAirport().getCity())) {
+        addCity(flight->getDepartureAirport());
     }
-    if (!cityExists(arrivalCity)) {
-        addCity(arrivalCity);
+    if (!cityExists(flight->getArrivalAirport().getCity())) {
+        addCity(flight->getArrivalAirport());
     }
 
-    int departureIndex = getCityIndex(departureCity);
-    int arrivalIndex = getCityIndex(arrivalCity);
-    flightNetwork[departureIndex][arrivalIndex].append(flight);
+    CityInfo departureCityInfo = getCityInfo(flight->getDepartureAirport().getCity());
+    CityInfo arrivalCityInfo = getCityInfo(flight->getArrivalAirport().getCity());
+
+    internationalFlight[departureCityInfo.index][arrivalCityInfo.index].append(flight);
+
+    if (!departureCityInfo.isAbroad && !arrivalCityInfo.isAbroad) {
+        domesticFlight[departureCityInfo.index][arrivalCityInfo.index].append(flight);
+    }
+
 }
 
 Map<Ticket, Ticket> FlightNetwork::findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const {
@@ -58,7 +68,7 @@ Map<Ticket, Ticket> FlightNetwork::findDirectFlights(const String& departureCity
 
     int departureIndex = getCityIndex(departureCity);
     int arrivalIndex = getCityIndex(arrivalCity);
-    flightNetwork[departureIndex][arrivalIndex].traverse([&](Flight* flight) {
+    internationalFlight[departureIndex][arrivalIndex].traverse([&](Flight* flight) {
         FlightTicketDetail* flightDetail = flight->getFlightSchedule().find(date);
         if (flightDetail) {
             Ticket ticket(flight, flightDetail);
@@ -69,13 +79,10 @@ Map<Ticket, Ticket> FlightNetwork::findDirectFlights(const String& departureCity
     return directFlights;
 }
 
-Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const {
-    Map<ConnectingTicket, ConnectingTicket> connectingFlights([](const ConnectingTicket& ticket) -> ConnectingTicket { return ticket; });
 
-    if (!cityExists(departureCity) || !cityExists(arrivalCity)) {
-        return connectingFlights;
-    }
 
+Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const{
+   Map<ConnectingTicket, ConnectingTicket> connectingFlights([](const ConnectingTicket& ticket) -> ConnectingTicket { return ticket; });
     int departureIndex = getCityIndex(departureCity);
     int arrivalIndex = getCityIndex(arrivalCity);
 
@@ -84,6 +91,7 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
         int currentCityIndex;
         int stops;
         DateTime totalArrivalTime;
+        Map<int, int> visitedCities;
     };
 
     LinkedList<FlightPath> stack;
@@ -96,7 +104,13 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
                 LinkedList<Ticket> tickets;
                 tickets.append(ticket);
                 DateTime arrivalTime = ticket.getArrivalDateTime();
-                stack.append({tickets, getCityIndex(flight->getArrivalAirport().getCity()), 0, arrivalTime});
+
+                Map<int, int> visitedCities([](const int& value) { return value; });
+                visitedCities.insert(departureIndex);
+                int arrivalCityIndex = getCityIndex(flight->getArrivalAirport().getCity());
+                visitedCities.insert(arrivalCityIndex);
+
+                stack.append({tickets, arrivalCityIndex, 0, arrivalTime, visitedCities});
             }
         });
     }
@@ -104,10 +118,10 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
     while (stack.size() > 0) {
         FlightPath currentPath = stack.removeLast();
         Ticket lastTicket = currentPath.tickets.getLast()->getElement();
-        String currentCity = lastTicket.getFlight()->getArrivalAirport().getCity();
+        int currentCityIndex = currentPath.currentCityIndex;
         DateTime lastArrivalTime = currentPath.totalArrivalTime;
 
-        if (currentCity == arrivalCity && currentPath.stops > 0) {
+        if (currentCityIndex == arrivalIndex && currentPath.stops > 0) {
             ConnectingTicket connectingTicket;
             currentPath.tickets.traverse([&](const Ticket& ticket) {
                 connectingTicket.addTicket(ticket);
@@ -121,7 +135,13 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
         }
 
         for (int i = 0; i < cityIndexMap.getSize(); ++i) {
-            flightNetwork[currentPath.currentCityIndex][i].traverse([&](Flight* nextFlight) {
+            flightNetwork[currentCityIndex][i].traverse([&](Flight* nextFlight) {
+                int nextCityIndex = getCityIndex(nextFlight->getArrivalAirport().getCity());
+
+                if (currentPath.visitedCities.find(nextCityIndex)) {
+                    return;
+                }
+
                 DateTime nextDepartureTime = lastArrivalTime + Time(24, 0, 0);
                 Date nextFlightDate = nextDepartureTime.getDate();
                 FlightTicketDetail* nextFlightDetail = nextFlight->getFlightSchedule().find(nextFlightDate);
@@ -137,7 +157,11 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
                 Ticket nextTicket(nextFlight, nextFlightDetail);
                 LinkedList<Ticket> newTickets = currentPath.tickets;
                 newTickets.append(nextTicket);
-                stack.append({newTickets, getCityIndex(nextFlight->getArrivalAirport().getCity()), currentPath.stops + 1, nextTicket.getArrivalDateTime()});
+
+                Map<int, int> newVisitedCities = currentPath.visitedCities;
+                newVisitedCities.insert(nextCityIndex);
+
+                stack.append({newTickets, nextCityIndex, currentPath.stops + 1, nextTicket.getArrivalDateTime(), newVisitedCities});
             });
         }
     }
@@ -145,18 +169,24 @@ Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(con
     return connectingFlights;
 }
 
-void FlightNetwork::traverseCities(std::function<void(const String&)> func) const {
-    cityIndexMap.traverse([&](const String& city, int index) {
-        func(city);
-    });
+Map<ConnectingTicket, ConnectingTicket> FlightNetwork::findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const{
+    Map<ConnectingTicket, ConnectingTicket> connectingFlights([](const ConnectingTicket& ticket) -> ConnectingTicket { return ticket; });
+    if (!cityExists(departureCity) || !cityExists(arrivalCity)) {
+        return connectingFlights;
+    }
+
+    CityInfo departureCityInfo = getCityInfo(departureCity);
+    CityInfo arrivalCityInfo = getCityInfo(arrivalCity);
+
+    if (!departureCityInfo.isAbroad && !arrivalCityInfo.isAbroad) {
+        return std::move(findConnectingFlights(domesticFlight, departureCity, arrivalCity, date, maxStops));
+    }
+    return std::move(findConnectingFlights(internationalFlight, departureCity, arrivalCity, date, maxStops));
 }
 
-void FlightNetwork::traverseFlights(std::function<void(const Flight&)> func) const {
-    for (size_t i = 0; i < cityIndexMap.getSize(); ++i) {
-        for (size_t j = 0; j < cityIndexMap.getSize(); ++j) {
-            flightNetwork[i][j].traverse([&](Flight* flight) {
-                func(*flight);
-            });
-        }
-    }
+
+void FlightNetwork::traverseCities(std::function<void(const String&)> func) const {
+    cityIndexMap.traverse([&](const String& city, CityInfo cityInfo) {
+        func(city);
+    });
 }

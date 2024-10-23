@@ -1,4 +1,3 @@
-// 初始化地图
 var map = L.map('map').setView([39.9, 116.4], 5);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

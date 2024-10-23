@@ -1,5 +1,5 @@
 #include <ui/server/AirportManageWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QWebEngineView>
@@ -48,7 +48,7 @@ void AirportManageWindow::openMapSearchWindow() {
 
 void AirportManageWindow::handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
     Airport newAirport(name.toStdString().c_str(), country.toStdString().c_str(), city.toStdString().c_str(), Point(longitude, latitude));
-    if (addAirport(newAirport)) {
+    if (addElementToMap(airport_map, newAirport, AIRPORTS_PATH.c_str())) {
         addAirportItem(newAirport);
     } else {
         QMessageBox::warning(this, "错误", "此机场已存在！！！");
@@ -68,8 +68,13 @@ void AirportManageWindow::onDeleteAirport(AirportItem *item) {
     if (reply == QMessageBox::Yes) {
         int row = airportListWidget->row(item);
         if (row != -1) {
-            deleteAirport(item->getAirportName());
-            delete airportListWidget->takeItem(row);
+            String key = item->getAirportName();
+            
+            if (deleteElementInMap(airport_map, key, AIRPORTS_PATH.c_str())) {
+                delete airportListWidget->takeItem(row);
+            } else {
+                QMessageBox::warning(this, "错误", "删除机场失败！");
+            }
         }
     }
 }

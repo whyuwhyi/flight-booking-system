@@ -10,24 +10,31 @@
 #include <FlightSystem/Time.h>
 #include <FlightSystem/Ticket.h>
 
+struct CityInfo {
+    bool isAbroad;
+    int index;
+};
+
 class FlightNetwork {
 private:
-    HashMap<String, int> cityIndexMap;
-    LinkedList<Flight*>** flightNetwork;
+    HashMap<String, CityInfo> cityIndexMap;
+    LinkedList<Flight*>** internationalFlight;
+    LinkedList<Flight*>** domesticFlight;
 
 public:
     FlightNetwork(int maxCityCount);
     ~FlightNetwork();
 
-    void addCity(const String& city);
+    void addCity(const Airport& airport);
     bool cityExists(const String& city) const;
     int getCityIndex(const String& city) const;
+    CityInfo getCityInfo(const String& city) const;
 
-    void addFlight(const String& departureCity, const String& arrivalCity, Flight* flight);
+    void addFlight(Flight* flight);
 
     Map<Ticket, Ticket> findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const;
+    Map<ConnectingTicket, ConnectingTicket> findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
     Map<ConnectingTicket, ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
 
     void traverseCities(std::function<void(const String&)> func) const;
-    void traverseFlights(std::function<void(const Flight&)> func) const;
 };

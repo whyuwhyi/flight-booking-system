@@ -1,5 +1,5 @@
 #include <ui/server/AirplaneModelManageWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QMessageBox>
 #include <QHBoxLayout>
 
@@ -58,7 +58,7 @@ void AirplaneModelManageWindow::openAddModelDialog() {
             model.setCabin(BusinessClass, Cabin(businessClassRowsLineEdit->text().toInt(), businessClassColumnsLineEdit->text().toInt()));
             model.setCabin(EconomyClass, Cabin(economyClassRowsLineEdit->text().toInt(), economyClassColumnsLineEdit->text().toInt()));
 
-            if (addAirplaneModel(model)) {
+            if (addElementToMap(airplane_model_map, model, MODELS_PATH.c_str())) {
                 addModelItem(model);
                 addModelDialog->accept();
             } else {
@@ -103,8 +103,13 @@ void AirplaneModelManageWindow::onDeleteModel(AirplaneModelItem *item) {
     if (reply == QMessageBox::Yes) {
         int row = modelListWidget->row(item);
         if (row != -1) {
-            deleteAirplaneModel(item->getModelName());
-            delete modelListWidget->takeItem(row);
+            String key = item->getModelName();
+            
+            if (deleteElementInMap(airplane_model_map, key, MODELS_PATH.c_str())){
+                delete modelListWidget->takeItem(row);
+            } else {
+                QMessageBox::warning(this, "错误", "删除机型失败！");
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 #include <ui/client/MainWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QFile>
 #include <QTextStream>
 #include <QVBoxLayout>
@@ -10,7 +10,7 @@
 MapBackend::MapBackend(QObject *parent) : QObject(parent) {}
 
 void MapBackend::requestRoutesData() {
-    QFile file("/home/yuyi/cs-learnning/cpp-projects/curriculum-design/flight-booking-system/data/airline/airlines.txt");
+    QFile file(AIRLINES_PATH.c_str());
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "无法打开文件：" << file.errorString();
         emit sendRoutesData("");
@@ -24,20 +24,20 @@ void MapBackend::requestRoutesData() {
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), webChannel(nullptr), mapBackend(nullptr) {
-    loadFlightNetworkFromFile(flight_network);
+    
+    
+    loadFlightNetworkFromFile();
+    
     setupUI();
     setupConnections();
     showLoginWindow();
-}
 
-MainWindow::~MainWindow() {
-    delete loginWindow;
-    delete registerWindow;
-    delete ticketBookingWindow;
-    delete webChannel;
-    delete mapBackend;
-    delete mapView;
-}
+    String fileName = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
+    loadMapFromFile(ticket_map, fileName.c_str());
+}    
+
+MainWindow::~MainWindow() {}
+
 
 void MainWindow::setupUI() {
     setWindowTitle("航空系统");
@@ -97,11 +97,20 @@ void MainWindow::setupConnections() {
     connect(loginWindow, &LoginWindow::registerRequested, this, &MainWindow::showRegisterWindow);
     connect(loginWindow, &LoginWindow::loginSuccess, this, &MainWindow::showMainContent);
     connect(registerWindow, &RegisterWindow::loginRequested, this, &MainWindow::showLoginWindow);
+
     connect(menuList, &QListWidget::currentRowChanged, this, [this](int index) {
-        if (index == 1) {
-            stackedWidget->setCurrentWidget(ticketBookingWindow);
-        } else if (stackedWidget->currentIndex() >= 3) {
-            stackedWidget->setCurrentIndex(index + 3);
+        switch (index) {
+            case 0:
+                stackedWidget->setCurrentWidget(routeMapWidget);
+                break;
+            case 1:
+                stackedWidget->setCurrentWidget(ticketBookingWindow);
+                break;
+            case 2:
+                stackedWidget->setCurrentWidget(personalCenterWidget);
+                break;
+            default:
+                break;
         }
     });
 }
@@ -118,7 +127,15 @@ void MainWindow::showRegisterWindow() {
 }
 
 void MainWindow::showMainContent() {
-    stackedWidget->setCurrentIndex(3);
+    stackedWidget->removeWidget(loginWindow);
+    delete loginWindow;
+    loginWindow = nullptr;
+
+    stackedWidget->removeWidget(registerWindow);
+    delete registerWindow;
+    registerWindow = nullptr;
+
+    stackedWidget->setCurrentWidget(routeMapWidget);
     menuList->setCurrentRow(0);
     menuList->setVisible(true);
 }

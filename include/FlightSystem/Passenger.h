@@ -1,7 +1,7 @@
 #pragma once
 
 #include <String/String.h>
-#include <cstdio>
+#include <iostream>
 
 class Passenger {
 private:
@@ -9,18 +9,13 @@ private:
     String idNumber;
 
 public:
+    Passenger();
     Passenger(const String& name, const String& idNumber);
     Passenger(const Passenger& other);
 
     const String& getName() const;
     const String& getIdNumber() const;
+    
+    friend std::istream& operator>>(std::istream& is, Passenger& passenger);
+    friend std::ostream& operator<<(std::ostream& os, const Passenger& passenger);
 };
-
-Passenger::Passenger(const String& name = nullptr, const String& idNumber = nullptr)
-    : name(name), idNumber(idNumber) {}
-
-Passenger::Passenger(const Passenger& other)
-    : name(other.name), idNumber(other.idNumber) {}
-
-const String& Passenger::getName() const { return name; }
-const String& Passenger::getIdNumber() const { return idNumber; }

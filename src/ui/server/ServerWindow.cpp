@@ -8,13 +8,13 @@
 #include <ui/server/AirlineManageWindow.h>
 #include <ui/server/AirplaneModelManageWindow.h>
 #include <ui/server/FlightManageWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 
 ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
-    loadAirportFromFile(airport_map);
-    loadAirlineFromFile(airline_map);
-    loadAirplaneModelFromFile(airplane_model_map);
-    loadFlightFromFile(flight_map);
+    loadMapFromFile(airport_map, AIRPORTS_PATH.c_str());
+    loadMapFromFile(airline_map, AIRLINES_PATH.c_str());
+    loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
+    loadMapFromFile(flight_map, FLIGHTS_PATH.c_str());
     setupUI();
     setupConnections();
 }
@@ -47,7 +47,7 @@ void ServerWindow::setupUI() {
 
     stackedWidget = new QStackedWidget(this);
 
-    airportManageWidget = new AirportManageWindow(this); // 使用AirportManagementWindow类
+    airportManageWidget = new AirportManageWindow(this);
     airlineManageWidget = new AirlineManageWindow(this);
     airplaneModelManageWidget = new AirplaneModelManageWindow(this);
     flightManageWidget = new FlightManageWindow(this);

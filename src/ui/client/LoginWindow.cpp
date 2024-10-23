@@ -1,6 +1,6 @@
 #include <ui/client/LoginWindow.h>
 #include <QLabel>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QMessageBox>
@@ -9,7 +9,7 @@
 #include <iostream>
 
 LoginWindow::LoginWindow(QWidget *parent) : QWidget(parent) {
-    loadUserFromFile(user_map);
+    loadMapFromFile(user_map, USERS_PATH.c_str());
     setupUI();
     setupConnections();
     checkAutoLogin();
@@ -80,13 +80,14 @@ void LoginWindow::setupConnections() {
 void LoginWindow::onLoginClicked() {
     QString phoneNumber = phoneNumberLineEdit->text();
     QString password = passwordLineEdit->text();
-
     User* user_node = user_map.find(phoneNumber.toStdString().c_str());
 
     if (user_node != nullptr && password == QString::fromStdString(user_node->getPassword().c_str())) {
         if (autoLoginCheckBox->isChecked()) {
             current_login_user = User(phoneNumber.toStdString().c_str(), password.toStdString().c_str());
-            writeLocalUserToFile(current_login_user);
+            
+            
+            writeLocalUserToFile(current_login_user, LOCAL_USER_PATH.c_str());
         }
         emit loginSuccess();
         return;
@@ -106,7 +107,7 @@ void LoginWindow::togglePasswordVisibility() {
 }
 
 void LoginWindow::checkAutoLogin() {
-    if (loadLocalUserFromFile(current_login_user)) {
+    if (loadLocalUserFromFile(current_login_user, LOCAL_USER_PATH.c_str())) {
         User* user_node = user_map.find(current_login_user.getPhoneNumber());
         if (user_node != nullptr && user_node->getPassword() == current_login_user.getPassword()) {
             phoneNumberLineEdit->setText(QString::fromStdString(current_login_user.getPhoneNumber().c_str()));

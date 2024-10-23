@@ -1,5 +1,5 @@
 #include <ui/server/AirlineManageWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QWebEngineView>
@@ -133,7 +133,7 @@ void AirlineManageWindow::handleRouteData(const QVariantList &routePoints, doubl
     QString airport1 = airport1ComboBox->currentText();
     QString airport2 = airport2ComboBox->currentText();
     Airline newAirline(airlineName.toStdString().c_str(), airport1.toStdString().c_str(), airport2.toStdString().c_str(), points, routeLengthInKm);
-    if (addAirline(newAirline)) {
+    if (addElementToMap(airline_map, newAirline, AIRLINES_PATH.c_str())) {
         addAirlineItem(newAirline);
     } else {
         QMessageBox::warning(this, "错误", "此航线已存在！！！");
@@ -153,8 +153,12 @@ void AirlineManageWindow::onDeleteAirline(AirlineItem *item) {
     if (reply == QMessageBox::Yes) {
         int row = airlineListWidget->row(item);
         if (row != -1) {
-            deleteAirline(item->getAirlineName().toStdString().c_str());
-            delete airlineListWidget->takeItem(row);
+            String key = item->getAirlineName().toStdString().c_str();
+            if (deleteElementInMap(airline_map, key, AIRLINES_PATH.c_str())) {                   
+                delete airlineListWidget->takeItem(row);
+            } else {
+                QMessageBox::warning(this, "错误", "删除航线失败！");
+            }
         }
     }
 }

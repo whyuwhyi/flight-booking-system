@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QListWidgetItem>
 #include <QWidget>
 #include <QComboBox>
 #include <QDateEdit>
@@ -16,10 +17,8 @@
 
 class TicketItem : public QWidget {
     Q_OBJECT
-
 public:
     TicketItem(const Ticket &ticket, QWidget *parent = nullptr);
-    QPushButton* getBookButton() const;
     const Ticket& getTicket() const;
 
 private:
@@ -29,9 +28,12 @@ private:
     QLabel *priceLabel;
     QLabel *durationLabel;
     QLabel *dayDifferenceLabel;
-    QPushButton *bookButton;
+    QLabel *departureAirportLabel;
+    QLabel *arrivalAirportLabel;
+    QLabel *airplaneModelLabel;
     Ticket ticket;
 
+    QWidget *itemWidget;
     QHBoxLayout *layout;
 
     void setupUI();
@@ -39,10 +41,8 @@ private:
 
 class ConnectingTicketItem : public QWidget {
     Q_OBJECT
-
 public:
     ConnectingTicketItem(const ConnectingTicket &ticket, QWidget *parent = nullptr);
-    QPushButton* getBookButton() const;
     const ConnectingTicket& getConnectingTicket() const;
 
 private:
@@ -51,9 +51,12 @@ private:
     QLabel *departureDateLabel;
     QLabel *arrivalDateLabel;
     QLabel *dayDifferenceLabel;
-    QPushButton *bookButton;
+    QLabel *departureAirportLabel;
+    QLabel *arrivalAirportLabel;
+    QLabel *airplaneModelLabel;
     ConnectingTicket connectingTicket;
 
+    QWidget *itemWidget;
     QVBoxLayout *mainLayout;
     QVBoxLayout *ticketsLayout;
 
@@ -69,8 +72,8 @@ public:
 
 private slots:
     void onSearchButtonClicked();
-    void onBookButtonClicked(const Ticket &ticket);
-    void onBookConnectingButtonClicked(const ConnectingTicket &connectingTicket);
+    void onTicketItemClicked(const Ticket &ticket);
+    void onConnectingTicketItemClicked(const ConnectingTicket &connectingTicket);
 
 private:
     QComboBox *departureCityComboBox;
@@ -86,4 +89,5 @@ private:
     void populateFlightList();
     void addTicketItem(const Ticket &ticket);
     void addConnectingTicketItem(const ConnectingTicket &connectingTicket);
+    void onFlightItemClicked(QListWidgetItem *item);
 };

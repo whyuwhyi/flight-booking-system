@@ -1,5 +1,5 @@
 #include <ui/client/RegisterWindow.h>
-#include <data/datamanage.h>
+#include <file/fileManage.h>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -91,6 +91,9 @@ void RegisterWindow::onRegisterClicked() {
     QString phoneNumber = phoneNumberLineEdit->text();
     QString password = passwordLineEdit->text();
     QString confirmPassword = confirmPasswordLineEdit->text();
+    
+    User newUser(phoneNumber.toStdString().c_str(), password.toStdString().c_str());
+    String fileName = USERS_DIR + phoneNumber.toStdString().c_str() + "/tickets.txt";
 
     QRegularExpression phoneRegex("^1[3-9]\\d{9}$");
     QRegularExpression passwordRegex("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{8,16}$");
@@ -110,7 +113,7 @@ void RegisterWindow::onRegisterClicked() {
         return;
     }
 
-    if (addUser(User(phoneNumber.toStdString().c_str(), password.toStdString().c_str()))) {
+    if (addElementToMap(user_map, newUser, USERS_PATH.c_str()) && createFile(fileName.c_str())) {
         QMessageBox::information(this, "注册成功", "注册成功！");
     }
     else {

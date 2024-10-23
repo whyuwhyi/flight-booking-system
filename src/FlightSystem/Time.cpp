@@ -2,7 +2,6 @@
 #include <String/String.h>
 #include <iomanip>
 
-// Time class implementation
 Time::Time(int hours, int minutes, int seconds) : hours(hours), minutes(minutes), seconds(seconds) {}
 
 int Time::getHours() const { return hours; }
