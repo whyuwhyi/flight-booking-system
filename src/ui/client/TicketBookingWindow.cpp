@@ -603,6 +603,7 @@ void ConnectingTicketItem::setupUI() {
     QLabel *headerLabel = new QLabel("联程航班详情", this);
     mainLayout->addWidget(headerLabel);
 
+    int startDay = connectingTicket.getDepartureDateTime().getDate().getDay();
     for (int i = 0; i < connectingTicket.getTickets().size(); ++i) {
         const Ticket& ticket = connectingTicket.getTickets().getElementAt(i);
 
@@ -618,7 +619,7 @@ void ConnectingTicketItem::setupUI() {
 
         QString arrivalInfo = "";
         if (ticket.getArrivalDateTime().getDate() > ticket.getDepartureDateTime().getDate()) {
-            int daysDifference = ticket.getArrivalDateTime().getDate().getDay() - ticket.getDepartureDateTime().getDate().getDay();
+            int daysDifference = ticket.getArrivalDateTime().getDate().getDay() - startDay;
             arrivalInfo = QString(" (+%1天)").arg(daysDifference);
         }
         arrivalTimeLabel->setText(arrivalTimeLabel->text() + arrivalInfo);
@@ -634,14 +635,21 @@ void ConnectingTicketItem::setupUI() {
         mainLayout->addLayout(segmentLayout);
 
         if (i < connectingTicket.getTickets().size() - 1) {
-            QLabel *layoverLabel = new QLabel(QString("换乘等待: %1 小时").arg(1), this);
+            const Ticket& nextTicket = connectingTicket.getTickets().getElementAt(i + 1);
+            Time awaitTime = nextTicket.getDepartureDateTime() - ticket.getArrivalDateTime();
+            QLabel *layoverLabel = new QLabel(QString("换乘等待: %1 小时 %2 分钟").arg(awaitTime.getHours())
+                                                                               .arg(awaitTime.getMinutes())
+                                                                               , this);
             mainLayout->addWidget(layoverLabel);
         }
 
         mainLayout->addSpacing(10);
     }
 
-    QLabel *totalDurationLabel = new QLabel(QString("总时长: %1 小时").arg(1), this);
+    Time  duration = connectingTicket.getDuration();
+    QLabel *totalDurationLabel = new QLabel(QString("总时长: %1 小时 %2 分钟").arg(duration.getHours())
+                                                                            .arg(duration.getMinutes())
+                                                                            , this);
     QLabel *totalPriceLabel = new QLabel(QString("总价格: ¥%1 起").arg(connectingTicket.getTotalPrice(EconomyClass)), this);
 
     mainLayout->addWidget(totalDurationLabel);

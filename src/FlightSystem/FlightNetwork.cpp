@@ -119,7 +119,7 @@ LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Fli
 
     while (stack.size() > 0) {
         FlightPath currentPath = stack.removeLast();
-        Ticket lastTicket = currentPath.tickets.getLast()->getElement();
+        // Ticket lastTicket = currentPath.tickets.getLast()->getElement();
         int currentCityIndex = currentPath.currentCityIndex;
         DateTime lastArrivalTime = currentPath.lastArrivalTime;
 
@@ -146,7 +146,7 @@ LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Fli
 
                 bool validTicketFound = false;
                 DateTime nextDepartureTime = lastArrivalTime + Time(1, 0, 0);  // 留出至少1小时换乘时间
-                Date sameDayDate = lastArrivalTime.getDate();
+                Date sameDayDate = nextDepartureTime.getDate();
                 Date nextDayDate = sameDayDate + 1;
 
                 // 查找同一天的车票

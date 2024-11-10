@@ -128,8 +128,8 @@ double ConnectingTicket::getTotalPrice(CabinType cabinType) const {
 }
 
 Time ConnectingTicket::getDuration() const {
-    DateTime departureTime = tickets.getHead()->getElement().getArrivalDateTime();
-    DateTime arrivalTime = tickets.getLast()->getElement().getDepartureDateTime();
+    DateTime departureTime = tickets.getHead()->getElement().getDepartureDateTime();
+    DateTime arrivalTime = tickets.getLast()->getElement().getArrivalDateTime();
     return arrivalTime - departureTime;
 }
 
