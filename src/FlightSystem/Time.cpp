@@ -1,20 +1,49 @@
 #include <FlightSystem/Time.h>
-#include <String/String.h>
-#include <iomanip>
+// -------------------- Time 类实现 --------------------
 
-Time::Time(int hours, int minutes, int seconds) : hours(hours), minutes(minutes), seconds(seconds) {}
+Time::Time(int hours, int minutes, int seconds) {
+    totalSeconds = static_cast<long long>(hours) * 3600 + minutes * 60 + seconds;
+}
 
-int Time::getHours() const { return hours; }
-void Time::setHours(int hours) { this->hours = hours; }
+int Time::getHours() const {
+    return static_cast<int>(totalSeconds / 3600);
+}
 
-int Time::getMinutes() const { return minutes; }
-void Time::setMinutes(int minutes) { this->minutes = minutes; }
+void Time::setHours(int hours) {
+    totalSeconds = static_cast<long long>(hours) * 3600 + getMinutes() * 60 + getSeconds();
+}
 
-int Time::getSeconds() const { return seconds; }
-void Time::setSeconds(int seconds) { this->seconds = seconds; }
+int Time::getMinutes() const {
+    return static_cast<int>((totalSeconds % 3600) / 60);
+}
+
+void Time::setMinutes(int minutes) {
+    totalSeconds = getHours() * 3600 + minutes * 60 + getSeconds();
+}
+
+int Time::getSeconds() const {
+    return static_cast<int>(totalSeconds % 60);
+}
+
+void Time::setSeconds(int seconds) {
+    totalSeconds = getHours() * 3600 + getMinutes() * 60 + seconds;
+}
+
+long long Time::toTotalSeconds() const {
+    return totalSeconds;
+}
+
+Time Time::fromTotalSeconds(long long totalSeconds) {
+    Time time;
+    time.totalSeconds = totalSeconds;
+    return time;
+}
 
 String Time::toString() const {
-    char buffer[9];
+    int hours = getHours();
+    int minutes = getMinutes();
+    int seconds = getSeconds();
+    char buffer[20];
     std::snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d", hours, minutes, seconds);
     return String(buffer);
 }
@@ -25,58 +54,69 @@ Time Time::fromString(const String& timeStr) {
     return Time(hours, minutes, seconds);
 }
 
+// 算术运算符
+Time Time::operator+(const Time& other) const {
+    return Time::fromTotalSeconds(totalSeconds + other.totalSeconds);
+}
+
+Time Time::operator-(const Time& other) const {
+    return Time::fromTotalSeconds(totalSeconds - other.totalSeconds);
+}
+
+Time& Time::operator+=(const Time& other) {
+    totalSeconds += other.totalSeconds;
+    return *this;
+}
+
+Time& Time::operator-=(const Time& other) {
+    totalSeconds -= other.totalSeconds;
+    return *this;
+}
+
+// 比较运算符
+bool Time::operator==(const Time& other) const {
+    return totalSeconds == other.totalSeconds;
+}
+
+bool Time::operator!=(const Time& other) const {
+    return totalSeconds != other.totalSeconds;
+}
+
+bool Time::operator<(const Time& other) const {
+    return totalSeconds < other.totalSeconds;
+}
+
+bool Time::operator<=(const Time& other) const {
+    return totalSeconds <= other.totalSeconds;
+}
+
+bool Time::operator>(const Time& other) const {
+    return totalSeconds > other.totalSeconds;
+}
+
+bool Time::operator>=(const Time& other) const {
+    return totalSeconds >= other.totalSeconds;
+}
+
+// 流操作符
 std::ostream& operator<<(std::ostream& out, const Time& time) {
-    out << (time.hours < 10 ? "0" : "") << time.hours << ":"
-        << (time.minutes < 10 ? "0" : "") << time.minutes << ":"
-        << (time.seconds < 10 ? "0" : "") << time.seconds;
+    out << time.toString();
     return out;
 }
 
 std::istream& operator>>(std::istream& in, Time& time) {
-    char delimiter;
-    in >> time.hours >> delimiter >> time.minutes >> delimiter >> time.seconds;
+    int hours, minutes, seconds;
+    char delimiter1, delimiter2;
+    in >> hours >> delimiter1 >> minutes >> delimiter2 >> seconds;
+    if (delimiter1 != ':' || delimiter2 != ':') {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    time = Time(hours, minutes, seconds);
     return in;
 }
 
-bool Time::operator==(const Time& other) const {
-    return hours == other.hours && minutes == other.minutes && seconds == other.seconds;
-}
-
-bool Time::operator!=(const Time& other) const {
-    return !(*this == other);
-}
-
-Time Time::operator+(const Time& other) const {
-    int totalSeconds = (hours + other.hours) * 3600 + (minutes + other.minutes) * 60 + (seconds + other.seconds);
-    return Time(totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
-}
-
-Time Time::operator-(const Time& other) const {
-    int totalSeconds = (hours - other.hours) * 3600 + (minutes - other.minutes) * 60 + (seconds - other.seconds);
-    return Time(totalSeconds / 3600, (totalSeconds % 3600) / 60, totalSeconds % 60);
-}
-
-bool Time::operator<(const Time& other) const {
-    if (hours != other.hours) {
-        return hours < other.hours;
-    }
-    if (minutes != other.minutes) {
-        return minutes < other.minutes;
-    }
-    return seconds < other.seconds;
-}
-
-bool Time::operator<=(const Time& other) const {
-    return *this < other || *this == other;
-}
-
-bool Time::operator>(const Time& other) const {
-    return !(*this <= other);
-}
-
-bool Time::operator>=(const Time& other) const {
-    return !(*this < other);
-}
+// -------------------- Date 类实现 --------------------
 
 Date::Date(int year, int month, int day) : year(year), month(month), day(day) {}
 
@@ -95,17 +135,90 @@ String Date::toString() const {
     return String(buffer);
 }
 
-
 Date Date::fromString(const String& dateStr) {
     int year, month, day;
     sscanf(dateStr.c_str(), "%d-%d-%d", &year, &month, &day);
     return Date(year, month, day);
 }
 
+// 辅助函数
+bool Date::isLeapYear(int year) const {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+int Date::daysInMonth(int year, int month) const {
+    static const int daysPerMonth[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    if (month == 2 && isLeapYear(year))
+        return 29;
+    return daysPerMonth[month - 1];
+}
+
+// 转换为儒略日
+int Date::toJulianDay() const {
+    int a = (14 - month) / 12;
+    int y = year + 4800 - a;
+    int m = month + 12 * a - 3;
+    return day + (153 * m + 2)/5 + y * 365 + y/4 - y/100 + y/400 - 32045;
+}
+
+// 从儒略日创建日期
+Date Date::fromJulianDay(int julianDay) {
+    int a = julianDay + 32044;
+    int b = (4 * a + 3)/146097;
+    int c = a - (146097 * b)/4;
+    int d = (4 * c + 3)/1461;
+    int e = c - (1461 * d)/4;
+    int m = (5 * e + 2)/153;
+    int day = e - (153 * m + 2)/5 + 1;
+    int month = m + 3 - 12 * (m/10);
+    int year = 100 * b + d - 4800 + m/10;
+    return Date(year, month, day);
+}
+
+// 日期运算
+Date Date::operator+(int days) const {
+    int julianDay = toJulianDay() + days;
+    return fromJulianDay(julianDay);
+}
+
+Date Date::operator-(int days) const {
+    int julianDay = toJulianDay() - days;
+    return fromJulianDay(julianDay);
+}
+
+// 两个日期之间的天数差
+int Date::operator-(const Date& other) const {
+    return toJulianDay() - other.toJulianDay();
+}
+
+// 比较运算符
+bool Date::operator==(const Date& other) const {
+    return year == other.year && month == other.month && day == other.day;
+}
+
+bool Date::operator!=(const Date& other) const {
+    return !(*this == other);
+}
+
+bool Date::operator<(const Date& other) const {
+    return toJulianDay() < other.toJulianDay();
+}
+
+bool Date::operator<=(const Date& other) const {
+    return toJulianDay() <= other.toJulianDay();
+}
+
+bool Date::operator>(const Date& other) const {
+    return toJulianDay() > other.toJulianDay();
+}
+
+bool Date::operator>=(const Date& other) const {
+    return toJulianDay() >= other.toJulianDay();
+}
+
+// 流操作符
 std::ostream& operator<<(std::ostream& out, const Date& date) {
-    out << std::setw(4) << std::setfill('0') << date.year << "-"
-        << (date.month < 10 ? "0" : "") << date.month << "-"
-        << (date.day < 10 ? "0" : "") << date.day;
+    out << date.toString();
     return out;
 }
 
@@ -118,43 +231,7 @@ std::istream& operator>>(std::istream& in, Date& date) {
     return in;
 }
 
-bool Date::operator==(const Date& other) const {
-    return year == other.year && month == other.month && day == other.day;
-}
-
-bool Date::operator!=(const Date& other) const {
-    return !(*this == other);
-}
-
-bool Date::operator<(const Date& other) const {
-    if (year != other.year) return year < other.year;
-    if (month != other.month) return month < other.month;
-    return day < other.day;
-}
-
-bool Date::operator<=(const Date& other) const {
-    return *this < other || *this == other;
-}
-
-bool Date::operator>(const Date& other) const {
-    return other < *this;
-}
-
-bool Date::operator>=(const Date& other) const {
-    return !(*this < other);
-}
-
-Date Date::operator+(int days) const {
-    Date result = *this;
-    result.day += days;
-    return result;
-}
-
-Date Date::operator-(int days) const {
-    Date result = *this;
-    result.day -= days;
-    return result;
-}
+// -------------------- DateTime 类实现 --------------------
 
 DateTime::DateTime() : date(), time() {}
 
@@ -163,7 +240,7 @@ DateTime::DateTime(const Date& date, const Time& time) : date(date), time(time) 
 DateTime::DateTime(int year, int month, int day, int hours, int minutes, int seconds)
     : date(year, month, day), time(hours, minutes, seconds) {}
 
-Date DateTime::getDate() const {
+const Date& DateTime::getDate() const {
     return date;
 }
 
@@ -171,61 +248,12 @@ void DateTime::setDate(const Date& date) {
     this->date = date;
 }
 
-Time DateTime::getTime() const {
+const Time& DateTime::getTime() const {
     return time;
 }
 
 void DateTime::setTime(const Time& time) {
     this->time = time;
-}
-
-DateTime DateTime::operator+(int seconds) const {
-    DateTime result(*this);
-    result.time = result.time + Time(0, 0, seconds);
-
-    if (result.time.getHours() >= 24) {
-        result.date = result.date + (result.time.getHours() / 24);
-        result.time.setHours(result.time.getHours() % 24);
-    }
-    return result;
-}
-
-DateTime DateTime::operator-(int seconds) const {
-    DateTime result(*this);
-    result.time = result.time - Time(0, 0, seconds);
-
-    if (result.time.getHours() < 0) {
-        result.date = result.date - 1;
-        result.time.setHours(24 + result.time.getHours());
-    }
-    return result;
-}
-
-DateTime DateTime::operator+(const Time& duration) const {
-    return *this + (duration.getHours() * 3600 + duration.getMinutes() * 60 + duration.getSeconds());
-}
-
-DateTime DateTime::operator-(const Time& duration) const {
-    return *this - (duration.getHours() * 3600 + duration.getMinutes() * 60 + duration.getSeconds());
-}
-
-bool DateTime::operator==(const DateTime& other) const {
-    return date == other.date && time == other.time;
-}
-
-bool DateTime::operator!=(const DateTime& other) const {
-    return !(*this == other);
-}
-
-bool DateTime::operator<(const DateTime& other) const {
-    if (date == other.date) {
-        return time < other.time;
-    }
-    return date < other.date;
-}
-
-bool DateTime::operator>(const DateTime& other) const {
-    return other < *this;
 }
 
 String DateTime::toString() const {
@@ -246,12 +274,82 @@ DateTime DateTime::fromString(const String& str) {
     return DateTime(date, time);
 }
 
+// 辅助函数
+long long DateTime::toTotalSeconds() const {
+    // 将日期转换为儒略日，然后计算自1970-01-01以来的天数
+    int daysSinceEpoch = date.toJulianDay() - Date(1970, 1, 1).toJulianDay();
+    return static_cast<long long>(daysSinceEpoch) * 86400 + time.toTotalSeconds();
+}
+
+DateTime DateTime::fromTotalSeconds(long long totalSeconds) {
+    int days = static_cast<int>(totalSeconds / 86400);
+    long long secondsInDay = totalSeconds % 86400;
+    if (secondsInDay < 0) {
+        secondsInDay += 86400;
+        days -= 1;
+    }
+    Date date = Date(1970, 1, 1) + days;
+    Time time = Time::fromTotalSeconds(secondsInDay);
+    return DateTime(date, time);
+}
+
+// 算术运算符
+DateTime DateTime::operator+(const Time& duration) const {
+    long long totalSeconds = toTotalSeconds() + duration.toTotalSeconds();
+    return fromTotalSeconds(totalSeconds);
+}
+
+DateTime DateTime::operator-(const Time& duration) const {
+    long long totalSeconds = toTotalSeconds() - duration.toTotalSeconds();
+    return fromTotalSeconds(totalSeconds);
+}
+
+// 两个 DateTime 对象之间的时间差
+Time DateTime::operator-(const DateTime& other) const {
+    long long secondsDiff = toTotalSeconds() - other.toTotalSeconds();
+    return Time::fromTotalSeconds(secondsDiff);
+}
+
+// 比较运算符
+bool DateTime::operator==(const DateTime& other) const {
+    return toTotalSeconds() == other.toTotalSeconds();
+}
+
+bool DateTime::operator!=(const DateTime& other) const {
+    return toTotalSeconds() != other.toTotalSeconds();
+}
+
+bool DateTime::operator<(const DateTime& other) const {
+    return toTotalSeconds() < other.toTotalSeconds();
+}
+
+bool DateTime::operator<=(const DateTime& other) const {
+    return toTotalSeconds() <= other.toTotalSeconds();
+}
+
+bool DateTime::operator>(const DateTime& other) const {
+    return toTotalSeconds() > other.toTotalSeconds();
+}
+
+bool DateTime::operator>=(const DateTime& other) const {
+    return toTotalSeconds() >= other.toTotalSeconds();
+}
+
+// 流操作符
 std::ostream& operator<<(std::ostream& out, const DateTime& dateTime) {
-    out << dateTime.date << " " << dateTime.time;
+    out << dateTime.toString();
     return out;
 }
 
 std::istream& operator>>(std::istream& in, DateTime& dateTime) {
-    in >> dateTime.date >> dateTime.time;
+    Date date;
+    Time time;
+    char space;
+    in >> date >> space >> time;
+    if (!in || space != ' ') {
+        in.setstate(std::ios::failbit);
+        return in;
+    }
+    dateTime = DateTime(date, time);
     return in;
 }

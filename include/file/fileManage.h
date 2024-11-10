@@ -10,7 +10,7 @@
 #include <FlightSystem/Flight.h>
 #include <FlightSystem/FlightNetwork.h>
 #include <FlightSystem/Passenger.h>
-#include <FlightSystem/TicketInfo.h>
+#include <FlightSystem/Order.h>
 
 typedef Map<String, User> UserMap;
 typedef Map<String, Airport> AirportMap;
@@ -18,7 +18,7 @@ typedef Map<String, Airline> AirlineMap;
 typedef Map<String, AirplaneModel> AirplaneModelMap;
 typedef Map<String, Flight> FlightMap;
 typedef Map<String, Passenger> PassengerMap;
-typedef Map<String, TicketInfo> TicketMap;
+typedef Map<String, Order> OrderMap;
 typedef LinkedList<Flight> FlightList;
 
 
@@ -41,7 +41,7 @@ extern AirportMap airport_map;
 extern AirlineMap airline_map;
 extern AirplaneModelMap airplane_model_map;
 extern FlightMap flight_map;
-extern TicketMap ticket_map;
+extern OrderMap order_map;
 extern FlightNetwork flight_network;
 
 bool createDirectory(const char* directoryPath);
@@ -54,7 +54,11 @@ bool writeLocalUserToFile(User &local_user, const char* fileName);
 
 bool loadFlightNetworkFromFile();
 
-bool buyTicket(const Ticket& ticket, const CabinType& cabin, const String& user, const Passenger& passenger);
+bool buyTicket(const Ticket& ticket, const CabinType& cabin, const Passenger& passenger);
+bool refundTicket(const Order& ticketInfo);
+
+bool buyMeal(const Order& order, enum Meal meal);
+bool chooseSeat(const Order& order, const String& seatNum);
 
 template <typename Key, typename Value>
 bool loadMapFromFile(Map<Key, Value> &map, const char* fileName);
@@ -63,13 +67,13 @@ template <typename Key, typename Value>
 bool writeMapToFile(Map<Key, Value> &map, const char* fileName);
 
 template <typename Key, typename Value>
-bool addElementToMap(Map<Key, Value> &map, Value &element, const char *fileName);
+bool addElementToMap(Map<Key, Value> &map, const Value &element, const char *fileName);
 
 template <typename Key, typename Value>
-bool modifyElementInMap(Map<Key, Value> &map, Value &updateElement, const char* fileName);
+bool modifyElementInMap(Map<Key, Value> &map, const Value &updateElement, const char* fileName);
 
 template <typename Key, typename Value>
-bool deleteElementInMap(Map<Key, Value> &map, Key &elementKey, const char* fileName);
+bool deleteElementInMap(Map<Key, Value> &map, const Key &elementKey, const char* fileName);
 
 template <typename Key, typename Value>
 bool loadMapFromFile(Map<Key, Value>& map, const char* fileName) {
@@ -102,7 +106,7 @@ bool writeMapToFile(Map<Key, Value>& map, const char* fileName) {
 }
 
 template <typename Key, typename Value>
-bool addElementToMap(Map<Key, Value>& map, Value& element, const char* fileName) {
+bool addElementToMap(Map<Key, Value>& map, const Value& element, const char* fileName) {
     if (map.insert(element)) {
         return writeMapToFile(map, fileName);
     }
@@ -110,8 +114,8 @@ bool addElementToMap(Map<Key, Value>& map, Value& element, const char* fileName)
 }
 
 template <typename Key, typename Value>
-bool modifyElementInMap(Map<Key, Value>& map, Value& updateElement, const char* fileName) {
-    Key key = updateElement.getKey();
+bool modifyElementInMap(Map<Key, Value>& map, const Value& updateElement, const char* fileName) {
+    Key key = map.getKey(updateElement);
     if (map.erase(key)) {
         return addElementToMap(map, updateElement, fileName);
     }
@@ -119,7 +123,7 @@ bool modifyElementInMap(Map<Key, Value>& map, Value& updateElement, const char* 
 }
 
 template <typename Key, typename Value>
-bool deleteElementInMap(Map<Key, Value>& map, Key& elementKey, const char* fileName) {
+bool deleteElementInMap(Map<Key, Value>& map, const Key& elementKey, const char* fileName) {
     if (map.erase(elementKey)) {
         return writeMapToFile(map, fileName);
     }

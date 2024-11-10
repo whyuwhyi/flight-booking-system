@@ -85,6 +85,11 @@ AirportItem::AirportItem(const Airport& airport, QListWidget *parent)
     nameLabel = new QLabel(airport.getName().c_str(), parent);
     countryLabel = new QLabel(airport.getCountry().c_str(), parent);
     cityLabel = new QLabel(airport.getCity().c_str(), parent);
+    
+    deleteButton->setFixedWidth(80);
+    nameLabel->setFixedWidth(200);
+    countryLabel->setFixedWidth(200);
+    cityLabel->setFixedWidth(200);
 
     QWidget *itemWidget = new QWidget(parent);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);

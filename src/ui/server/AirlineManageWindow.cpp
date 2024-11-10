@@ -170,6 +170,11 @@ AirlineItem::AirlineItem(const Airline& airline, QListWidget *parent)
     airport1Label = new QLabel(airline.getAirport1().c_str(), parent);
     airport2Label = new QLabel(airline.getAirport2().c_str(), parent);
 
+    deleteButton->setFixedWidth(80);
+    nameLabel->setFixedWidth(200);
+    airport1Label->setFixedWidth(200);
+    airport2Label->setFixedWidth(200);
+
     QWidget *itemWidget = new QWidget(parent);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);
     layout->setContentsMargins(0, 0, 0, 0);

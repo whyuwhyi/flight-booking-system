@@ -24,6 +24,13 @@ window.onload = function() {
     });
 }
 
+function normalizeLongitude360(lng) {
+    if (lng < 0) {
+        return lng + 360;
+    }
+    return lng;
+}
+
 function loadRoutesData(routesData) {
     if (!routesData) {
         console.error("Invalid route data");
@@ -65,7 +72,7 @@ function loadRoutesData(routesData) {
                 console.error("Invalid coordinate data: " + coordsLine);
                 continue;
             }
-            points.push({ lat: coords[0], lng: coords[1] });
+            points.push({ lat: coords[0], lng: normalizeLongitude360(coords[1]) });
         }
 
         routes.push({

@@ -93,6 +93,7 @@ public:
     bool addFlightSchedule(const FlightTicketDetail& ticketInfo);
     bool removeFlightSchedule(const Date& date);
     const FlightScheduleMap& getFlightSchedule() const;
+    FlightTicketDetail* getFlightTicketDetail(const Date& date);
 
     friend std::ostream& operator<<(std::ostream& out, const Flight& flight);
     friend std::istream& operator>>(std::istream& in, Flight& flight);

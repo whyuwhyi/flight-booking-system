@@ -9,12 +9,21 @@ template<typename T>
 class LinkedList {
 private:
     Link<T>* head;
+    Link<T>* tail;
     int nodeCount;
 
-    void destory();
+    void destroy();
+
+    void quickSort(Link<T>* low, Link<T>* high, std::function<bool(const T&, const T&)> compare);
+    Link<T>* partition(Link<T>* low, Link<T>* high, std::function<bool(const T&, const T&)> compare);
+
 public:
     LinkedList();
     LinkedList(const LinkedList<T>& other);
+    LinkedList(LinkedList<T>&& other) noexcept;
+    LinkedList<T>& operator=(const LinkedList<T>& other);
+    LinkedList<T>& operator=(LinkedList<T>&& other) noexcept;
+
     ~LinkedList();
 
     int size() const;
@@ -24,7 +33,7 @@ public:
     void clear();
 
     bool isEmpty() const;
-    T& getElementAt(int index) const;
+    T& getElementAt(int index);
     void insert(int index, const T& element);
     bool remove(const T& element);
     void popBack();
@@ -35,8 +44,9 @@ public:
     void traverse(std::function<void(const T&)> func) const;
     void traverse(std::function<void(T*)> func) const;
 
-    LinkedList<T>& operator=(const LinkedList<T>& other);
+    void sort(std::function<bool(const T&, const T&)> compare);
 
+    
 
     template<typename U>
     friend std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list);
@@ -45,24 +55,25 @@ public:
     friend std::istream& operator>>(std::istream& in, LinkedList<U>& list);
 };
 
-template<typename T>
-LinkedList<T>::LinkedList() : head(nullptr), nodeCount(0) { }
 
 template<typename T>
-LinkedList<T>::LinkedList(const LinkedList<T>& other) : head(nullptr), nodeCount(0) {
+LinkedList<T>::LinkedList() : head(nullptr), tail(nullptr), nodeCount(0) { }
+
+template<typename T>
+LinkedList<T>::LinkedList(const LinkedList<T>& other) : head(nullptr), tail(nullptr), nodeCount(0) {
     Link<T>* current = other.head;
-    Link<T>* tail = nullptr;
     while (current != nullptr) {
-        Link<T>* newLink = new Link<T>(current->getElement());
-        if (tail == nullptr) {
-            head = newLink;
-        } else {
-            tail->setNext(newLink);
-        }
-        tail = newLink;
+        append(current->getElement());
         current = current->getNext();
-        nodeCount++;
     }
+}
+
+template<typename T>
+LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept
+    : head(other.head), tail(other.tail), nodeCount(other.nodeCount) {
+    other.head = nullptr;
+    other.tail = nullptr;
+    other.nodeCount = 0;
 }
 
 template<typename T>
@@ -70,25 +81,46 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
     if (this != &other) {
         clear();
         Link<T>* current = other.head;
-        Link<T>* tail = nullptr;
         while (current != nullptr) {
-            Link<T>* newLink = new Link<T>(current->getElement());
-            if (tail == nullptr) {
-                head = newLink;
-            } else {
-                tail->setNext(newLink);
-            }
-            tail = newLink;
+            append(current->getElement());
             current = current->getNext();
-            nodeCount++;
         }
     }
     return *this;
 }
 
 template<typename T>
+LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& other) noexcept {
+    if (this != &other) {
+        destroy();
+        
+        head = other.head;
+        tail = other.tail;
+        nodeCount = other.nodeCount;
+
+        other.head = nullptr;
+        other.tail = nullptr;
+        other.nodeCount = 0;
+    }
+    return *this;
+}
+
+template<typename T>
 LinkedList<T>::~LinkedList() {
-    destory();
+    destroy();
+}
+
+template<typename T>
+void LinkedList<T>::destroy() {
+    Link<T>* current = head;
+    while (current != nullptr) {
+        Link<T>* next = current->getNext();
+        delete current;
+        current = next;
+    }
+    head = nullptr;
+    tail = nullptr;
+    nodeCount = 0;
 }
 
 template<typename T>
@@ -108,43 +140,28 @@ void LinkedList<T>::setHead(Link<T>* head) {
 
 template<typename T>
 void LinkedList<T>::append(const T& element) {
-    Link<T>* newLink = new Link<T>(element);
-    if (head == nullptr) {
-        head = newLink;
+    Link<T>* newLink = new Link<T>(element, tail, nullptr);
+    if (tail != nullptr) {
+        tail->setNext(newLink);
     } else {
-        Link<T>* pointer = head;
-        while (pointer->getNext() != nullptr) {
-            pointer = pointer->getNext();
-        }
-        pointer->setNext(newLink);
+        head = newLink;
     }
+    tail = newLink;
     nodeCount++;
 }
 
 template<typename T>
-void LinkedList<T>::destory() {
-    Link<T>* node;
-    while (head != nullptr) {
-        node = head;
-        head = head->getNext();
-        delete node;
-    }
-}
-
-template<typename T>
 void LinkedList<T>::clear() {
-    destory();
-    head = nullptr;
-    nodeCount = 0;
+    destroy();
 }
 
 template<typename T>
 bool LinkedList<T>::isEmpty() const {
-    return head == nullptr;
+    return nodeCount == 0;
 }
 
 template<typename T>
-T& LinkedList<T>::getElementAt(int index) const {
+T& LinkedList<T>::getElementAt(int index) {
     if (index < 0 || index >= nodeCount) {
         throw std::out_of_range("Index out of range");
     }
@@ -160,37 +177,43 @@ void LinkedList<T>::insert(int index, const T& element) {
     if (index < 0 || index > nodeCount) {
         throw std::out_of_range("Index out of range");
     }
-    Link<T>* newLink = new Link<T>(element);
-    if (index == 0) {
-        newLink->setNext(head);
-        head = newLink;
+    if (index == nodeCount) {
+        append(element);
     } else {
         Link<T>* current = head;
-        for (int i = 0; i < index - 1; ++i) {
+        for (int i = 0; i < index; ++i) {
             current = current->getNext();
         }
-        newLink->setNext(current->getNext());
-        current->setNext(newLink);
+        Link<T>* newLink = new Link<T>(element, current->getPrev(), current);
+        if (current->getPrev() != nullptr) {
+            current->getPrev()->setNext(newLink);
+        } else {
+            head = newLink;
+        }
+        current->setPrev(newLink);
+        nodeCount++;
     }
-    nodeCount++;
 }
 
 template<typename T>
 bool LinkedList<T>::remove(const T& element) {
     Link<T>* current = head;
-    Link<T>* previous = nullptr;
     while (current != nullptr) {
         if (current->getElement() == element) {
-            if (previous == nullptr) {
-                head = current->getNext();
+            if (current->getPrev() != nullptr) {
+                current->getPrev()->setNext(current->getNext());
             } else {
-                previous->setNext(current->getNext());
+                head = current->getNext();
+            }
+            if (current->getNext() != nullptr) {
+                current->getNext()->setPrev(current->getPrev());
+            } else {
+                tail = current->getPrev();
             }
             delete current;
             nodeCount--;
             return true;
         }
-        previous = current;
         current = current->getNext();
     }
     return false;
@@ -198,20 +221,15 @@ bool LinkedList<T>::remove(const T& element) {
 
 template<typename T>
 void LinkedList<T>::popBack() {
-    if (head == nullptr) return;
-    if (head->getNext() == nullptr) {
-        delete head;
-        head = nullptr;
+    if (tail == nullptr) return;
+    Link<T>* temp = tail;
+    if (tail->getPrev() != nullptr) {
+        tail->getPrev()->setNext(nullptr);
     } else {
-        Link<T>* current = head;
-        Link<T>* previous = nullptr;
-        while (current->getNext() != nullptr) {
-            previous = current;
-            current = current->getNext();
-        }
-        previous->setNext(nullptr);
-        delete current;
+        head = nullptr;
     }
+    tail = tail->getPrev();
+    delete temp;
     nodeCount--;
 }
 
@@ -219,6 +237,11 @@ template<typename T>
 void LinkedList<T>::popFront() {
     if (head == nullptr) return;
     Link<T>* temp = head;
+    if (head->getNext() != nullptr) {
+        head->getNext()->setPrev(nullptr);
+    } else {
+        tail = nullptr;
+    }
     head = head->getNext();
     delete temp;
     nodeCount--;
@@ -238,40 +261,20 @@ Link<T>* LinkedList<T>::find(const T& element) const {
 
 template<typename T>
 Link<T>* LinkedList<T>::getLast() const {
-    if (head == nullptr) return nullptr;
-    Link<T>* current = head;
-    while (current->getNext() != nullptr) {
-        current = current->getNext();
-    }
-    return current;
+    return tail;
 }
 
 template<typename T>
 T LinkedList<T>::removeLast() {
-    if (head == nullptr) {
+    if (tail == nullptr) {
         throw std::out_of_range("List is empty");
     }
-    if (head->getNext() == nullptr) {
-        T element = head->getElement();
-        delete head;
-        head = nullptr;
-        nodeCount--;
-        return element;
-    }
-    Link<T>* current = head;
-    Link<T>* previous = nullptr;
-    while (current->getNext() != nullptr) {
-        previous = current;
-        current = current->getNext();
-    }
-    T element = current->getElement();
-    delete current;
-    previous->setNext(nullptr);
-    nodeCount--;
+    T element = tail->getElement();
+    popBack();
     return element;
 }
 
-template <typename T>
+template<typename T>
 void LinkedList<T>::traverse(std::function<void(const T&)> func) const {
     Link<T>* current = head;
     while (current != nullptr) {
@@ -280,7 +283,7 @@ void LinkedList<T>::traverse(std::function<void(const T&)> func) const {
     }
 }
 
-template <typename T>
+template<typename T>
 void LinkedList<T>::traverse(std::function<void(T*)> func) const {
     Link<T>* current = head;
     while (current != nullptr) {
@@ -289,12 +292,43 @@ void LinkedList<T>::traverse(std::function<void(T*)> func) const {
     }
 }
 
+template<typename T>
+void LinkedList<T>::sort(std::function<bool(const T&, const T&)> compare) {
+    if (isEmpty() || head->getNext() == nullptr) return;
+    quickSort(head, tail, compare);
+}
+
+template<typename T>
+void LinkedList<T>::quickSort(Link<T>* low, Link<T>* high, std::function<bool(const T&, const T&)> compare) {
+    if (low != nullptr && high != nullptr && low != high && low != high->getNext()) {
+        Link<T>* p = partition(low, high, compare);
+        quickSort(low, p->getPrev(), compare);
+        quickSort(p->getNext(), high, compare);
+    }
+}
+
+template<typename T>
+Link<T>* LinkedList<T>::partition(Link<T>* low, Link<T>* high, std::function<bool(const T&, const T&)> compare) {
+    T pivot = high->getElement();
+    Link<T>* i = low->getPrev();
+
+    for (Link<T>* j = low; j != high; j = j->getNext()) {
+        if (compare(j->getElement(), pivot)) {
+            i = (i == nullptr) ? low : i->getNext();
+            std::swap(i->getElement(), j->getElement());
+        }
+    }
+    i = (i == nullptr) ? low : i->getNext();
+    std::swap(i->getElement(), high->getElement());
+    return i;
+}
+
 template<typename U>
 std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list) {
     out << list.nodeCount << "\n";
     Link<U>* current = list.getHead();
     while (current != nullptr) {
-        out << *current << "\n";
+        out << current->getElement() << "\n";
         current = current->getNext();
     }
     return out;
@@ -306,17 +340,9 @@ std::istream& operator>>(std::istream& in, LinkedList<U>& list) {
     in >> count;
     list.clear();
     U element;
-    Link<U>* tail = nullptr;
     for (int i = 0; i < count; ++i) {
         in >> element;
-        Link<U>* newLink = new Link<U>(element);
-        if (tail == nullptr) {
-            list.setHead(newLink);
-        } else {
-            tail->setNext(newLink);
-        }
-        tail = newLink;
-        list.nodeCount++;
+        list.append(element);
     }
     return in;
 }

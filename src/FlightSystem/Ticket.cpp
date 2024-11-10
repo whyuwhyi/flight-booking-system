@@ -42,6 +42,24 @@ DateTime Ticket::getArrivalDateTime() const {
     return getDepartureDateTime() + flight->getCostTime();
 }
 
+Time Ticket::getDuration() const {
+    return flight->getCostTime();
+}
+
+double Ticket::getPrice() const {
+    return getPrice(EconomyClass);
+}
+
+double Ticket::getPrice(CabinType cabinType) const {
+    return flightTicketDetail->getCabinPrice(cabinType);
+}
+
+double Ticket::getCabinDiscount(CabinType cabinType) const {
+    double originPrice = flight->getInitialPrice(cabinType);
+    double currentPrice = flightTicketDetail->getCabinPrice(cabinType);
+    return currentPrice*10 / originPrice;
+}
+
 bool Ticket::operator<(const Ticket& other) const {
     return flightTicketDetail->getFlightDate() < other.flightTicketDetail->getFlightDate();
 }
@@ -80,7 +98,7 @@ int ConnectingTicket::getNumberOfTickets() const {
     return tickets.size();
 }
 
-LinkedList<Ticket> ConnectingTicket::getTickets() const {
+LinkedList<Ticket>& ConnectingTicket::getTickets(){
     return tickets;
 }
 
@@ -95,6 +113,10 @@ DateTime ConnectingTicket::getArrivalDateTime() const {
     return current->getElement().getArrivalDateTime();
 }
 
+double ConnectingTicket::getPrice() const {
+    return getTotalPrice(EconomyClass);
+}
+
 double ConnectingTicket::getTotalPrice(CabinType cabinType) const {
     double total = 0.0;
     Link<Ticket>* current = tickets.getHead();
@@ -105,14 +127,10 @@ double ConnectingTicket::getTotalPrice(CabinType cabinType) const {
     return total;
 }
 
-Time ConnectingTicket::getTotalDuration() const {
-    Time total;
-    Link<Ticket>* current = tickets.getHead();
-    while (current != nullptr) {
-        total = total + current->getElement().getFlight()->getCostTime();
-        current = current->getNext();
-    }
-    return total;
+Time ConnectingTicket::getDuration() const {
+    DateTime departureTime = tickets.getHead()->getElement().getArrivalDateTime();
+    DateTime arrivalTime = tickets.getLast()->getElement().getDepartureDateTime();
+    return arrivalTime - departureTime;
 }
 
 bool ConnectingTicket::isValid() const {
@@ -136,5 +154,5 @@ bool ConnectingTicket::isValid() const {
 }
 
 bool ConnectingTicket::operator<(const ConnectingTicket& other) const {
-    return getTotalDuration() < other.getTotalDuration();
+    return getDuration() < other.getDuration();
 }

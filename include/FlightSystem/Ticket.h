@@ -1,4 +1,3 @@
-// Tickets.h
 #pragma once
 
 #include <FlightSystem/Flight.h>
@@ -24,12 +23,18 @@ public:
 
     Flight* getFlight() const;
     void setFlight(Flight* flight);
+    
 
     FlightTicketDetail* getFlightTicketDetail() const;
     void setFlightTicketDetail(FlightTicketDetail* flightTicketDetail);
 
     DateTime getDepartureDateTime() const;
     DateTime getArrivalDateTime() const;
+    Time getDuration() const;
+    double getPrice() const;
+    double getPrice(CabinType cabinType) const;
+
+    double getCabinDiscount(CabinType cabinType) const;
 
     bool operator<(const Ticket& other) const;
 };
@@ -48,10 +53,11 @@ public:
     void addTicket(const Ticket& ticket);
     void removeLastTicket();
     int getNumberOfTickets() const;
-    LinkedList<Ticket> getTickets() const;
+    LinkedList<Ticket>& getTickets();
 
+    double getPrice() const;
     double getTotalPrice(CabinType cabinType) const;
-    Time getTotalDuration() const;
+    Time getDuration() const;
     DateTime getDepartureDateTime() const;
     DateTime getArrivalDateTime() const;
 

@@ -15,6 +15,7 @@ ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
     loadMapFromFile(airline_map, AIRLINES_PATH.c_str());
     loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
     loadMapFromFile(flight_map, FLIGHTS_PATH.c_str());
+
     setupUI();
     setupConnections();
 }

@@ -32,9 +32,9 @@ public:
 
     void addFlight(Flight* flight);
 
-    Map<Ticket, Ticket> findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const;
-    Map<ConnectingTicket, ConnectingTicket> findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
-    Map<ConnectingTicket, ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
+    LinkedList<Ticket> findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const;
+    LinkedList<ConnectingTicket> findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
+    LinkedList<ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
 
-    void traverseCities(std::function<void(const String&)> func) const;
+    void traverseCities(std::function<void(const String&, const CityInfo&)> func) const;
 };

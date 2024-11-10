@@ -117,9 +117,12 @@ void AirplaneModelManageWindow::onDeleteModel(AirplaneModelItem *item) {
 AirplaneModelItem::AirplaneModelItem(const AirplaneModel &model, QListWidget *parent)
     : QListWidgetItem(parent) {
     deleteButton = new QPushButton("删除", parent);
-
     nameLabel = new QLabel(model.getName().c_str(), parent);
     capacityLabel = new QLabel(QString("总载客量: %1").arg(model.getPassengerCapacity()), parent);
+    
+    deleteButton->setFixedWidth(80);
+    nameLabel->setFixedWidth(200);
+    capacityLabel->setFixedWidth(200);
 
     QWidget *itemWidget = new QWidget(parent);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);

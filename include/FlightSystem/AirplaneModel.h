@@ -6,7 +6,7 @@
 
 
 
-enum CabinType { FirstClass, BusinessClass, EconomyClass };
+enum CabinType { None, FirstClass, BusinessClass, EconomyClass };
 
 class Cabin {
 public:

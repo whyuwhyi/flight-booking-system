@@ -417,10 +417,15 @@ void FlightItem::setupFlightItemUI(const Flight &flight, QListWidget *parent) {
     airlineLabel = new QLabel(flight.getAirline().c_str(), parent);
     departureCityLabel = new QLabel(flight.getDepartureAirport().getName().c_str(), parent);
     arrivalCityLabel = new QLabel(flight.getArrivalAirport().getName().c_str(), parent);
-    departureTimeLabel = new QLabel(flight.getDepartureTime().toString().c_str(), parent);
-
     deleteButton = new QPushButton("删除", parent);
     manageButton = new QPushButton("管理", parent);
+
+    flightNameLabel->setFixedWidth(100);
+    airlineLabel->setFixedWidth(80);
+    departureCityLabel->setFixedWidth(200);
+    arrivalCityLabel->setFixedWidth(200);
+    deleteButton->setFixedWidth(60);    
+    manageButton->setFixedWidth(60);
 
     QWidget *itemWidget = new QWidget(parent);
     QHBoxLayout *layout = new QHBoxLayout(itemWidget);
@@ -430,7 +435,6 @@ void FlightItem::setupFlightItemUI(const Flight &flight, QListWidget *parent) {
     layout->addWidget(airlineLabel);
     layout->addWidget(departureCityLabel);
     layout->addWidget(arrivalCityLabel);
-    layout->addWidget(departureTimeLabel);
     layout->addWidget(deleteButton);
     layout->addWidget(manageButton);
 

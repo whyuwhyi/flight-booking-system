@@ -200,6 +200,10 @@ const FlightScheduleMap& Flight::getFlightSchedule() const {
     return flightScheduleMap;
 }
 
+FlightTicketDetail* Flight::getFlightTicketDetail(const Date& date) {
+    return flightScheduleMap.find(date);
+}
+
 double Flight::getInitialPrice(CabinType type) const {
     switch (type) {
         case FirstClass:

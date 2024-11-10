@@ -25,7 +25,6 @@ void MapBackend::requestRoutesData() {
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), webChannel(nullptr), mapBackend(nullptr) {
     
-    
     loadFlightNetworkFromFile();
     
     setupUI();
@@ -33,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
     showLoginWindow();
 
     String fileName = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
-    loadMapFromFile(ticket_map, fileName.c_str());
+    loadMapFromFile(order_map, fileName.c_str());
+    
+    loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
 }    
 
 MainWindow::~MainWindow() {}
@@ -47,14 +48,14 @@ void MainWindow::setupUI() {
     loginWindow = new LoginWindow(this);
     registerWindow = new RegisterWindow(this);
     ticketBookingWindow = new TicketBookingWindow(this);
+    personalCenterWindow = new PersonalCenterWindow(this);
+    routeMapWidget = new QWidget(this);
 
     stackedWidget->addWidget(loginWindow);
     stackedWidget->addWidget(registerWindow);
+    stackedWidget->addWidget(routeMapWidget);
     stackedWidget->addWidget(ticketBookingWindow);
-
-    routeMapWidget = new QWidget(this);
-    serviceHallWidget = new QWidget(this);
-    personalCenterWidget = new QWidget(this);
+    stackedWidget->addWidget(personalCenterWindow);
 
     mapBackend = new MapBackend(this);
     webChannel = new QWebChannel(this);
@@ -67,9 +68,6 @@ void MainWindow::setupUI() {
     QVBoxLayout *routeLayout = new QVBoxLayout(routeMapWidget);
     routeLayout->addWidget(mapView);
 
-    stackedWidget->addWidget(routeMapWidget);
-    stackedWidget->addWidget(serviceHallWidget);
-    stackedWidget->addWidget(personalCenterWidget);
 
     menuList = new QListWidget(this);
     menuList->setViewMode(QListView::IconMode);
@@ -107,7 +105,8 @@ void MainWindow::setupConnections() {
                 stackedWidget->setCurrentWidget(ticketBookingWindow);
                 break;
             case 2:
-                stackedWidget->setCurrentWidget(personalCenterWidget);
+                stackedWidget->setCurrentWidget(personalCenterWindow);
+                personalCenterWindow->refreshOrderList();
                 break;
             default:
                 break;
