@@ -119,6 +119,6 @@ std::ostream& operator<<(std::ostream& os, const Order& order) {
        << order.date << "\n" 
        << order.seatNum << "\n" 
        << static_cast<int>(order.meal) << "\n"
-       << static_cast<int>(order.status);
+       << static_cast<int>(order.status) << "\n";
     return os;
 }

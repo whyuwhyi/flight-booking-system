@@ -60,7 +60,7 @@ public:
     void* operator new(size_t size);
     void operator delete(void* ptr);
 
-std::function<Key(const Value&)> getKey;
+    std::function<Key(const Value&)> getKey;
 
     template<typename K, typename V>
     friend std::ostream& operator<<(std::ostream& out, const Map<K, V>& map);

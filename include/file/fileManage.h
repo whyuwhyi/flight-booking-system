@@ -55,7 +55,8 @@ bool writeLocalUserToFile(User &local_user, const char* fileName);
 bool loadFlightNetworkFromFile();
 
 bool buyTicket(const Ticket& ticket, const CabinType& cabin, const Passenger& passenger);
-bool refundTicket(const Order& ticketInfo);
+bool refundTicket(const Order& order);
+bool changeTicket(const Order& order, const Date& newDate);
 
 bool buyMeal(const Order& order, enum Meal meal);
 bool chooseSeat(const Order& order, const String& seatNum);

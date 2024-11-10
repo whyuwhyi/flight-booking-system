@@ -29,12 +29,54 @@ void OrderItem::setupUI() {
 
     flightNumberLabel = new QLabel("航班号: " + QString::fromUtf8(flight->getFlightName().c_str()), this);
     dateLabel = new QLabel("日期: " + QString(order.getDate().toString().c_str()), this);
-    departureCityLabel = new QLabel("出发城市: " + QString::fromUtf8(flight->getDepartureAirport().getName().c_str()), this);
-    arrivalCityLabel = new QLabel("到达城市: " + QString::fromUtf8(flight->getArrivalAirport().getName().c_str()), this);
+    departureCityLabel = new QLabel("出发: " + QString::fromUtf8(flight->getDepartureAirport().getName().c_str()), this);
+    arrivalCityLabel = new QLabel("到达: " + QString::fromUtf8(flight->getArrivalAirport().getName().c_str()), this);
     departureTimeLabel = new QLabel("出发时间: " + QString(flight->getDepartureTime().toString().c_str()), this);
-    arrivalTimeLabel = new QLabel("到达时间: " + QString(flight->getDepartureTime().toString().c_str()), this);
+
+    Time arrivalTime = flight->getDepartureTime() + flight->getCostTime();
+    int daysDifference = 0;
+    while (arrivalTime > Time(24, 0, 0)) {
+        arrivalTime -= Time(24, 0, 0);
+        daysDifference++;
+    }
+    QString arrivalTimeStr = QString(arrivalTime.toString().c_str());
+    QString dayDif = daysDifference > 0 ? "(+" + QString::number(daysDifference) + ")" : "";
+    arrivalTimeStr += dayDif;
+    
+
+    arrivalTimeLabel = new QLabel("到达时间: " + arrivalTimeStr, this);
     seatNumLabel = new QLabel("座位号: " + QString::fromUtf8(order.getSeatNum().c_str()), this);
-    statusLabel = new QLabel("状态: " + QString::number(order.getStatus()), this);
+    
+    switch (order.getMeal()) {
+        case NO_MEAL:
+            mealLabel = new QLabel("餐食: 无", this);
+            break;
+        case WESTERN:
+            mealLabel = new QLabel("餐食: 西餐", this);
+            break;
+        case CHINESE:
+            mealLabel = new QLabel("餐食: 中餐", this);
+            break;
+        case VEGETARIAN:
+            mealLabel = new QLabel("餐食: 素食", this);
+            break;
+    }
+
+    switch (order.getStatus()) {
+        case BOOKED:
+            statusLabel = new QLabel("状态: 已订票", this);
+            break;
+        case CANCELED:
+            statusLabel = new QLabel("状态: 已取消", this);
+            break;
+        case CHECKED_IN:
+            statusLabel = new QLabel("状态: 已登机", this);
+            break;
+        case REFUNDED:
+            statusLabel = new QLabel("状态: 已退票", this);
+            break;
+    }
+    
 
     selectSeatButton = new QPushButton("选座", this);
     orderMealButton = new QPushButton("订餐", this);
@@ -54,6 +96,7 @@ void OrderItem::setupUI() {
     layout->addWidget(departureTimeLabel);
     layout->addWidget(arrivalTimeLabel);
     layout->addWidget(seatNumLabel);
+    layout->addWidget(mealLabel);
     layout->addWidget(statusLabel);
     layout->addLayout(buttonLayout);
 
@@ -61,14 +104,18 @@ void OrderItem::setupUI() {
 }
 
 void OrderItem::setupConnecttions() {
-    if (order.getSeatNum() == "NULL")
+    if (order.getSeatNum() != "NULL")
         selectSeatButton->setEnabled(false);
     
-    if (order.getStatus() == REFUNDED)
+    if (order.getStatus() == REFUNDED) {
+        selectSeatButton->setEnabled(false);
+        orderMealButton->setEnabled(false);
         refundTicketButton->setEnabled(false);
+        changeTicketButton->setEnabled(false);
+    }
         
     if (order.getMeal() != NO_MEAL)
-        changeTicketButton->setEnabled(false);
+        orderMealButton->setEnabled(false);
     
     connect(selectSeatButton, &QPushButton::clicked, this, [=]() {
         emit selectSeat(order, flight);
@@ -114,7 +161,6 @@ void PersonalCenterWindow::populateOrderList() {
     order_map.traverse([this](const Order &order) {
         addOrderItem(order);
     });
-
 }
 
 void PersonalCenterWindow::refreshOrderList() {
@@ -241,7 +287,7 @@ void PersonalCenterWindow::handleSelectSeat(const Order &order, const Flight* fl
 
 
 void PersonalCenterWindow::handleOrderMeal(const Order &order) {
-    QDialog *dialog = createDetailWindow("订餐");
+    QDialog *dialog = createDetailWindow("选餐");
 
     QVBoxLayout *layout = static_cast<QVBoxLayout*>(dialog->property("contentLayout").value<void*>());
 
@@ -264,16 +310,16 @@ void PersonalCenterWindow::handleOrderMeal(const Order &order) {
     connect(confirmButton, &QPushButton::clicked, this, [=]() {
         QAbstractButton *checkedButton = mealGroup->checkedButton();
         if (checkedButton) {
-            QString meal = checkedButton->text();
-            Order updatedTicket = order;
-            // updatedTicket.setMeal(String(meal.toStdString().c_str()));
+            Meal meal = static_cast<Meal>(mealGroup->id(checkedButton)+1);
 
-            // 更新票务信息
-            String userPhone = current_login_user.getPhoneNumber();
-            // order_map.updateTicket(userPhone, updatedTicket);
+            if (buyMeal(order, meal)) {
+                QMessageBox::information(dialog, "成功", "订餐成功！");
+                dialog->accept();
+                refreshOrderList();
+            } else {
+                QMessageBox::warning(dialog, "错误", "订餐失败");
+            }
 
-            QMessageBox::information(dialog, "成功", "订餐成功！");
-            dialog->accept();
         } else {
             QMessageBox::warning(dialog, "错误", "请选择餐食");
         }
@@ -285,14 +331,12 @@ void PersonalCenterWindow::handleOrderMeal(const Order &order) {
 void PersonalCenterWindow::handleRefundTicket(const Order &order) {
     int ret = QMessageBox::question(this, "退票确认", "确定要退票吗？", QMessageBox::Yes | QMessageBox::No);
     if (ret == QMessageBox::Yes) {
-        Order updatedTicket = order;
-        updatedTicket.setStatus(REFUNDED);
-
-        refundTicket(updatedTicket);
-        // order_map.updateTicket(userPhone, updatedTicket);
-
-        QMessageBox::information(this, "成功", "退票成功！");
-        refreshOrderList();
+        if (refundTicket(order)) {
+            QMessageBox::information(this, "成功", "退票成功！");
+            refreshOrderList();
+        } else {
+            QMessageBox::warning(this, "错误", "退票失败");
+        }
     }
 }
 
@@ -304,31 +348,54 @@ void PersonalCenterWindow::handleChangeTicket(const Order &order) {
     QLabel *infoLabel = new QLabel("请选择新的日期:", dialog);
     layout->addWidget(infoLabel);
 
-    QDateEdit *dateEdit = new QDateEdit(QDate::currentDate(), dialog);
-    dateEdit->setCalendarPopup(true);
-    layout->addWidget(dateEdit);
+    QComboBox *dateComboBox = new QComboBox(dialog);
+
+    const Flight *flight = flight_map.find(order.getFlightNumber());
+    if (!flight) {
+        QMessageBox::warning(this, "错误", "无法找到航班信息");
+        dialog->reject();
+        return;
+    }
+
+    CabinType cabinType = order.getCabinType();
+    const FlightScheduleMap &scheduleMap = flight->getFlightSchedule();
+    scheduleMap.traverse([&](const FlightTicketDetail &ticketDetail) {
+        if (ticketDetail.getRemainingTickets(cabinType) > 0) {
+            dateComboBox->addItem(QString::fromUtf8(ticketDetail.getFlightDate().toString().c_str()));
+        }
+    });
+
+    if (dateComboBox->count() == 0) {
+        QMessageBox::warning(dialog, "提示", "没有符合条件的日期");
+        dialog->reject();
+        return;
+    }
+
+    layout->addWidget(dateComboBox);
 
     QPushButton *confirmButton = new QPushButton("确认", dialog);
     layout->addWidget(confirmButton);
 
     connect(confirmButton, &QPushButton::clicked, this, [=]() {
-        QDate newDate = dateEdit->date();
-        Date date = Date::fromString(newDate.toString("yyyy-MM-dd").toStdString().c_str());
+        if (dateComboBox->currentIndex() >= 0) {
+            QString selectedDateStr = dateComboBox->currentText();
+            Date selectedDate = Date::fromString(selectedDateStr.toStdString().c_str());
 
-        Order updatedTicket = order;
-        updatedTicket.setDate(date);
-
-        // 更新票务信息
-        String userPhone = current_login_user.getPhoneNumber();
-        // order_map.updateTicket(userPhone, updatedTicket);
-
-        QMessageBox::information(dialog, "成功", "改签成功！");
-        dialog->accept();
-        refreshOrderList();
+            if (changeTicket(order, selectedDate)) {
+                QMessageBox::information(dialog, "成功", "改签成功！");
+                dialog->accept();
+                refreshOrderList();
+            } else {
+                QMessageBox::warning(dialog, "错误", "改签失败");
+            }
+        } else {
+            QMessageBox::warning(dialog, "错误", "请选择日期");
+        }
     });
 
     dialog->exec();
 }
+
 
 QDialog* PersonalCenterWindow::createDetailWindow(const QString &title) {
     QDialog *detailWindow = new QDialog(this);

@@ -21,7 +21,9 @@ public:
     bool operator<=(const String& other) const;
     bool operator>=(const String& other) const;
     bool operator==(const String& other) const;
+    bool operator!=(const String& other) const;
     bool operator==(const char* other) const;
+    bool operator!=(const char* other) const;
 
     size_t size() const;
     const char* c_str() const;

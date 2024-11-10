@@ -103,5 +103,4 @@ private:
     void addCabinRow(QGridLayout *layout, const Ticket &ticket, const QString &cabinTypeStr, CabinType cabinType, const QString &discount, QPushButton *&bookButton, QWidget *parent);
     void handleTicketPurchase(const Ticket &ticket, CabinType cabinType, QWidget *parent);
     void handleConnectingTicketPurchase(const Ticket **tickets, const CabinType *selectedCabins, int segmentCount, QWidget *parent); 
-
 };

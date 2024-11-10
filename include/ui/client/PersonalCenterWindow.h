@@ -42,6 +42,7 @@ private:
     QLabel *departureTimeLabel;
     QLabel *arrivalTimeLabel;
     QLabel *seatNumLabel;
+    QLabel *mealLabel;
     QLabel *statusLabel;
 
     QPushButton *selectSeatButton;
@@ -49,7 +50,7 @@ private:
     QPushButton *refundTicketButton;
     QPushButton *changeTicketButton;
     
-    Order order;
+    const Order& order;
     Flight *flight;
     FlightTicketDetail *flightTicketDetail;
 };

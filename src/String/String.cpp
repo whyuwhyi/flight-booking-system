@@ -97,10 +97,18 @@ bool String::operator==(const String& other) const {
     return std::strcmp(data, other.data) == 0;
 }
 
+bool String::operator!=(const String& other) const {
+    return !(*this == other);
+}
+
 bool String::operator==(const char* other) const {
     if (!data && !other) return true;
     if (!data || !other) return false;
     return std::strcmp(data, other) == 0;
+}
+
+bool String::operator!=(const char* other) const {
+    return !(*this == other);
 }
 
 size_t String::size() const {
