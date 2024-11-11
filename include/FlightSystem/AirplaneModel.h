@@ -4,8 +4,6 @@
 #include <iostream>
 #include <stdexcept>
 
-
-
 enum CabinType { None, FirstClass, BusinessClass, EconomyClass };
 
 class Cabin {

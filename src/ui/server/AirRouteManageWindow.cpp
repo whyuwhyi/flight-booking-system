@@ -1,46 +1,46 @@
-#include <ui/server/AirlineManageWindow.h>
+#include <ui/server/AirRouteManageWindow.h>
 #include <file/fileManage.h>
 #include <QMessageBox>
 #include <QHBoxLayout>
 #include <QWebEngineView>
 
-AirlineManageWindow::AirlineManageWindow(QWidget *parent) : QWidget(parent) {
+AirRouteManageWindow::AirRouteManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
 }
 
-void AirlineManageWindow::setupUI() {
+void AirRouteManageWindow::setupUI() {
     mainLayout = new QVBoxLayout(this);
-    airlineListWidget = new QListWidget(this);
-    mainLayout->addWidget(airlineListWidget);
-    addAirlineButton = new QPushButton("添加航线", this);
-    mainLayout->addWidget(addAirlineButton);
-    airline_map.traverse([this](const Airline& airline){ addAirlineItem(airline); });
+    airRouteListWidget = new QListWidget(this);
+    mainLayout->addWidget(airRouteListWidget);
+    addAirRouteButton = new QPushButton("添加航线", this);
+    mainLayout->addWidget(addAirRouteButton);
+    air_route_map.traverse([this](const AirRoute& airline){ addAirRouteItem(airline); });
     setLayout(mainLayout);
 }
 
-void AirlineManageWindow::setupConnections() {
-    connect(addAirlineButton, &QPushButton::clicked, this, &AirlineManageWindow::openAddAirlineWindow);
+void AirRouteManageWindow::setupConnections() {
+    connect(addAirRouteButton, &QPushButton::clicked, this, &AirRouteManageWindow::openAddAirRouteWindow);
 }
 
-void AirlineManageWindow::openAddAirlineWindow() {
-    QDialog *addAirlineDialog = createAddAirlineDialog();
+void AirRouteManageWindow::openAddAirRouteWindow() {
+    QDialog *addAirlineDialog = createAddAirRouteDialog();
     addAirlineDialog->exec();
 }
 
-QDialog* AirlineManageWindow::createAddAirlineDialog() {
+QDialog* AirRouteManageWindow::createAddAirRouteDialog() {
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("添加航线");
     QVBoxLayout *layout = new QVBoxLayout(dialog);
 
-    airlineNameLineEdit = createLineEdit(dialog, "请输入航线名称");
+    airRouteNameLineEdit = createLineEdit(dialog, "请输入航线名称");
     airport1ComboBox = createComboBox(dialog, "选择出发机场");
     airport2ComboBox = createComboBox(dialog, "选择到达机场");
 
     populateAirportComboBoxes();
 
     QPushButton *confirmAddAirlineButton = new QPushButton("确认添加航线", dialog);
-    layout->addWidget(airlineNameLineEdit);
+    layout->addWidget(airRouteNameLineEdit);
     layout->addWidget(airport1ComboBox);
     layout->addWidget(airport2ComboBox);
     layout->addWidget(confirmAddAirlineButton);
@@ -48,7 +48,7 @@ QDialog* AirlineManageWindow::createAddAirlineDialog() {
     dialog->resize(400, 300);
 
     connect(confirmAddAirlineButton, &QPushButton::clicked, this, [this, dialog]() {
-        QString airlineName = airlineNameLineEdit->text();
+        QString airlineName = airRouteNameLineEdit->text();
         QString airport1 = airport1ComboBox->currentText();
         QString airport2 = airport2ComboBox->currentText();
         if (airlineName.isEmpty() || !airport1ComboBox->currentIndex() || !airport2ComboBox->currentIndex()) {
@@ -62,31 +62,31 @@ QDialog* AirlineManageWindow::createAddAirlineDialog() {
     return dialog;
 }
 
-QLineEdit* AirlineManageWindow::createLineEdit(QWidget* parent, const QString& placeholder) {
+QLineEdit* AirRouteManageWindow::createLineEdit(QWidget* parent, const QString& placeholder) {
     QLineEdit *lineEdit = new QLineEdit(parent);
     lineEdit->setPlaceholderText(placeholder);
     return lineEdit;
 }
 
-QComboBox* AirlineManageWindow::createComboBox(QWidget* parent, const QString& defaultText) {
+QComboBox* AirRouteManageWindow::createComboBox(QWidget* parent, const QString& defaultText) {
     QComboBox *comboBox = new QComboBox(parent);
     comboBox->addItem(defaultText);
     return comboBox;
 }
 
-void AirlineManageWindow::populateAirportComboBoxes() {
+void AirRouteManageWindow::populateAirportComboBoxes() {
     airport_map.traverse([this](const Airport& airport) {
         airport1ComboBox->addItem(airport.getName().c_str());
         airport2ComboBox->addItem(airport.getName().c_str());
     });
 }
 
-void AirlineManageWindow::openMapSearchWindow(const QString &airport1, const QString &airport2) {
+void AirRouteManageWindow::openMapSearchWindow(const QString &airport1, const QString &airport2) {
     QDialog *mapDialog = createMapSearchDialog(airport1, airport2);
     mapDialog->exec();
 }
 
-QDialog* AirlineManageWindow::createMapSearchDialog(const QString &airport1, const QString &airport2) {
+QDialog* AirRouteManageWindow::createMapSearchDialog(const QString &airport1, const QString &airport2) {
     QDialog *dialog = new QDialog(this);
     dialog->setWindowTitle("绘制航线");
     dialog->resize(900, 900);
@@ -95,33 +95,33 @@ QDialog* AirlineManageWindow::createMapSearchDialog(const QString &airport1, con
     QWebEngineView *webView = new QWebEngineView(dialog);
     QWebChannel *channel = new QWebChannel(this);
 
-    AirlineManageBackend *backend = new AirlineManageBackend(this);
+    AirRouteManageBackend *backend = new AirRouteManageBackend(this);
     setupBackendConnections(backend, airport1, airport2);
 
     webView->page()->setWebChannel(channel);
-    channel->registerObject(QStringLiteral("qt_addAirline"), backend);
+    channel->registerObject(QStringLiteral("qt_addAirRoute"), backend);
 
-    webView->load(QUrl("qrc:/pages/airline/addAirline.html"));
+    webView->load(QUrl("qrc:/pages/airRoute/addAirRoute.html"));
     layout->addWidget(webView);
     dialog->setLayout(layout);
 
     return dialog;
 }
 
-void AirlineManageWindow::setupBackendConnections(AirlineManageBackend* backend, const QString &airport1, const QString &airport2) {
+void AirRouteManageWindow::setupBackendConnections(AirRouteManageBackend* backend, const QString &airport1, const QString &airport2) {
     Airport* airport_p1 = airport_map.find(airport1.toStdString().c_str());
     Airport* airport_p2 = airport_map.find(airport2.toStdString().c_str());
 
-    connect(backend, &AirlineManageBackend::routeDataReceived, this, &AirlineManageWindow::handleRouteData);
-    connect(backend, &AirlineManageBackend::airlineDataRequested, this, [backend, airport1, airport2, airport_p1, airport_p2]() {
-        QMetaObject::invokeMethod(backend, "receiveAirlineData",
+    connect(backend, &AirRouteManageBackend::routeDataReceived, this, &AirRouteManageWindow::handleRouteData);
+    connect(backend, &AirRouteManageBackend::airRouteDataRequested, this, [backend, airport1, airport2, airport_p1, airport_p2]() {
+        QMetaObject::invokeMethod(backend, "receiveAirRouteData",
             Q_ARG(QString, airport1), Q_ARG(QString, airport2),
             Q_ARG(double, airport_p1->getPosition().getLatitude()), Q_ARG(double, airport_p1->getPosition().getLongitude()),
             Q_ARG(double, airport_p2->getPosition().getLatitude()), Q_ARG(double, airport_p2->getPosition().getLongitude()));
     });
 }
 
-void AirlineManageWindow::handleRouteData(const QVariantList &routePoints, double routeLengthInKm) {
+void AirRouteManageWindow::handleRouteData(const QVariantList &routePoints, double routeLengthInKm) {
     LinkedList<Point> points;
     for (const QVariant &pointVariant : routePoints) {
         QVariantMap pointMap = pointVariant.toMap();
@@ -129,33 +129,33 @@ void AirlineManageWindow::handleRouteData(const QVariantList &routePoints, doubl
         double lng = pointMap["lng"].toDouble();
         points.append(Point(lat, lng));
     }
-    QString airlineName = airlineNameLineEdit->text();
+    QString airlineName = airRouteNameLineEdit->text();
     QString airport1 = airport1ComboBox->currentText();
     QString airport2 = airport2ComboBox->currentText();
-    Airline newAirline(airlineName.toStdString().c_str(), airport1.toStdString().c_str(), airport2.toStdString().c_str(), points, routeLengthInKm);
-    if (addElementToMap(airline_map, newAirline, AIRLINES_PATH.c_str())) {
-        addAirlineItem(newAirline);
+    AirRoute newAirline(airlineName.toStdString().c_str(), airport1.toStdString().c_str(), airport2.toStdString().c_str(), points, routeLengthInKm);
+    if (addElementToMap(air_route_map, newAirline, AIRLINES_PATH.c_str())) {
+        addAirRouteItem(newAirline);
     } else {
         QMessageBox::warning(this, "错误", "此航线已存在！！！");
     }
 }
 
-void AirlineManageWindow::addAirlineItem(const Airline& airline) {
-    AirlineItem *item = new AirlineItem(airline, airlineListWidget);
-    airlineListWidget->addItem(item);
+void AirRouteManageWindow::addAirRouteItem(const AirRoute& airline) {
+    AirRouteItem *item = new AirRouteItem(airline, airRouteListWidget);
+    airRouteListWidget->addItem(item);
     connect(item->getDeleteButton(), &QPushButton::clicked, this, [this, item]() {
-        onDeleteAirline(item);
+        onDeleteAirRoute(item);
     });
 }
 
-void AirlineManageWindow::onDeleteAirline(AirlineItem *item) {
+void AirRouteManageWindow::onDeleteAirRoute(AirRouteItem *item) {
     QMessageBox::StandardButton reply = QMessageBox::question(this, "确认删除", "确定要删除这个航线吗？", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
-        int row = airlineListWidget->row(item);
+        int row = airRouteListWidget->row(item);
         if (row != -1) {
             String key = item->getAirlineName().toStdString().c_str();
-            if (deleteElementInMap(airline_map, key, AIRLINES_PATH.c_str())) {                   
-                delete airlineListWidget->takeItem(row);
+            if (deleteElementInMap(air_route_map, key, AIRLINES_PATH.c_str())) {                   
+                delete airRouteListWidget->takeItem(row);
             } else {
                 QMessageBox::warning(this, "错误", "删除航线失败！");
             }
@@ -163,7 +163,7 @@ void AirlineManageWindow::onDeleteAirline(AirlineItem *item) {
     }
 }
 
-AirlineItem::AirlineItem(const Airline& airline, QListWidget *parent)
+AirRouteItem::AirRouteItem(const AirRoute& airline, QListWidget *parent)
     : QListWidgetItem(parent) {
     deleteButton = new QPushButton("删除", parent);
     nameLabel = new QLabel(airline.getName().c_str(), parent);
@@ -189,10 +189,10 @@ AirlineItem::AirlineItem(const Airline& airline, QListWidget *parent)
     parent->setItemWidget(this, itemWidget);
 }
 
-QPushButton* AirlineItem::getDeleteButton() {
+QPushButton* AirRouteItem::getDeleteButton() {
     return deleteButton;
 }
 
-QString AirlineItem::getAirlineName() {
+QString AirRouteItem::getAirlineName() {
     return nameLabel->text();
 }

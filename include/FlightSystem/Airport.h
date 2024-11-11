@@ -10,7 +10,6 @@ private:
     String city;
     Point position;
 
-
 public:
     Airport();
     Airport( const String& name, const String& country, const String& city, const Point& position = Point());

@@ -5,14 +5,14 @@
 #include <QLabel>
 #include <QPushButton>
 #include <ui/server/AirportManageWindow.h>
-#include <ui/server/AirlineManageWindow.h>
+#include <ui/server/AirRouteManageWindow.h>
 #include <ui/server/AirplaneModelManageWindow.h>
 #include <ui/server/FlightManageWindow.h>
 #include <file/fileManage.h>
 
 ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
     loadMapFromFile(airport_map, AIRPORTS_PATH.c_str());
-    loadMapFromFile(airline_map, AIRLINES_PATH.c_str());
+    loadMapFromFile(air_route_map, AIRLINES_PATH.c_str());
     loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
     loadMapFromFile(flight_map, FLIGHTS_PATH.c_str());
 
@@ -49,7 +49,7 @@ void ServerWindow::setupUI() {
     stackedWidget = new QStackedWidget(this);
 
     airportManageWidget = new AirportManageWindow(this);
-    airlineManageWidget = new AirlineManageWindow(this);
+    airlineManageWidget = new AirRouteManageWindow(this);
     airplaneModelManageWidget = new AirplaneModelManageWindow(this);
     flightManageWidget = new FlightManageWindow(this);
 

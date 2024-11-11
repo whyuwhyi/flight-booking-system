@@ -14,7 +14,7 @@
 #include <FlightSystem/Flight.h>
 #include <FlightSystem/AirplaneModel.h>
 #include <FlightSystem/Airport.h>
-#include <FlightSystem/Airline.h>
+#include <FlightSystem/AirRoute.h>
 
 // 独立的 FlightItem 类，用于表示航班项
 class FlightItem : public QListWidgetItem {

@@ -169,18 +169,74 @@ void OrderItem::setupUI() {
 }
 
 void OrderItem::setupConnecttions() {
-    if (order.getSeatNum() != "NULL")
+    if (order.getSeatNum() != "NULL") {
         selectSeatButton->setEnabled(false);
+        selectSeatButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
+    }
     
     if (order.getStatus() == REFUNDED) {
         selectSeatButton->setEnabled(false);
         orderMealButton->setEnabled(false);
         refundTicketButton->setEnabled(false);
         changeTicketButton->setEnabled(false);
+        selectSeatButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
+         orderMealButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
+         refundTicketButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
+         changeTicketButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
     }
         
-    if (order.getMeal() != NO_MEAL)
+    if (order.getMeal() != NO_MEAL) {
         orderMealButton->setEnabled(false);
+        orderMealButton->setStyleSheet(
+            "QPushButton {"
+            "   background-color: lightgray;"  // 按钮背景色
+            "   color: white;"                 // 按钮文字颜色
+            "   font-size: 16px;"              // 字体大小
+            "   border-radius: 8px;"           // 圆角
+            "   padding: 10px 15px;"           // 内边距
+            "}"
+        );
+    }
     
     connect(selectSeatButton, &QPushButton::clicked, this, [=]() {
         emit selectSeat(order, flight);

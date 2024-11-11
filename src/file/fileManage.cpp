@@ -18,7 +18,7 @@ const String LOCAL_USER_PATH = LOCAL_DATA_DIR + "local-user.txt";
 User current_login_user;
 UserMap user_map([] (const User &user) { return user.getPhoneNumber(); });
 AirportMap airport_map([] (const Airport &airport) { return airport.getName(); });
-AirlineMap airline_map([] (const Airline &airline) { return airline.getName(); });
+AirRouteMap air_route_map([] (const AirRoute &airline) { return airline.getName(); });
 AirplaneModelMap airplane_model_map([] (const AirplaneModel &model) { return model.getName(); });
 FlightMap flight_map([] (const Flight &flight) { return flight.getFlightName(); });
 OrderMap order_map([] (const Order &order)

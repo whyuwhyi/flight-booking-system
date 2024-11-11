@@ -159,8 +159,8 @@ function cubicN(a, b, c, d, t) {
 }
 
 confirmRouteButton.addEventListener('click', function() {
-    if (window.qt_addAirline) {
-        window.qt_addAirline.receiveRouteData(routePoints, routeLengthInKm);
+    if (window.qt_addAirRoute) {
+        window.qt_addAirRoute.receiveRouteData(routePoints, routeLengthInKm);
     }
 });
 
@@ -178,10 +178,10 @@ citySearchInput.addEventListener('focus', function() {
 
 window.onload = function() {
     new QWebChannel(qt.webChannelTransport, function(channel) {
-        window.qt_addAirline = channel.objects.qt_addAirline;
+        window.qt_addAirRoute = channel.objects.qt_addAirRoute;
 
-        if (window.qt_addAirline) {
-            window.qt_addAirline.airlineDataReceived.connect(function(airport1, airport2, lat1, lng1, lat2, lng2) {
+        if (window.qt_addAirRoute) {
+            window.qt_addAirRoute.airRouteDataReceived.connect(function(airport1, airport2, lat1, lng1, lat2, lng2) {
                 airport1Input.value = airport1;
                 airport2Input.value = airport2;
 
@@ -196,7 +196,7 @@ window.onload = function() {
                 drawRoute();
             });
 
-            window.qt_addAirline.requestAirlineData();
+            window.qt_addAirRoute.requestAirRouteData();
         }
     });
 };

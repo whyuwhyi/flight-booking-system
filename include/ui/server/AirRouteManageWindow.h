@@ -9,63 +9,63 @@
 #include <QLabel>
 #include <QComboBox>
 #include <QWebChannel>
-#include <FlightSystem/Airline.h>
+#include <FlightSystem/AirRoute.h>
 
-class AirlineManageBackend : public QObject {
+class AirRouteManageBackend : public QObject {
     Q_OBJECT
 public:
-    AirlineManageBackend(QObject *parent = nullptr) : QObject(parent) {}
+    AirRouteManageBackend(QObject *parent = nullptr) : QObject(parent) {}
 
     Q_INVOKABLE void receiveRouteData(const QVariantList &routePoints, double routeLengthInKm) {
         emit routeDataReceived(routePoints, routeLengthInKm);
     }
-    Q_INVOKABLE void receiveAirlineData(const QString &airport1, const QString &airport2, double lat1, double lng1, double lat2, double lng2) {
-        emit airlineDataReceived(airport1, airport2, lat1, lng1, lat2, lng2);
+    Q_INVOKABLE void receiveAirRouteData(const QString &airport1, const QString &airport2, double lat1, double lng1, double lat2, double lng2) {
+        emit airRouteDataReceived(airport1, airport2, lat1, lng1, lat2, lng2);
     }
-    Q_INVOKABLE void requestAirlineData() {
-        emit airlineDataRequested();
+    Q_INVOKABLE void requestAirRouteData() {
+        emit airRouteDataRequested();
     }
 
 signals:
     void routeDataReceived(const QVariantList &routePoints, double routeLengthInKm);
-    void airlineDataReceived(const QString &airport1, const QString &airport2, double lat1, double lng1, double lat2, double lng2);
-    void airlineDataRequested();
+    void airRouteDataReceived(const QString &airport1, const QString &airport2, double lat1, double lng1, double lat2, double lng2);
+    void airRouteDataRequested();
 };
 
-class AirlineItem;
+class AirRouteItem;
 
-class AirlineManageWindow : public QWidget {
+class AirRouteManageWindow : public QWidget {
     Q_OBJECT
 
 public:
-    explicit AirlineManageWindow(QWidget *parent = nullptr);
+    explicit AirRouteManageWindow(QWidget *parent = nullptr);
 
 private:
     void setupUI();
     void setupConnections();
-    void openAddAirlineWindow();
-    QDialog* createAddAirlineDialog();
+    void openAddAirRouteWindow();
+    QDialog* createAddAirRouteDialog();
     QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);
     QComboBox* createComboBox(QWidget* parent, const QString& defaultText);
     void populateAirportComboBoxes();
     void openMapSearchWindow(const QString &airport1, const QString &airport2);
     QDialog* createMapSearchDialog(const QString &airport1, const QString &airport2);
-    void setupBackendConnections(class AirlineManageBackend* backend, const QString &airport1, const QString &airport2);
+    void setupBackendConnections(class AirRouteManageBackend* backend, const QString &airport1, const QString &airport2);
     void handleRouteData(const QVariantList &routePoints, double routeLengthInKm);
-    void addAirlineItem(const Airline& airline);
-    void onDeleteAirline(AirlineItem *item);
+    void addAirRouteItem(const AirRoute& airRoute);
+    void onDeleteAirRoute(AirRouteItem *item);
 
     QVBoxLayout *mainLayout;
-    QListWidget *airlineListWidget;
-    QPushButton *addAirlineButton;
-    QLineEdit *airlineNameLineEdit;
+    QListWidget *airRouteListWidget;
+    QPushButton *addAirRouteButton;
+    QLineEdit *airRouteNameLineEdit;
     QComboBox *airport1ComboBox;
     QComboBox *airport2ComboBox;
 };
 
-class AirlineItem : public QListWidgetItem {
+class AirRouteItem : public QListWidgetItem {
 public:
-    AirlineItem(const Airline &airline, QListWidget *parent = nullptr);
+    AirRouteItem(const AirRoute &airRoute, QListWidget *parent = nullptr);
     QPushButton* getDeleteButton();
     QString getAirlineName();
 

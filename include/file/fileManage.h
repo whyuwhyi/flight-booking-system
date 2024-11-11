@@ -5,7 +5,7 @@
 #include <User/User.h>
 #include <LinkedList/LinkedList.h>
 #include <FlightSystem/Airport.h>
-#include <FlightSystem/Airline.h>
+#include <FlightSystem/AirRoute.h>
 #include <FlightSystem/AirplaneModel.h>
 #include <FlightSystem/Flight.h>
 #include <FlightSystem/FlightNetwork.h>
@@ -14,7 +14,7 @@
 
 typedef Map<String, User> UserMap;
 typedef Map<String, Airport> AirportMap;
-typedef Map<String, Airline> AirlineMap;
+typedef Map<String, AirRoute> AirRouteMap;
 typedef Map<String, AirplaneModel> AirplaneModelMap;
 typedef Map<String, Flight> FlightMap;
 typedef Map<String, Passenger> PassengerMap;
@@ -38,7 +38,7 @@ extern const String LOCAL_USER_PATH;
 extern User current_login_user;
 extern UserMap user_map;
 extern AirportMap airport_map;
-extern AirlineMap airline_map;
+extern AirRouteMap air_route_map;
 extern AirplaneModelMap airplane_model_map;
 extern FlightMap flight_map;
 extern OrderMap order_map;

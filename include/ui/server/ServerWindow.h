@@ -5,7 +5,7 @@
 class QListWidget;
 class QStackedWidget;
 class AirportManageWindow;
-class AirlineManageWindow;
+class AirRouteManageWindow;
 class AirplaneModelManageWindow;
 class FlightManageWindow;
 
@@ -23,7 +23,7 @@ private:
 
     AirplaneModelManageWindow *airplaneModelManageWidget;
     AirportManageWindow *airportManageWidget;
-    AirlineManageWindow *airlineManageWidget;
+    AirRouteManageWindow *airlineManageWidget;
     FlightManageWindow *flightManageWidget;
 
     void setupUI();

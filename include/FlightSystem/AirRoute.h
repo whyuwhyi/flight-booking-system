@@ -3,7 +3,7 @@
 #include <FlightSystem/Point.h>
 #include <LinkedList/LinkedList.h>
 
-class Airline {
+class AirRoute {
 private:
     String name;
     String airport1;
@@ -12,8 +12,8 @@ private:
     LinkedList<Point> route;
 
 public:
-    Airline();
-    Airline(const String& name, const String& airport1, const String& airport2, const LinkedList<Point>& route = LinkedList<Point>(), double length = 0.0);
+    AirRoute();
+    AirRoute(const String& name, const String& airport1, const String& airport2, const LinkedList<Point>& route = LinkedList<Point>(), double length = 0.0);
 
     const String& getName() const;
     const String& getAirport1() const;
@@ -29,6 +29,6 @@ public:
 
     void addPoint(const Point& point);
 
-    friend std::ostream& operator<<(std::ostream& out, const Airline& airline);
-    friend std::istream& operator>>(std::istream& in, Airline& airline);
+    friend std::ostream& operator<<(std::ostream& out, const AirRoute& airline);
+    friend std::istream& operator>>(std::istream& in, AirRoute& airline);
 };
