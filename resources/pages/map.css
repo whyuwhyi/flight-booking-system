@@ -12,3 +12,14 @@ body {
     border-radius: 5px;
     margin: 20px 0;
 }
+
+#controls {
+    margin: 10px;
+}
+
+#controls label,
+#controls input,
+#controls button {
+    margin-right: 10px;
+    font-size: 14px;
+}

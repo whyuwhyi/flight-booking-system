@@ -45,12 +45,12 @@ public:
 
 class Flight {
 private:
-    String flightName;
+    String flightNumber;
     String airline;
     String airplaneModel;
     Airport departureAirport;
     Airport arrivalAirport;
-    String flightRouteName;
+    String airRoute;
     Time departureTime;
     Time costTime;
     Cabin firstClassCabin;
@@ -63,13 +63,13 @@ private:
 
 public:
     Flight();
-    Flight(const String& flightName, const String& airline, const String& airplaneModel,
-           const Airport& departureAirport, const Airport& arrivalAirport, const String& flightRouteName,
+    Flight(const String& flightNumber, const String& airline, const String& airplaneModel,
+           const Airport& departureAirport, const Airport& arrivalAirport, const String& airRoute,
            const Time& departureTime = Time(), const Time& costTime = Time(),
            double initialFirstClassPrice = 0.0, double initialBusinessClassPrice = 0.0, double initialEconomyClassPrice = 0.0);
 
     const String& getFlightName() const;
-    void setFlightName(const String& flightName);
+    void setFlightName(const String& flightNumber);
     const String& getAirline() const;
     void setAirline(const String& airline);
     const String& getAirplaneModel() const;
@@ -78,8 +78,8 @@ public:
     void setDepartureAirport(const Airport& departureAirport);
     const Airport& getArrivalAirport() const;
     void setArrivalAirport(const Airport& arrivalAirport);
-    const String& getFlightRouteName() const;
-    void setFlightRouteName(const String& flightRouteName);
+    const String& getairRoute() const;
+    void setairRoute(const String& airRoute);
     const Time& getDepartureTime() const;
     void setDepartureTime(const Time& departureTime);
     const Time& getCostTime() const;

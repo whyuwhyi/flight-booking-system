@@ -24,6 +24,7 @@ class Order {
 private:
     String orderNumber;
     String flightNumber;
+    String airRoute;
     String bookTicketUser;
     Passenger passenger;
     CabinType cabin;
@@ -36,7 +37,7 @@ private:
 public:
     // Constructors
     Order();
-    Order(const String& flightNumber, const String& bookTicketUser, const Passenger& passenger,
+    Order(const String& flightNumber, const String& airRoute, const String& bookTicketUser, const Passenger& passenger,
                CabinType cabin, int price, const Date& date, const String& seatNum = String(), TicketStatus status = BOOKED);
     Order(const Order& order);
 

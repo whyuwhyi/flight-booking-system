@@ -2,10 +2,10 @@
 
 Order::Order() : seatNum("NULL"){}
 
-Order::Order(const String& flightNumber, const String& bookTicketUser, const Passenger& passenger,
+Order::Order(const String& flightNumber,const String& airRoute, const String& bookTicketUser, const Passenger& passenger,
                        CabinType cabin, int price, const Date& date, const String& seatNum, TicketStatus status)
-    : flightNumber(flightNumber), bookTicketUser(bookTicketUser), passenger(passenger), cabin(cabin), price(price),
-      date(date), seatNum(seatNum), meal(NO_MEAL), status(status) {
+    : flightNumber(flightNumber), airRoute(airRoute), bookTicketUser(bookTicketUser), passenger(passenger), 
+      cabin(cabin), price(price), date(date), seatNum(seatNum), meal(NO_MEAL), status(status) {
         if (seatNum == nullptr)
             this->seatNum = "NULL";
         this->orderNumber =date.toString() + flightNumber + passenger.getIdNumber();
@@ -14,6 +14,7 @@ Order::Order(const String& flightNumber, const String& bookTicketUser, const Pas
 Order::Order(const Order& order) {
     orderNumber = order.orderNumber;
     flightNumber = order.flightNumber;
+    airRoute = order.airRoute;
     bookTicketUser = order.bookTicketUser;
     passenger = order.passenger;
     cabin = order.cabin;
@@ -102,7 +103,7 @@ void Order::setStatus(TicketStatus status) {
 
 std::istream& operator>>(std::istream& is, Order& order) {
     int cabinInt, statusInt, mealInt;
-    is >> order.orderNumber >> order.flightNumber >> order.bookTicketUser >> order.passenger >> 
+    is >> order.orderNumber >> order.flightNumber >> order.airRoute >> order.bookTicketUser >> order.passenger >> 
           cabinInt >> order.price >> order.date >> order.seatNum >> mealInt >> statusInt;
     order.cabin = static_cast<CabinType>(cabinInt);
     order.status = static_cast<TicketStatus>(statusInt);
@@ -113,6 +114,7 @@ std::istream& operator>>(std::istream& is, Order& order) {
 std::ostream& operator<<(std::ostream& os, const Order& order) {
     os << order.orderNumber << "\n"
        << order.flightNumber << "\n" 
+       << order.airRoute << "\n"
        << order.bookTicketUser << "\n"
        << order.passenger << "\n"
        << static_cast<int>(order.cabin) << " " << order.price << "\n" 

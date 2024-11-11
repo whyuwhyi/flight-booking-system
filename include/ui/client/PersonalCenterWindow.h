@@ -74,6 +74,8 @@ private:
     void populateOrderList();
     void addOrderItem(const Order &order);
     QDialog* createDetailWindow(const QString &title);
+    double calculateRefundFee(const Order &order, QDateTime &datetime);
+    bool isRefundAllowed(const Order &order, QDateTime &datetime);
 
-    QListWidget *ticketListWidget;
+    QListWidget *orderListWidget;
 };

@@ -68,29 +68,29 @@ std::istream& operator>>(std::istream& in, FlightTicketDetail& ticketInfo) {
 }
 
 // Flight class implementation
-Flight::Flight() : flightName(), airline(), airplaneModel(), departureAirport(), arrivalAirport(),
-                   flightRouteName(), departureTime(), costTime(), firstClassCabin(),
+Flight::Flight() : flightNumber(), airline(), airplaneModel(), departureAirport(), arrivalAirport(),
+                   airRoute(), departureTime(), costTime(), firstClassCabin(),
                    businessClassCabin(), economyClassCabin(),
                    initialFirstClassPrice(0.0), initialBusinessClassPrice(0.0), initialEconomyClassPrice(0.0),
                    flightScheduleMap([] (const FlightTicketDetail& ticketInfo) { return ticketInfo.getFlightDate(); }) {}
 
-Flight::Flight(const String& flightName, const String& airline, const String& airplaneModel,
-               const Airport& departureAirport, const Airport& arrivalAirport, const String& flightRouteName,
+Flight::Flight(const String& flightNumber, const String& airline, const String& airplaneModel,
+               const Airport& departureAirport, const Airport& arrivalAirport, const String& airRoute,
                const Time& departureTime, const Time& costTime, double initialFirstClassPrice,
                double initialBusinessClassPrice, double initialEconomyClassPrice)
-    : flightName(flightName), airline(airline), airplaneModel(airplaneModel), departureAirport(departureAirport),
-      arrivalAirport(arrivalAirport), flightRouteName(flightRouteName), departureTime(departureTime),
+    : flightNumber(flightNumber), airline(airline), airplaneModel(airplaneModel), departureAirport(departureAirport),
+      arrivalAirport(arrivalAirport), airRoute(airRoute), departureTime(departureTime),
       costTime(costTime), firstClassCabin(), businessClassCabin(), economyClassCabin(),
       initialFirstClassPrice(initialFirstClassPrice), initialBusinessClassPrice(initialBusinessClassPrice),
       initialEconomyClassPrice(initialEconomyClassPrice),
       flightScheduleMap([] (const FlightTicketDetail& ticketInfo) { return ticketInfo.getFlightDate(); }) {}
 
 const String& Flight::getFlightName() const {
-    return flightName;
+    return flightNumber;
 }
 
-void Flight::setFlightName(const String& flightName) {
-    this->flightName = flightName;
+void Flight::setFlightName(const String& flightNumber) {
+    this->flightNumber = flightNumber;
 }
 
 const String& Flight::getAirline() const {
@@ -125,12 +125,12 @@ void Flight::setArrivalAirport(const Airport& arrivalAirport) {
     this->arrivalAirport = arrivalAirport;
 }
 
-const String& Flight::getFlightRouteName() const {
-    return flightRouteName;
+const String& Flight::getairRoute() const {
+    return airRoute;
 }
 
-void Flight::setFlightRouteName(const String& flightRouteName) {
-    this->flightRouteName = flightRouteName;
+void Flight::setairRoute(const String& airRoute) {
+    this->airRoute = airRoute;
 }
 
 const Time& Flight::getDepartureTime() const {
@@ -182,7 +182,7 @@ bool Flight::hasFlightOnDate(const Date& date) const {
 
 bool Flight::addFlightSchedule(const FlightTicketDetail& ticketInfo) {
     if (flightScheduleMap.insert(ticketInfo)) {
-        String fileName = FLIGHTS_DIR + flightName + "/" + ticketInfo.getFlightDate().toString() + ".txt";
+        String fileName = FLIGHTS_DIR + flightNumber + "/" + ticketInfo.getFlightDate().toString() + ".txt";
         return writeMapToFile(flight_map, FLIGHTS_PATH.c_str()) && createFile(fileName.c_str());
     }
     return false;
@@ -190,7 +190,7 @@ bool Flight::addFlightSchedule(const FlightTicketDetail& ticketInfo) {
 
 bool Flight::removeFlightSchedule(const Date& date) {
     if (flightScheduleMap.erase(date)) {
-        String fileName = FLIGHTS_DIR + flightName + "/" + date.toString() + ".txt";
+        String fileName = FLIGHTS_DIR + flightNumber + "/" + date.toString() + ".txt";
         return writeMapToFile(flight_map, FLIGHTS_PATH.c_str()) && removeFile(fileName.c_str());
     }
     return false;
@@ -234,12 +234,12 @@ void Flight::setInitialPrice(CabinType type, double price) {
 }
 
 std::ostream& operator<<(std::ostream& out, const Flight& flight) {
-    out << flight.flightName << "\n"
+    out << flight.flightNumber << "\n"
         << flight.airline << "\n"
         << flight.airplaneModel << "\n"
         << flight.departureAirport
         << flight.arrivalAirport
-        << flight.flightRouteName << "\n"
+        << flight.airRoute << "\n"
         << flight.departureTime << " " << flight.costTime << "\n"
         << flight.firstClassCabin << "\n"
         << flight.businessClassCabin << "\n"
@@ -250,8 +250,8 @@ std::ostream& operator<<(std::ostream& out, const Flight& flight) {
 }
 
 std::istream& operator>>(std::istream& in, Flight& flight) {
-    in >> flight.flightName >> flight.airline >> flight.airplaneModel >> flight.departureAirport >> flight.arrivalAirport
-       >> flight.flightRouteName >> flight.departureTime >> flight.costTime >> flight.firstClassCabin
+    in >> flight.flightNumber >> flight.airline >> flight.airplaneModel >> flight.departureAirport >> flight.arrivalAirport
+       >> flight.airRoute >> flight.departureTime >> flight.costTime >> flight.firstClassCabin
        >> flight.businessClassCabin >> flight.economyClassCabin
        >> flight.initialFirstClassPrice >> flight.initialBusinessClassPrice >> flight.initialEconomyClassPrice
        >> flight.flightScheduleMap;

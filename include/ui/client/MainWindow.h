@@ -18,9 +18,11 @@ public:
 
 signals:
     void sendRoutesData(const QString &routesData);
+    void sendUserOrderInfo(const QString &orderInfo);
 
 public slots:
     void requestRoutesData();
+    void requestUserOrderInfo();
 };
 
 class MainWindow : public QMainWindow {

@@ -62,10 +62,21 @@ function displayAirport(item) {
     airportNameInput.value = parts[0].trim();
     airportLatInput.value = lat;
     airportLngInput.value = lng;
-    var city = parts.length > 1 ? parts[parts.length - 2].trim() : '未知城市';
-    var country = parts.length > 2 ? parts[parts.length - 1].trim() : '未知国家';
-    airportCityElement.value = city;
+
+    // 识别国家，一定是最后一个字符串
+    var country = parts[parts.length - 1].trim();
     airportCountryElement.value = country;
+
+    // 识别城市
+    var city = '未知城市';
+    for (var i = parts.length - 2; i >= 0; i--) {
+        if (parts[i].trim().endsWith('市')) {
+            city = parts[i].trim();
+            break;
+        }
+    }
+    airportCityElement.value = city;
+
     modal.style.display = 'block';
 }
 

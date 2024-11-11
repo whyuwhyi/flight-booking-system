@@ -90,33 +90,34 @@ bool loadFlightNetworkFromFile() {
     return false;
 }
 
-bool buyTicket(const Ticket& ticket, const CabinType& cabin, const Passenger& passenger) {
-    int remainTickets = ticket.getFlightTicketDetail()->getRemainingTickets(cabin);
+bool buyTicket(const Order& order) {
+    Flight* flight = flight_map.find(order.getFlightNumber());
+    FlightTicketDetail* ticketDetail = flight->getFlightTicketDetail(order.getDate());
+    int remainTickets = ticketDetail->getRemainingTickets(order.getCabinType());
     if (remainTickets == 0) {
         std::cout << "No more ticket to book!" << std::endl;
         return false;
     }
 
     Map<String, Order> orderMap([](const Order& order) { return order.getFlightNumber() + order.getPassenger().getIdNumber(); });
-    Order order(ticket.getFlight()->getFlightName(), current_login_user.getPhoneNumber(), passenger,
-                cabin, ticket.getFlightTicketDetail()->getCabinPrice(cabin), ticket.getFlightTicketDetail()->getFlightDate(), "NULL");
-    String file1Name = FLIGHTS_DIR + ticket.getFlight()->getFlightName() + "/" +
-                       ticket.getFlightTicketDetail()->getFlightDate().toString() + ".txt";
+    String file1Name = FLIGHTS_DIR + order.getFlightNumber() + "/" +
+                       ticketDetail->getFlightDate().toString() + ".txt";
     String file2Name = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
+    Order *exist_order = order_map.find(order.getOrderNumber());
 
     if (!loadMapFromFile(orderMap, file1Name.c_str())) {
         std::cerr << "Load ticket info failed!" << std::endl;
         return false;
     }
     
-    ticket.getFlightTicketDetail()->setRemainingTickets(cabin, remainTickets-1);
+    ticketDetail->setRemainingTickets(order.getCabinType(), remainTickets-1);
 
     if(!writeMapToFile(flight_map, FLIGHTS_PATH.c_str())) {
         std::cerr << "Update flight info failed!" << std::endl;
         return false;
     }
-    
-    if (order_map.find(order.getOrderNumber()) != nullptr) {
+
+    if (exist_order != nullptr && exist_order->getStatus() == REFUNDED) {
         return addElementToMap(orderMap, order, file1Name.c_str()) && modifyElementInMap(order_map, order, file2Name.c_str());
     }
 
@@ -164,18 +165,9 @@ bool refundTicket(const Order& order) {
 }
 
 bool changeTicket(const Order& order, const Date& newDate) {
-    Ticket ticket;
-    Flight* flight = flight_map.find(order.getFlightNumber());
-    FlightTicketDetail* flightTicketDetail = flight->getFlightSchedule().find(newDate);
-    
-    if (flight == nullptr || flightTicketDetail == nullptr) {
-        std::cerr << "Flight or flight ticket detail not found!" << std::endl;
-        return false;
-    }
-
-    ticket.setFlight(flight);
-    ticket.setFlightTicketDetail(flightTicketDetail);
-    return refundTicket(order) && buyTicket(ticket, order.getCabinType(), order.getPassenger());
+    Order newOrder(order);
+    newOrder.setDate(newDate);
+    return refundTicket(order) && buyTicket(newOrder);
 }
 
 bool buyMeal(const Order& order, enum Meal meal) {

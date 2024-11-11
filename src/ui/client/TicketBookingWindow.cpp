@@ -91,10 +91,25 @@ void TicketBookingWindow::setupDateEdit(QDateEdit *dateEdit) {
 
 QListWidget* TicketBookingWindow::createFlightListWidget() {
     flightListWidget = new QListWidget(this);
-    flightListWidget->setStyleSheet("font-size: 16px;");
+    flightListWidget->setStyleSheet(
+        "QListWidget {"
+        "   font-size: 16px;"
+        "}"
+        "QListWidget::item {"
+        "   background-color: lightblue;"
+        "   border: 1px solid lightblue;"
+        "   border-radius: 10px;"
+        "   padding: 1px;"
+        "}"
+    );
+
+    flightListWidget->setSpacing(5);
     flightListWidget->setUniformItemSizes(false);
     flightListWidget->setSelectionMode(QAbstractItemView::NoSelection);
     flightListWidget->setFocusPolicy(Qt::NoFocus);
+    
+
+
     return flightListWidget;
 }
 
@@ -492,14 +507,55 @@ void TicketBookingWindow::handleTicketPurchase(const Ticket &ticket, CabinType c
         String name = nameInput.text().toStdString().c_str();
         String id = idInput.text().toStdString().c_str();
         Passenger passenger(name, id);
+        Flight* flight = ticket.getFlight();
+        FlightTicketDetail* ticketDetail = ticket.getFlightTicketDetail();
+        Order order(flight->getFlightName(), flight->getairRoute(), user, passenger, cabinType,
+                    ticketDetail->getCabinPrice(cabinType) ,ticketDetail->getFlightDate(), "NULL");
 
-        bool success = buyTicket(ticket, cabinType, passenger);
-        if (success) {
-            QMessageBox::information(this, "订票成功", "订票成功！");
-            passengerInfoDialog.accept();
-        } else {
-            QMessageBox::warning(this, "订票失败", "订票失败，请重试");
+        QDialog orderDialog(&passengerInfoDialog);
+        orderDialog.setWindowTitle("订单确认");
+        orderDialog.setMinimumSize(300, 200);
+        QVBoxLayout orderLayout(&orderDialog);
+
+        QString cabinStr;
+
+        switch(cabinType) {
+            case FirstClass:
+                cabinStr = "头等舱";
+                break;
+            case BusinessClass:
+                cabinStr = "商务舱";
+                break;
+            case EconomyClass:
+                cabinStr = "经济舱";
+                break;
+            default:
+                cabinStr = "";
         }
+
+        QLabel orderInfoLabel(QString("订单号: %1\n乘客: %2\n航班: %3\n舱位: %4\n总费用: %5")
+                              .arg(order.getOrderNumber().c_str())
+                              .arg(nameInput.text())
+                              .arg(order.getFlightNumber().c_str())
+                              .arg(cabinStr)
+                              .arg(order.getPrice()), &orderDialog);
+        orderLayout.addWidget(&orderInfoLabel);
+
+        QPushButton payButton("支付", &orderDialog);
+        orderLayout.addWidget(&payButton);
+
+        connect(&payButton, &QPushButton::clicked, &orderDialog, [&]() {
+            bool success = buyTicket(order);
+            if (success) {
+                QMessageBox::information(this, "订票成功", "订票成功！");
+                orderDialog.accept();
+                passengerInfoDialog.accept();
+            } else {
+                QMessageBox::warning(this, "订票失败", "订票失败，请重试");
+            }
+        });
+
+        orderDialog.exec();
     });
 
     passengerInfoDialog.exec();
@@ -528,28 +584,131 @@ void TicketBookingWindow::handleConnectingTicketPurchase(const Ticket **tickets,
         String id = idInput.text().toStdString().c_str();
         Passenger passenger(name, id);
 
-        bool success = true;
+        QVector<Order> orders;
+        double totalPrice = 0.0;
 
         for (int i = 0; i < segmentCount; ++i) {
             const Ticket *ticket = tickets[i];
             CabinType cabinType = selectedCabins[i];
+            Flight *flight = ticket->getFlight();
+            FlightTicketDetail *ticketDetail = ticket->getFlightTicketDetail();
+            double price = ticketDetail->getCabinPrice(cabinType);
 
-            if (!buyTicket(*ticket, cabinType, passenger)) {
-                success = false;
-                break;
+            // 创建订单
+            Order order(flight->getFlightName(), flight->getairRoute(), user, passenger, cabinType,
+                        price, ticketDetail->getFlightDate(), "NULL");
+            orders.push_back(order);
+            totalPrice += price;
+        }
+
+        // 显示订单页面
+        QDialog orderDialog(&passengerInfoDialog);
+        orderDialog.setWindowTitle("订单确认");
+        orderDialog.setMinimumSize(400, 300);
+        QVBoxLayout orderLayout(&orderDialog);
+
+        for (int i = 0; i < orders.size(); ++i) {
+            const Order &order = orders[i];
+            QString cabinStr;
+            switch(selectedCabins[i]) {
+                case FirstClass:
+                    cabinStr = "头等舱";
+                    break;
+                case BusinessClass:
+                    cabinStr = "商务舱";
+                    break;
+                case EconomyClass:
+                    cabinStr = "经济舱";
+                    break;
+                default:
+                    cabinStr = "未知舱位";
             }
+
+            QLabel *orderInfoLabel = new QLabel(QString("订单 %1:\n订单号: %2\n乘客: %3\n航班: %4\n舱位: %5\n费用: %6")
+                                                .arg(i + 1)
+                                                .arg(order.getOrderNumber().c_str())
+                                                .arg(nameInput.text())
+                                                .arg(order.getFlightNumber().c_str())
+                                                .arg(cabinStr)
+                                                .arg(order.getPrice()), &orderDialog);
+            orderLayout.addWidget(orderInfoLabel);
         }
 
-        if (success) {
-            QMessageBox::information(this, "订票成功", "订票成功！");
-            passengerInfoDialog.accept();
-        } else {
-            QMessageBox::warning(this, "订票失败", "订票失败，请勿重复购票！");
-        }
+        QLabel totalLabel(QString("总费用: %1").arg(totalPrice), &orderDialog);
+        orderLayout.addWidget(&totalLabel);
+
+        QPushButton payButton("支付", &orderDialog);
+        orderLayout.addWidget(&payButton);
+
+        connect(&payButton, &QPushButton::clicked, &orderDialog, [&]() {
+            bool success = true;
+            for (const Order &order : orders) {
+                if (!buyTicket(order)) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success) {
+                QMessageBox::information(this, "订票成功", "联程航班订票成功！");
+                orderDialog.accept();
+                passengerInfoDialog.accept();
+            } else {
+                QMessageBox::warning(this, "订票失败", "订票失败，请重试！");
+            }
+        });
+
+        orderDialog.exec();
     });
 
     passengerInfoDialog.exec();
 }
+
+// void TicketBookingWindow::handleConnectingTicketPurchase(const Ticket **tickets, const CabinType *selectedCabins, int segmentCount, QWidget *parent) {
+//     QDialog passengerInfoDialog(parent);
+//     passengerInfoDialog.setWindowTitle("乘车人信息");
+//     passengerInfoDialog.setMinimumSize(300, 200);
+//     QVBoxLayout layout(&passengerInfoDialog);
+
+//     QLineEdit nameInput(&passengerInfoDialog);
+//     nameInput.setPlaceholderText("请输入乘客姓名");
+//     layout.addWidget(&nameInput);
+
+//     QLineEdit idInput(&passengerInfoDialog);
+//     idInput.setPlaceholderText("请输入乘客身份证号");
+//     layout.addWidget(&idInput);
+
+//     QPushButton confirmPassengerButton("确认", &passengerInfoDialog);
+//     layout.addWidget(&confirmPassengerButton);
+
+//     connect(&confirmPassengerButton, &QPushButton::clicked, &passengerInfoDialog, [&]() {
+//         String user = current_login_user.getPhoneNumber();
+//         String name = nameInput.text().toStdString().c_str();
+//         String id = idInput.text().toStdString().c_str();
+//         Passenger passenger(name, id);
+
+//         bool success = true;
+
+//         for (int i = 0; i < segmentCount; ++i) {
+//             const Ticket *ticket = tickets[i];
+//             CabinType cabinType = selectedCabins[i];
+
+//             if (!buyTicket(*ticket, cabinType, passenger)) {
+//                 success = false;
+//                 break;
+//             }
+//         }
+
+//         if (success) {
+//             QMessageBox::information(this, "订票成功", "订票成功！");
+//             passengerInfoDialog.accept();
+//         } else {
+//             QMessageBox::warning(this, "订票失败", "订票失败，请勿重复购票！");
+//         }
+//     });
+
+//     passengerInfoDialog.exec();
+// }
 
 TicketItem::TicketItem(const Ticket &ticket, QWidget *parent)
     : QWidget(parent), ticket(ticket) {

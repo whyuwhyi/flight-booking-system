@@ -22,6 +22,21 @@ void MapBackend::requestRoutesData() {
     emit sendRoutesData(routesData);
 }
 
+void MapBackend::requestUserOrderInfo() {
+    String filePath = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
+    QFile file(filePath.c_str());
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "无法打开文件：" << file.errorString();
+        emit sendUserOrderInfo("");
+        return;
+    }
+
+    QTextStream in(&file);
+    QString orderInfo = in.readAll();
+    emit sendUserOrderInfo(orderInfo);
+}
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), webChannel(nullptr), mapBackend(nullptr) {
     
@@ -35,6 +50,17 @@ MainWindow::MainWindow(QWidget *parent)
     loadMapFromFile(order_map, fileName.c_str());
     
     loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
+    
+    connect(mapView, &QWebEngineView::loadFinished, this, [=](bool ok){
+        if (ok) {
+            mapBackend->requestRoutesData();
+            mapBackend->requestUserOrderInfo();
+        } else {
+            QTimer::singleShot(1000, [=]{
+                mapView->reload();
+            });
+        }
+    });
 }    
 
 MainWindow::~MainWindow() {}
@@ -126,6 +152,7 @@ void MainWindow::showRegisterWindow() {
 }
 
 void MainWindow::showMainContent() {
+    mapBackend->requestRoutesData();
     stackedWidget->removeWidget(loginWindow);
     delete loginWindow;
     loginWindow = nullptr;
@@ -133,6 +160,7 @@ void MainWindow::showMainContent() {
     stackedWidget->removeWidget(registerWindow);
     delete registerWindow;
     registerWindow = nullptr;
+
 
     stackedWidget->setCurrentWidget(routeMapWidget);
     menuList->setCurrentRow(0);

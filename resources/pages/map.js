@@ -1,28 +1,85 @@
 var map = L.map('map').setView([39.9, 116.4], 5);
 
+// 添加地图瓦片层
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-window.onload = function() {
-    new QWebChannel(qt.webChannelTransport, function(channel) {
-        window.qt_map = channel.objects.qt_map;
+var userOrders = []; // 存储用户订单信息
+var routes = []; // 存储航线信息
 
-        if (window.qt_map) {
-            window.qt_map.sendRoutesData.connect(function(routesData) {
-                if (routesData) {
-                    loadRoutesData(routesData);
-                } else {
-                    console.error("No data received from backend");
-                }
-            });
-            window.qt_map.requestRoutesData();
-        } else {
-            console.error("Backend object or sendRoutesData signal not found");
-        }
+new QWebChannel(qt.webChannelTransport, function(channel) {
+    window.qt_map = channel.objects.qt_map;
+
+    if (window.qt_map) {
+        window.qt_map.sendRoutesData.connect(function(routesData) {
+            if (routesData) {
+                loadRoutesData(routesData);
+            } else {
+                console.error("No data received from backend");
+            }
+        });
+        window.qt_map.sendUserOrderInfo.connect(function(orderInfo) {
+            if (orderInfo) {
+                parseUserOrders(orderInfo);
+            } else {
+                console.error("No order data received from backend");
+            }
+        });
+
+    } else {
+        console.error("Backend object or sendRoutesData signal not found");
+    }
+});
+
+function parseUserOrders(orderData) {
+    if (!orderData) {
+        console.error("Invalid order data");
+        return;
+    }
+
+    var lines = orderData.split('\n').map(function(line) {
+        return line.trim();
+    }).filter(function(line) {
+        return line.length > 0;
     });
+
+    userOrders = [];
+    var i = 0;
+
+    // 读取并跳过第一行的订单数
+    var totalOrders = parseInt(lines[i++]);
+    if (isNaN(totalOrders) || totalOrders <= 0) {
+        console.error("Invalid total order count: " + totalOrders);
+        return;
+    }
+    
+    while (i < lines.length) {
+        var order = {};
+        if (i + 10 > lines.length) {
+            console.error("Incomplete order data at line " + i);
+            break;
+        }
+
+        order.orderNum = lines[i++]; // 订单号
+        order.flightNumber = lines[i++];
+        order.routeName = lines[i++];
+        order.phoneNumber = lines[i++];
+        order.passengerInfo = lines[i++];
+        order.seatClassPrice = lines[i++];
+        order.flightDate = lines[i++];
+        order.seatNumber = lines[i++];
+        order.mealType = lines[i++];
+        order.orderStatus = lines[i++];
+
+        // 只保留状态不为 1 或 2 的订单
+        if (order.orderStatus !== '1' && order.orderStatus !== '3') {
+            userOrders.push(order);
+        }
+    }
 }
+
 
 function normalizeLongitude360(lng) {
     if (lng < 0) {
@@ -43,7 +100,7 @@ function loadRoutesData(routesData) {
         return line.length > 0;
     });
 
-    var routes = [];
+    routes = [];
     var i = 0;
 
     var numRoutes = parseInt(lines[i++]);
@@ -83,16 +140,34 @@ function loadRoutesData(routesData) {
             length: length
         });
     }
-    drawRoutes(routes);
+
+    // 初始绘制航线，不显示频率信息
+    drawRoutes(routes, {});
 }
 
-function drawRoutes(routes) {
+function drawRoutes(routes, routeFrequency) {
+    // 清除地图上的已有图层
+    map.eachLayer(function(layer) {
+        if (layer instanceof L.Curve || layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
+
     routes.forEach(function(route) {
-        if (route.points.length < 2) {
-            console.error("Route has insufficient points to draw:", route.name);
-            return;
+        // 获取该航线的飞行次数
+        var frequency = routeFrequency[route.name] || 0;
+
+        // 根据频率调整航线样式
+        var weight = 3; // 默认线宽
+        var color = 'blue'; // 默认颜色
+
+        if (frequency > 0) {
+            // 增加线宽，改变颜色
+            weight = 3 + frequency; // 线宽随频率增加
+            color = 'red'; // 有飞行记录的航线显示为红色
         }
 
+        // 现有的路径绘制代码
         var path = [];
         path.push('M', [route.points[0].lat, route.points[0].lng]);
 
@@ -101,11 +176,6 @@ function drawRoutes(routes) {
             var p1 = route.points[i];
             var p2 = route.points[i + 1];
             var p3 = route.points[i + 2] || p2;
-
-            if (!p1 || !p2 || !p1.lat || !p1.lng || !p2.lat || !p2.lng) {
-                console.error("Invalid points found in route:", route.name);
-                continue;
-            }
 
             var controlLat1 = p1.lat + (p2.lat - p0.lat) / 6;
             var controlLng1 = p1.lng + (p2.lng - p0.lng) / 6;
@@ -116,19 +186,26 @@ function drawRoutes(routes) {
         }
 
         var curvePath = L.curve(path, {
-            color: 'blue',
-            weight: 3,
+            color: color,
+            weight: weight,
             opacity: 0.7
         }).addTo(map);
 
+        // 为航线添加点击事件，显示飞行次数
         curvePath.on('click', function(e) {
             var popupContent = '航线: ' + route.name + '<br>长度: ' + route.length.toFixed(2) + ' km';
+            if (frequency > 0) {
+                popupContent += '<br>您在所选时间段内飞行了 ' + frequency + ' 次此航线';
+            } else {
+                popupContent += '<br>您在所选时间段内未飞行此航线';
+            }
             L.popup()
                 .setLatLng(e.latlng)
                 .setContent(popupContent)
                 .openOn(map);
         });
 
+        // 绘制起点和终点标记
         L.marker([route.points[0].lat, route.points[0].lng]).addTo(map)
             .bindPopup('起点机场: ' + route.departureAirport);
 
@@ -136,3 +213,40 @@ function drawRoutes(routes) {
             .bindPopup('终点机场: ' + route.arrivalAirport);
     });
 }
+
+function updateRoutesDisplay(startDateStr, endDateStr) {
+    var startDate = new Date(startDateStr);
+    var endDate = new Date(endDateStr);
+
+    // 统计每条航线的飞行次数
+    var routeFrequency = {};
+
+    userOrders.forEach(function(order) {
+        var flightDate = new Date(order.flightDate);
+        if (flightDate >= startDate && flightDate <= endDate) {
+            var routeName = order.routeName;
+            if (!routeFrequency[routeName]) {
+                routeFrequency[routeName] = 0;
+            }
+            routeFrequency[routeName]++;
+        }
+    });
+
+    console.log("Route frequencies:", routeFrequency);
+
+    // 根据飞行次数更新航线样式
+    drawRoutes(routes, routeFrequency);
+}
+
+// 添加按钮的点击事件监听
+document.getElementById('updateButton').addEventListener('click', function() {
+    var startDate = document.getElementById('startDate').value;
+    var endDate = document.getElementById('endDate').value;
+
+    if (!startDate || !endDate) {
+        alert("请选择起始日期和结束日期");
+        return;
+    }
+
+    updateRoutesDisplay(startDate, endDate);
+});

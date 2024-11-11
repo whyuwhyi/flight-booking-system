@@ -115,9 +115,9 @@ void FlightManageWindow::setupAddFlightDialog(QDialog *addFlightDialog) {
     });
 }
 
-void FlightManageWindow::confirmAddFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice, QDialog* dialog) {
-    if (validateFlightInput(flightName, airline, airplaneModel, routeName, departureAirport, arrivalAirport, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice)) {
-        Flight flight = createFlight(flightName, airline, airplaneModel, routeName, departureAirport, arrivalAirport, departureTime, costTime, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice);
+void FlightManageWindow::confirmAddFlight(const QString& flightNumber, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice, QDialog* dialog) {
+    if (validateFlightInput(flightNumber, airline, airplaneModel, routeName, departureAirport, arrivalAirport, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice)) {
+        Flight flight = createFlight(flightNumber, airline, airplaneModel, routeName, departureAirport, arrivalAirport, departureTime, costTime, initialFirstClassPrice, initialBusinessClassPrice, initialEconomyClassPrice);
         if (addElementToMap(flight_map, flight, FLIGHTS_PATH.c_str())) {
             String dirPath = FLIGHTS_DIR + flight.getFlightName();
             
@@ -134,18 +134,18 @@ void FlightManageWindow::confirmAddFlight(const QString& flightName, const QStri
     }
 }
 
-bool FlightManageWindow::validateFlightInput(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) const {
-    return !flightName.isEmpty() && !airline.isEmpty() && airplaneModel != "选择机型" && routeName != "选择航线" && !departureAirport.isEmpty() && !arrivalAirport.isEmpty() && initialFirstClassPrice > 0 && initialBusinessClassPrice > 0 && initialEconomyClassPrice > 0;
+bool FlightManageWindow::validateFlightInput(const QString& flightNumber, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) const {
+    return !flightNumber.isEmpty() && !airline.isEmpty() && airplaneModel != "选择机型" && routeName != "选择航线" && !departureAirport.isEmpty() && !arrivalAirport.isEmpty() && initialFirstClassPrice > 0 && initialBusinessClassPrice > 0 && initialEconomyClassPrice > 0;
 }
 
-Flight FlightManageWindow::createFlight(const QString& flightName, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirportName, const QString& arrivalAirportName, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) {
+Flight FlightManageWindow::createFlight(const QString& flightNumber, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirportName, const QString& arrivalAirportName, const QTime& departureTime, const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) {
     Airport* departureAirport = airport_map.find(departureAirportName.toStdString().c_str());
     Airport* arrivalAirport = airport_map.find(arrivalAirportName.toStdString().c_str());
     Time departureTimeObj(departureTime.hour(), departureTime.minute(), departureTime.second());
     Time costTimeObj(costTime.hour(), costTime.minute(), costTime.second());
     AirplaneModel* airplane_model = airplane_model_map.find(airplaneModel.toStdString().c_str());
 
-    Flight flight(flightName.toStdString().c_str(), airline.toStdString().c_str(), airplane_model->getName(), *departureAirport, *arrivalAirport, routeName.toStdString().c_str(), departureTimeObj, costTimeObj);
+    Flight flight(flightNumber.toStdString().c_str(), airline.toStdString().c_str(), airplane_model->getName(), *departureAirport, *arrivalAirport, routeName.toStdString().c_str(), departureTimeObj, costTimeObj);
     flight.setCabin(FirstClass, airplane_model->getCabin(FirstClass));
     flight.setCabin(BusinessClass, airplane_model->getCabin(BusinessClass));
     flight.setCabin(EconomyClass, airplane_model->getCabin(EconomyClass));
