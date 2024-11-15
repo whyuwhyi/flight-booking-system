@@ -63,26 +63,6 @@ void FlightNetwork::addFlight(Flight* flight) {
 
 }
 
-LinkedList<Ticket> FlightNetwork::findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const {
-    LinkedList<Ticket> directFlights;
-
-    if (!cityExists(departureCity) || !cityExists(arrivalCity)) {
-        return directFlights;
-    }
-
-    int departureIndex = getCityIndex(departureCity);
-    int arrivalIndex = getCityIndex(arrivalCity);
-    internationalFlight[departureIndex][arrivalIndex].traverse([&](Flight* flight) {
-        FlightTicketDetail* flightDetail = flight->getFlightSchedule().find(date);
-        if (flightDetail) {
-            Ticket ticket(flight, flightDetail);
-            directFlights.append(ticket);
-        }
-    });
-
-    return std::move(directFlights);
-}
-
 LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const {
     LinkedList<ConnectingTicket> connectingFlights;
     int departureIndex = getCityIndex(departureCity);
@@ -119,11 +99,10 @@ LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Fli
 
     while (stack.size() > 0) {
         FlightPath currentPath = stack.removeLast();
-        // Ticket lastTicket = currentPath.tickets.getLast()->getElement();
         int currentCityIndex = currentPath.currentCityIndex;
         DateTime lastArrivalTime = currentPath.lastArrivalTime;
 
-        if (currentCityIndex == arrivalIndex && currentPath.stops > 0) {
+        if (currentCityIndex == arrivalIndex) {
             ConnectingTicket connectingTicket;
             currentPath.tickets.traverse([&](const Ticket& ticket) {
                 connectingTicket.addTicket(ticket);
@@ -145,11 +124,10 @@ LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Fli
                 }
 
                 bool validTicketFound = false;
-                DateTime nextDepartureTime = lastArrivalTime + Time(1, 0, 0);  // 留出至少1小时换乘时间
+                DateTime nextDepartureTime = lastArrivalTime + Time(1, 0, 0); 
                 Date sameDayDate = nextDepartureTime.getDate();
                 Date nextDayDate = sameDayDate + 1;
 
-                // 查找同一天的车票
                 FlightTicketDetail* sameDayFlightDetail = nextFlight->getFlightSchedule().find(sameDayDate);
                 if (sameDayFlightDetail) {
                     DateTime sameDayArrivalTime = DateTime(sameDayDate, nextFlight->getDepartureTime()) + nextFlight->getCostTime();
@@ -166,7 +144,6 @@ LinkedList<ConnectingTicket> FlightNetwork::findConnectingFlights(LinkedList<Fli
                     }
                 }
 
-                // 如果同一天没有符合条件的航班，查找下一天的航班
                 if (!validTicketFound) {
                     FlightTicketDetail* nextDayFlightDetail = nextFlight->getFlightSchedule().find(nextDayDate);
                     if (nextDayFlightDetail) {

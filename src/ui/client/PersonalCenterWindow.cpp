@@ -281,7 +281,7 @@ void PersonalCenterWindow::setupUI() {
     orderListWidget->setUniformItemSizes(false);
     orderListWidget->setSelectionMode(QAbstractItemView::NoSelection);
     orderListWidget->setFocusPolicy(Qt::NoFocus);
-    connect(orderListWidget, &QListWidget::itemClicked, this, &PersonalCenterWindow::onOrdertItemClicked);
+    connect(orderListWidget, &QListWidget::itemClicked, this, &PersonalCenterWindow::onOrderItemClicked);
 
     mainLayout->addWidget(orderListWidget);
     setLayout(mainLayout);
@@ -320,7 +320,7 @@ void PersonalCenterWindow::addOrderItem(const Order &order) {
     orderListWidget->setItemWidget(listItem, itemWidget);
 }
 
-void PersonalCenterWindow::onOrdertItemClicked(QListWidgetItem *item) {
+void PersonalCenterWindow::onOrderItemClicked(QListWidgetItem *item) {
 }
 
 void PersonalCenterWindow::handleSelectSeat(const Order &order, const Flight* flight) {

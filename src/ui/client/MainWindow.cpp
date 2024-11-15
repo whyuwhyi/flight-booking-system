@@ -125,6 +125,7 @@ void MainWindow::setupConnections() {
     connect(menuList, &QListWidget::currentRowChanged, this, [this](int index) {
         switch (index) {
             case 0:
+                mapBackend->requestUserOrderInfo();
                 stackedWidget->setCurrentWidget(routeMapWidget);
                 break;
             case 1:
@@ -153,6 +154,7 @@ void MainWindow::showRegisterWindow() {
 
 void MainWindow::showMainContent() {
     mapBackend->requestRoutesData();
+    mapBackend->requestUserOrderInfo();
     stackedWidget->removeWidget(loginWindow);
     delete loginWindow;
     loginWindow = nullptr;

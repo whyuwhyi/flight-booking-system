@@ -54,7 +54,6 @@ Time Time::fromString(const String& timeStr) {
     return Time(hours, minutes, seconds);
 }
 
-// 算术运算符
 Time Time::operator+(const Time& other) const {
     return Time::fromTotalSeconds(totalSeconds + other.totalSeconds);
 }
@@ -73,7 +72,6 @@ Time& Time::operator-=(const Time& other) {
     return *this;
 }
 
-// 比较运算符
 bool Time::operator==(const Time& other) const {
     return totalSeconds == other.totalSeconds;
 }
@@ -98,7 +96,6 @@ bool Time::operator>=(const Time& other) const {
     return totalSeconds >= other.totalSeconds;
 }
 
-// 流操作符
 std::ostream& operator<<(std::ostream& out, const Time& time) {
     out << time.toString();
     return out;
@@ -141,7 +138,6 @@ Date Date::fromString(const String& dateStr) {
     return Date(year, month, day);
 }
 
-// 辅助函数
 bool Date::isLeapYear(int year) const {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
@@ -153,7 +149,6 @@ int Date::daysInMonth(int year, int month) const {
     return daysPerMonth[month - 1];
 }
 
-// 转换为儒略日
 int Date::toJulianDay() const {
     int a = (14 - month) / 12;
     int y = year + 4800 - a;
@@ -161,7 +156,6 @@ int Date::toJulianDay() const {
     return day + (153 * m + 2)/5 + y * 365 + y/4 - y/100 + y/400 - 32045;
 }
 
-// 从儒略日创建日期
 Date Date::fromJulianDay(int julianDay) {
     int a = julianDay + 32044;
     int b = (4 * a + 3)/146097;
@@ -175,7 +169,6 @@ Date Date::fromJulianDay(int julianDay) {
     return Date(year, month, day);
 }
 
-// 日期运算
 Date Date::operator+(int days) const {
     int julianDay = toJulianDay() + days;
     return fromJulianDay(julianDay);
@@ -186,12 +179,10 @@ Date Date::operator-(int days) const {
     return fromJulianDay(julianDay);
 }
 
-// 两个日期之间的天数差
 int Date::operator-(const Date& other) const {
     return toJulianDay() - other.toJulianDay();
 }
 
-// 比较运算符
 bool Date::operator==(const Date& other) const {
     return year == other.year && month == other.month && day == other.day;
 }
@@ -216,7 +207,6 @@ bool Date::operator>=(const Date& other) const {
     return toJulianDay() >= other.toJulianDay();
 }
 
-// 流操作符
 std::ostream& operator<<(std::ostream& out, const Date& date) {
     out << date.toString();
     return out;
@@ -274,9 +264,7 @@ DateTime DateTime::fromString(const String& str) {
     return DateTime(date, time);
 }
 
-// 辅助函数
 long long DateTime::toTotalSeconds() const {
-    // 将日期转换为儒略日，然后计算自1970-01-01以来的天数
     int daysSinceEpoch = date.toJulianDay() - Date(1970, 1, 1).toJulianDay();
     return static_cast<long long>(daysSinceEpoch) * 86400 + time.toTotalSeconds();
 }
@@ -293,7 +281,6 @@ DateTime DateTime::fromTotalSeconds(long long totalSeconds) {
     return DateTime(date, time);
 }
 
-// 算术运算符
 DateTime DateTime::operator+(const Time& duration) const {
     long long totalSeconds = toTotalSeconds() + duration.toTotalSeconds();
     return fromTotalSeconds(totalSeconds);
@@ -304,13 +291,11 @@ DateTime DateTime::operator-(const Time& duration) const {
     return fromTotalSeconds(totalSeconds);
 }
 
-// 两个 DateTime 对象之间的时间差
 Time DateTime::operator-(const DateTime& other) const {
     long long secondsDiff = toTotalSeconds() - other.toTotalSeconds();
     return Time::fromTotalSeconds(secondsDiff);
 }
 
-// 比较运算符
 bool DateTime::operator==(const DateTime& other) const {
     return toTotalSeconds() == other.toTotalSeconds();
 }
@@ -335,7 +320,6 @@ bool DateTime::operator>=(const DateTime& other) const {
     return toTotalSeconds() >= other.toTotalSeconds();
 }
 
-// 流操作符
 std::ostream& operator<<(std::ostream& out, const DateTime& dateTime) {
     out << dateTime.toString();
     return out;

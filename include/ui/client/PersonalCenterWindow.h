@@ -63,7 +63,7 @@ public:
     void refreshOrderList();
 
 private slots:
-    void onOrdertItemClicked(QListWidgetItem *item);
+    void onOrderItemClicked(QListWidgetItem *item);
     void handleSelectSeat(const Order &order, const Flight* flight);
     void handleOrderMeal(const Order &order);
     void handleRefundTicket(const Order &order);

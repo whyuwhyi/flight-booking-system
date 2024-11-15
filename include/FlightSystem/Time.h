@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <String/String.h>
 
-// 类声明部分
 class Time {
 public:
     Time(int hours = 0, int minutes = 0, int seconds = 0);
@@ -21,21 +20,17 @@ public:
     int getSeconds() const;
     void setSeconds(int seconds);
 
-    // 总秒数表示
     long long toTotalSeconds() const;
     static Time fromTotalSeconds(long long totalSeconds);
 
-    // 字符串表示
     String toString() const;
     static Time fromString(const String& timeStr);
 
-    // 算术运算符
     Time operator+(const Time& other) const;
     Time operator-(const Time& other) const;
     Time& operator+=(const Time& other);
     Time& operator-=(const Time& other);
 
-    // 比较运算符
     bool operator==(const Time& other) const;
     bool operator!=(const Time& other) const;
     bool operator<(const Time& other) const;
@@ -43,12 +38,11 @@ public:
     bool operator>(const Time& other) const;
     bool operator>=(const Time& other) const;
 
-    // 流操作符
     friend std::ostream& operator<<(std::ostream& out, const Time& time);
     friend std::istream& operator>>(std::istream& in, Time& time);
 
 private:
-    long long totalSeconds; // 用于存储任意持续时间的总秒数
+    long long totalSeconds;
 };
 
 class Date {
@@ -64,16 +58,13 @@ public:
     int getDay() const;
     void setDay(int day);
 
-    // 字符串表示
     String toString() const;
     static Date fromString(const String& dateStr);
 
-    // 日期运算
     Date operator+(int days) const;
     Date operator-(int days) const;
-    int operator-(const Date& other) const; // 返回天数差
+    int operator-(const Date& other) const;
 
-    // 比较运算符
     bool operator==(const Date& other) const;
     bool operator!=(const Date& other) const;
     bool operator<(const Date& other) const;
@@ -83,14 +74,12 @@ public:
     
     int toJulianDay() const;
 
-    // 流操作符
     friend std::ostream& operator<<(std::ostream& out, const Date& date);
     friend std::istream& operator>>(std::istream& in, Date& date);
 
 private:
     int year, month, day;
 
-    // 辅助函数
     bool isLeapYear(int year) const;
     int daysInMonth(int year, int month) const;
 
@@ -109,16 +98,13 @@ public:
     const Time& getTime() const;
     void setTime(const Time& time);
 
-    // 字符串表示
     String toString() const;
     static DateTime fromString(const String& str);
 
-    // 算术运算符
     DateTime operator+(const Time& duration) const;
     DateTime operator-(const Time& duration) const;
-    Time operator-(const DateTime& other) const; // 返回时间差（Time类型）
+    Time operator-(const DateTime& other) const;
 
-    // 比较运算符
     bool operator==(const DateTime& other) const;
     bool operator!=(const DateTime& other) const;
     bool operator<(const DateTime& other) const;
@@ -126,7 +112,6 @@ public:
     bool operator>(const DateTime& other) const;
     bool operator>=(const DateTime& other) const;
 
-    // 流操作符
     friend std::ostream& operator<<(std::ostream& out, const DateTime& dateTime);
     friend std::istream& operator>>(std::istream& in, DateTime& dateTime);
 
@@ -134,7 +119,6 @@ private:
     Date date;
     Time time;
 
-    // 辅助函数
     long long toTotalSeconds() const;
     static DateTime fromTotalSeconds(long long totalSeconds);
 };

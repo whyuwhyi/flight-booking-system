@@ -32,7 +32,6 @@ public:
 
     void addFlight(Flight* flight);
 
-    LinkedList<Ticket> findDirectFlights(const String& departureCity, const String& arrivalCity, const Date& date) const;
     LinkedList<ConnectingTicket> findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
     LinkedList<ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
 

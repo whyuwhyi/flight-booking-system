@@ -33,7 +33,8 @@ public:
     void clear();
 
     bool isEmpty() const;
-    T& getElementAt(int index);
+    const T& getElementAt(int index) const;
+    void setElementAt(int index, const T& element);
     void insert(int index, const T& element);
     bool remove(const T& element);
     void popBack();
@@ -79,7 +80,7 @@ LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept
 template<typename T>
 LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other) {
     if (this != &other) {
-        clear();
+        destroy();
         Link<T>* current = other.head;
         while (current != nullptr) {
             append(current->getElement());
@@ -161,7 +162,7 @@ bool LinkedList<T>::isEmpty() const {
 }
 
 template<typename T>
-T& LinkedList<T>::getElementAt(int index) {
+const T& LinkedList<T>::getElementAt(int index) const {
     if (index < 0 || index >= nodeCount) {
         throw std::out_of_range("Index out of range");
     }
@@ -170,6 +171,18 @@ T& LinkedList<T>::getElementAt(int index) {
         current = current->getNext();
     }
     return current->getElement();
+}
+
+template<typename T>
+void LinkedList<T>::setElementAt(int index, const T& element) {
+    if (index < 0 || index >= nodeCount) {
+        throw std::out_of_range("Index out of range");
+    }
+    Link<T>* current = head;
+    for (int i = 0; i < index; ++i) {
+        current = current->getNext();
+    }
+    current->setElement(element);
 }
 
 template<typename T>

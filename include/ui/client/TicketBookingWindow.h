@@ -17,31 +17,11 @@
 #include <QRadioButton>
 #include <QLineEdit>
 
-class TicketItem : public QWidget {
-    Q_OBJECT
-public:
-    TicketItem(const Ticket &ticket, QWidget *parent = nullptr);
-    Ticket& getTicket();
-
-private:
-    QLabel *flightNumberLabel;
-    QLabel *departureTimeLabel;
-    QLabel *arrivalTimeLabel;
-    QLabel *priceLabel;
-    QLabel *departureAirportLabel;
-    QLabel *arrivalAirportLabel;
-    QLabel *airplaneModelLabel;
-    Ticket ticket;
-    QHBoxLayout *layout;
-
-    void setupUI();
-};
-
 class ConnectingTicketItem : public QWidget {
     Q_OBJECT
 public:
     ConnectingTicketItem(const ConnectingTicket &ticket, QWidget *parent = nullptr);
-    ConnectingTicket& getConnectingTicket();
+    const ConnectingTicket& getConnectingTicket() const;
 
 private:
     QLabel *totalPriceLabel;
@@ -51,7 +31,7 @@ private:
     QLabel *departureAirportLabel;
     QLabel *arrivalAirportLabel;
     QLabel *airplaneModelLabel;
-    ConnectingTicket connectingTicket;
+    const ConnectingTicket& connectingTicket;
     QVBoxLayout *mainLayout;
     QVBoxLayout *ticketsLayout;
 
@@ -66,9 +46,8 @@ public:
 
 private slots:
     void onSearchButtonClicked();
-    void onOrdertItemClicked(Ticket &ticket);
-    void onConnectingTicketItemClicked(ConnectingTicket &connectingTicket);
     void onFlightItemClicked(QListWidgetItem *item);
+    void onConnectingTicketItemClicked(const ConnectingTicket &connectingTicket);
 
 private:
     QComboBox *departureCityComboBox;
@@ -82,7 +61,6 @@ private:
     void setupConnections();
     void populateCityComboBoxes();
     void populateFlightList();
-    void addTicketItem(const Ticket &ticket);
     void addConnectingTicketItem(const ConnectingTicket &connectingTicket);
 
     QHBoxLayout* createSelectionLayout();
@@ -92,15 +70,11 @@ private:
     String getSelectedCity(QComboBox *comboBox);
     Date getSelectedDate();
     bool validateCities(const String &departureCity, const String &arrivalCity);
-    void queryDirectFlights(const String &departureCity, const String &arrivalCity, const Date &date);
     void queryConnectingFlights(const String &departureCity, const String &arrivalCity, const Date &date);
-    QDialog* createDetailWindow(const QString &title);
     QWidget* createFlightInfoLabels(const Ticket &ticket, QWidget *parent);
     QLabel* createConnectingFlightInfoLabel(int segmentNumber, QWidget *parent);
-    QGridLayout* createCabinSelectionLayout(const Ticket &ticket, QWidget *parent);
-    QGridLayout* createCabinSelectionLayout(const Ticket &ticket, int segmentIndex, QWidget *parent, CabinType *selectedCabins);
+    QGridLayout* createCabinSelectionLayout(const Ticket &ticket, int segmentIndex, LinkedList<CabinType> &selectedCabins, QWidget *parent);
+    
     void addCabinLayoutHeaders(QGridLayout *layout, QWidget *parent);
-    void addCabinRow(QGridLayout *layout, const Ticket &ticket, const QString &cabinTypeStr, CabinType cabinType, const QString &discount, QPushButton *&bookButton, QWidget *parent);
-    void handleTicketPurchase(const Ticket &ticket, CabinType cabinType, QWidget *parent);
-    void handleConnectingTicketPurchase(const Ticket **tickets, const CabinType *selectedCabins, int segmentCount, QWidget *parent); 
+    void handleConnectingTicketPurchase(const ConnectingTicket &connectingTicket, const LinkedList<CabinType> &selectedCabins); 
 };

@@ -98,7 +98,7 @@ int ConnectingTicket::getNumberOfTickets() const {
     return tickets.size();
 }
 
-LinkedList<Ticket>& ConnectingTicket::getTickets(){
+const LinkedList<Ticket>& ConnectingTicket::getTickets() const{
     return tickets;
 }
 
@@ -133,24 +133,8 @@ Time ConnectingTicket::getDuration() const {
     return arrivalTime - departureTime;
 }
 
-bool ConnectingTicket::isValid() const {
-    if (tickets.size() <= 1) return false;
-    Link<Ticket>* current = tickets.getHead();
-    Ticket* previousTicket = nullptr;
-    while (current != nullptr) {
-        Ticket* ticket = &current->getElement();
-        if (previousTicket != nullptr) {
-            DateTime lastArrival = previousTicket->getArrivalDateTime();
-            DateTime currentDeparture = ticket->getDepartureDateTime();
-            if (!(previousTicket->getFlight()->getArrivalAirport().getCity() == ticket->getFlight()->getDepartureAirport().getCity()) ||
-                !(lastArrival.getDate() == currentDeparture.getDate() || lastArrival.getDate() + 1 == currentDeparture.getDate())) {
-                return false;
-            }
-        }
-        previousTicket = ticket;
-        current = current->getNext();
-    }
-    return true;
+bool ConnectingTicket::isDirectFlight() const {
+    return tickets.size() == 1;
 }
 
 bool ConnectingTicket::operator<(const ConnectingTicket& other) const {

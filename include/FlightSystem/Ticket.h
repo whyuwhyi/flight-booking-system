@@ -35,7 +35,6 @@ public:
     double getPrice(CabinType cabinType) const;
 
     double getCabinDiscount(CabinType cabinType) const;
-
     bool operator<(const Ticket& other) const;
 };
 
@@ -53,7 +52,7 @@ public:
     void addTicket(const Ticket& ticket);
     void removeLastTicket();
     int getNumberOfTickets() const;
-    LinkedList<Ticket>& getTickets();
+    const LinkedList<Ticket>& getTickets() const;
 
     double getPrice() const;
     double getTotalPrice(CabinType cabinType) const;
@@ -61,7 +60,7 @@ public:
     DateTime getDepartureDateTime() const;
     DateTime getArrivalDateTime() const;
 
-    bool isValid() const;
+    bool isDirectFlight() const;
 
     bool operator<(const ConnectingTicket& other) const;
 };
