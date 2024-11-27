@@ -11,6 +11,7 @@
 #include <FlightSystem/FlightNetwork.h>
 #include <FlightSystem/Passenger.h>
 #include <FlightSystem/Order.h>
+#include <User/UserProfile.h>
 
 typedef Map<String, User> UserMap;
 typedef Map<String, Airport> AirportMap;
@@ -43,6 +44,7 @@ extern AirplaneModelMap airplane_model_map;
 extern FlightMap flight_map;
 extern OrderMap order_map;
 extern FlightNetwork flight_network;
+extern UserProfile user_profile;
 
 bool createDirectory(const char* directoryPath);
 bool removeDirectory(const char* directoryPath);
@@ -56,10 +58,10 @@ bool loadFlightNetworkFromFile();
 
 bool buyTicket(const Order& order);
 bool refundTicket(const Order& order);
-bool changeTicket(const Order& order, const Date& newDate);
+bool changeTicket(const Order& order, const Order& newOrder);
 
-bool buyMeal(const Order& order, enum Meal meal);
-bool chooseSeat(const Order& order, const String& seatNum);
+bool buyMeal(const Order& order, int segmentCount ,enum Meal meal);
+bool chooseSeat(const Order& order, int segmentCount ,const String& seatNum);
 
 template <typename Key, typename Value>
 bool loadMapFromFile(Map<Key, Value> &map, const char* fileName);

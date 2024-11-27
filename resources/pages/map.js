@@ -8,6 +8,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var userOrders = [];
 var routes = [];
 
+var timeSlotStats = { MORNING: 0, AFTERNOON: 0, EVENING: 0, NIGHT: 0 };
+var airlineStats = {};
+var airplaneModelStats = {};
+
 new QWebChannel(qt.webChannelTransport, function(channel) {
     window.qt_map = channel.objects.qt_map;
 
@@ -17,11 +21,23 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
                 loadRoutesData(routesData);
             }
         });
+
         window.qt_map.sendUserOrderInfo.connect(function(orderInfo) {
             if (orderInfo) {
                 parseUserOrders(orderInfo);
+                generateUserProfile();
+                var startDate = document.getElementById('startDate').value;
+                var endDate = document.getElementById('endDate').value;
+            
+                if (!startDate || !endDate) {
+                    alert("请选择起始日期和结束日期");
+                    return;
+                }
+            
+                updateRoutesDisplay(startDate, endDate);
             }
         });
+        qt_map.requestRoutesData();
     }
 });
 
@@ -35,28 +51,141 @@ function parseUserOrders(orderData) {
     });
 
     userOrders = [];
+    timeSlotStats = { MORNING: 0, AFTERNOON: 0, EVENING: 0, NIGHT: 0 };
+    airlineStats = {};
+    airplaneModelStats = {};
+
     var i = 0;
     var totalOrders = parseInt(lines[i++]);
     if (isNaN(totalOrders) || totalOrders <= 0) return;
 
-    while (i < lines.length) {
+    for (var orderIndex = 0; orderIndex < totalOrders; orderIndex++) {
+        if (i >= lines.length) break;
+
         var order = {};
-        if (i + 10 > lines.length) break;
-
         order.orderNum = lines[i++];
-        order.flightNumber = lines[i++];
-        order.routeName = lines[i++];
         order.phoneNumber = lines[i++];
-        order.passengerInfo = lines[i++];
-        order.seatClassPrice = lines[i++];
-        order.flightDate = lines[i++];
-        order.seatNumber = lines[i++];
-        order.mealType = lines[i++];
-        order.orderStatus = lines[i++];
+        order.orderStatus = parseInt(lines[i++]); // Adjusted: removed passengerInfo
+        var numSegments = parseInt(lines[i++]);
 
-        if (order.orderStatus !== '1' && order.orderStatus !== '3') {
-            userOrders.push(order);
+        for (var j = 0; j < numSegments; j++) {
+            if (i + 9 > lines.length) break; // Adjusted line count per segment
+
+            var segment = {};
+            segment.flightNumber = lines[i++];
+            segment.airRoute = lines[i++];
+            segment.airplaneModel = lines[i++];
+            segment.airline = lines[i++];
+            segment.departureTimeSlot = parseInt(lines[i++]);
+            segment.cabinType = parseInt(lines[i++]);
+            segment.price = parseFloat(lines[i++]);
+            segment.flightDate = lines[i++];
+
+            // Read Passenger Data
+            if (i >= lines.length) break;
+            var passengerLine = lines[i++];
+            var passengerTokens = passengerLine.split(' ');
+            if (passengerTokens.length < 4) {
+                console.error('Invalid passenger info format at line ' + (i - 1));
+                continue;
+            }
+
+            var passenger = {};
+            passenger.name = passengerTokens[0];
+            passenger.idNumber = passengerTokens[1];
+            passenger.seatNumber = passengerTokens[2];
+            passenger.mealType = parseInt(passengerTokens[3]);
+
+            if (order.orderStatus === 0 || order.orderStatus === 2) {
+                // Update statistics
+                if (segment.departureTimeSlot === 0) timeSlotStats.MORNING++;
+                else if (segment.departureTimeSlot === 1) timeSlotStats.AFTERNOON++;
+                else if (segment.departureTimeSlot === 2) timeSlotStats.EVENING++;
+                else if (segment.departureTimeSlot === 3) timeSlotStats.NIGHT++;
+
+                if (!airlineStats[segment.airline]) {
+                    airlineStats[segment.airline] = 0;
+                }
+                airlineStats[segment.airline]++;
+
+                if (!airplaneModelStats[segment.airplaneModel]) {
+                    airplaneModelStats[segment.airplaneModel] = 0;
+                }
+                airplaneModelStats[segment.airplaneModel]++;
+
+                userOrders.push({
+                    orderNum: order.orderNum,
+                    flightNumber: segment.flightNumber,
+                    airRoute: segment.airRoute,
+                    airplaneModel: segment.airplaneModel,
+                    airline: segment.airline,
+                    departureTimeSlot: segment.departureTimeSlot,
+                    cabinType: segment.cabinType,
+                    price: segment.price,
+                    flightDate: segment.flightDate,
+                    seatNumber: passenger.seatNumber,
+                    mealType: passenger.mealType,
+                    passengerName: passenger.name,
+                    passengerIdNumber: passenger.idNumber,
+                    phoneNumber: order.phoneNumber,
+                    orderStatus: order.orderStatus
+                });
+            }
         }
+    }
+}
+
+
+function generateUserProfile() {
+    if (userOrders.length === 0) {
+        alert("没有出行记录");
+        return;
+    }
+
+    var mostPreferredTimeSlot = Object.keys(timeSlotStats).reduce((a, b) => timeSlotStats[a] > timeSlotStats[b] ? a : b);
+    var mostPreferredAirline = Object.keys(airlineStats).reduce((a, b) => airlineStats[a] > airlineStats[b] ? a : b, "无");
+    var mostPreferredAirplaneModel = Object.keys(airplaneModelStats).reduce((a, b) => airplaneModelStats[a] > airplaneModelStats[b] ? a : b, "无");
+
+    var profileHtml = `
+        <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">您的出行偏好分析</h2>
+        <div style="margin-bottom: 10px;">
+            <span style="font-weight: bold; color: #007bff;">最偏好出行时间段：</span>
+            <span>${translateTimeSlot(mostPreferredTimeSlot)}，共出行 ${timeSlotStats[mostPreferredTimeSlot]} 次。</span>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <span style="font-weight: bold; color: #007bff;">最常乘坐的航空公司：</span>
+            <span>${mostPreferredAirline}，共乘坐 ${airlineStats[mostPreferredAirline]} 次。</span>
+        </div>
+        <div style="margin-bottom: 10px;">
+            <span style="font-weight: bold; color: #007bff;">最常乘坐的机型：</span>
+            <span>${mostPreferredAirplaneModel}，共乘坐 ${airplaneModelStats[mostPreferredAirplaneModel]} 次。</span>
+        </div>
+    `;
+
+    var profileDiv = document.getElementById('userProfile');
+    if (!profileDiv) {
+        profileDiv = document.createElement('div');
+        profileDiv.id = 'userProfile';
+        profileDiv.style.padding = '15px';
+        profileDiv.style.border = '1px solid #ccc';
+        profileDiv.style.borderRadius = '8px';
+        profileDiv.style.marginTop = '15px';
+        profileDiv.style.backgroundColor = '#f5faff';
+        profileDiv.style.fontSize = '16px';
+        profileDiv.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+        document.body.appendChild(profileDiv);
+    }
+    profileDiv.innerHTML = profileHtml;
+}
+
+
+function translateTimeSlot(slot) {
+    switch (slot) {
+        case 'MORNING': return "早晨";
+        case 'AFTERNOON': return "下午";
+        case 'EVENING': return "晚上";
+        case 'NIGHT': return "夜间";
+        default: return "未知时段";
     }
 }
 
@@ -184,7 +313,7 @@ function updateRoutesDisplay(startDateStr, endDateStr) {
     userOrders.forEach(function(order) {
         var flightDate = new Date(order.flightDate);
         if (flightDate >= startDate && flightDate <= endDate) {
-            var routeName = order.routeName;
+            var routeName = order.airRoute;
             var flightNumber = order.flightNumber;
 
             if (!routeFrequency[routeName]) {
@@ -206,13 +335,5 @@ function updateRoutesDisplay(startDateStr, endDateStr) {
 }
 
 document.getElementById('updateButton').addEventListener('click', function() {
-    var startDate = document.getElementById('startDate').value;
-    var endDate = document.getElementById('endDate').value;
-
-    if (!startDate || !endDate) {
-        alert("请选择起始日期和结束日期");
-        return;
-    }
-
-    updateRoutesDisplay(startDate, endDate);
+    qt_map.requestUserOrderInfo()
 });

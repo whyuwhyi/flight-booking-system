@@ -7,6 +7,13 @@
 #include <stdexcept>
 #include <String/String.h>
 
+enum TimeSlot {
+    MORNING,
+    AFTERNOON,
+    EVENING,
+    NIGHT
+};
+
 class Time {
 public:
     Time(int hours = 0, int minutes = 0, int seconds = 0);
@@ -25,6 +32,7 @@ public:
 
     String toString() const;
     static Time fromString(const String& timeStr);
+    enum TimeSlot getTimeSlot() const;
 
     Time operator+(const Time& other) const;
     Time operator-(const Time& other) const;

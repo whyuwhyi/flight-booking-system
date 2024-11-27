@@ -39,6 +39,17 @@ Time Time::fromTotalSeconds(long long totalSeconds) {
     return time;
 }
 
+enum TimeSlot Time::getTimeSlot() const {
+    int hours = getHours();
+    if (hours >= 6 && hours < 12)
+        return MORNING;
+    if (hours >= 12 && hours < 18)
+        return AFTERNOON;
+    if (hours >= 18 && hours < 24)
+        return EVENING;
+    return NIGHT;
+}
+
 String Time::toString() const {
     int hours = getHours();
     int minutes = getMinutes();

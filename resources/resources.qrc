@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/eye_open.svg</file>
+        <file>icons/seat_occupied.png</file>
+        <file>icons/seat_available.png</file>
         <file>icons/route.svg</file>
         <file>icons/airplane.svg</file>
         <file>icons/service.svg</file>
@@ -8,6 +10,7 @@
         <file>icons/airline.svg</file>
         <file>icons/flight.svg</file>
         <file>icons/app.svg</file>
+        <file>icons/seat_selected.png</file>
         <file>icons/eye_closed.svg</file>
         <file>icons/personal.svg</file>
         <file>pages/plugins/leaflet.curve.js</file>

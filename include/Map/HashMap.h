@@ -5,15 +5,14 @@
 #include <functional>
 #include <iostream>
 
-// 自定义常数组替代动态数组
 constexpr size_t MAX_CAPACITY = 1000;
 
-// HashMap 类定义
 template<typename Key, typename Value>
 class HashMap {
 public:
     HashMap(size_t capacity = MAX_CAPACITY, double max_load_factor = 0.75);
     bool insert(const Key& key, const Value& value);
+    void clear();
     std::optional<Value> get(const Key& key) const;
     bool erase(const Key& key);
     bool contains(const Key& key) const;
@@ -21,15 +20,11 @@ public:
     size_t getSize() const;
     bool update(const Key& key, const Value& value);
 
-    // 新增功能
-    Value& operator[](const Key& key);  // 支持通过 key 访问或插入
-    const Value& operator[](const Key& key) const;
     bool operator==(const HashMap& other) const;
     bool operator!=(const HashMap& other) const;
 
     void traverse(std::function<void(const Key&, const Value&)> func) const;
 
-    // 输入输出重载
     template<typename K, typename V>
     friend std::ostream& operator<<(std::ostream& out, const HashMap<K, V>& map);
 
@@ -64,6 +59,14 @@ template<typename Key, typename Value>
 size_t HashMap<Key, Value>::hash(const Key& key) const {
     std::hash<std::string> str_hash;
     return str_hash(key.c_str()) % capacity;
+}
+
+template<typename Key, typename Value>
+void HashMap<Key, Value>::clear() {
+    for (size_t i = 0; i < capacity; ++i) {
+        table[i] = std::nullopt;
+    }
+    size = 0;
 }
 
 template<typename Key, typename Value>
@@ -170,27 +173,6 @@ bool HashMap<Key, Value>::update(const Key& key, const Value& value) {
         return true;
     }
     return false;
-}
-
-// 运算符重载：[] 支持通过键访问或插入
-template<typename Key, typename Value>
-Value& HashMap<Key, Value>::operator[](const Key& key) {
-    size_t index = find_position(key);
-    if (index == capacity || table[index]->is_deleted) {
-        // 如果 key 不存在，则插入一个默认值
-        insert(key, Value());
-        index = find_position(key);
-    }
-    return table[index]->value;
-}
-
-template<typename Key, typename Value>
-const Value& HashMap<Key, Value>::operator[](const Key& key) const {
-    size_t index = find_position(key);
-    if (index == capacity || table[index]->is_deleted) {
-        throw std::out_of_range("Key not found");
-    }
-    return table[index]->value;
 }
 
 // 运算符重载：比较

@@ -41,26 +41,11 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), webChannel(nullptr), mapBackend(nullptr) {
     
     loadFlightNetworkFromFile();
-    
+    loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
+
     setupUI();
     setupConnections();
     showLoginWindow();
-
-    String fileName = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
-    loadMapFromFile(order_map, fileName.c_str());
-    
-    loadMapFromFile(airplane_model_map, MODELS_PATH.c_str());
-    
-    connect(mapView, &QWebEngineView::loadFinished, this, [=](bool ok){
-        if (ok) {
-            mapBackend->requestRoutesData();
-            mapBackend->requestUserOrderInfo();
-        } else {
-            QTimer::singleShot(1000, [=]{
-                mapView->reload();
-            });
-        }
-    });
 }    
 
 MainWindow::~MainWindow() {}
@@ -68,20 +53,20 @@ MainWindow::~MainWindow() {}
 
 void MainWindow::setupUI() {
     setWindowTitle("航空系统");
-    setFixedSize(1200, 800);
+    setFixedSize(1300, 1000);
 
     stackedWidget = new QStackedWidget(this);
     loginWindow = new LoginWindow(this);
     registerWindow = new RegisterWindow(this);
     ticketBookingWindow = new TicketBookingWindow(this);
-    personalCenterWindow = new PersonalCenterWindow(this);
+    orderWindow = new OrderWindow(this);
     routeMapWidget = new QWidget(this);
 
     stackedWidget->addWidget(loginWindow);
     stackedWidget->addWidget(registerWindow);
     stackedWidget->addWidget(routeMapWidget);
     stackedWidget->addWidget(ticketBookingWindow);
-    stackedWidget->addWidget(personalCenterWindow);
+    stackedWidget->addWidget(orderWindow);
 
     mapBackend = new MapBackend(this);
     webChannel = new QWebChannel(this);
@@ -102,9 +87,25 @@ void MainWindow::setupUI() {
     menuList->setSpacing(10);
     menuList->setMovement(QListView::Static);
     menuList->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    // 设置样式表以对齐图标和文本，并自定义选中颜色
+    menuList->setStyleSheet(R"(
+        QListWidget::item {
+            width: 80px; /* 固定宽度确保文本对齐 */
+            text-align: center; /* 居中对齐文本 */
+            margin: 5px;
+        }
+        QListWidget::item:selected {
+            background: #2a9d8f; /* 自定义选中背景色 */
+            color: white; /* 选中文字颜色 */
+        }
+
+    )");
+
     menuList->addItem(new QListWidgetItem(QIcon(":/icons/route.svg"), "航线图"));
-    menuList->addItem(new QListWidgetItem(QIcon(":/icons/service.svg"), "查/订票"));
-    menuList->addItem(new QListWidgetItem(QIcon(":/icons/personal.svg"), "个人中心"));
+    menuList->addItem(new QListWidgetItem(QIcon(":/icons/service.svg"), "订  票"));
+    menuList->addItem(new QListWidgetItem(QIcon(":/icons/personal.svg"), "订  单"));
+
 
     QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->addWidget(menuList);
@@ -125,15 +126,14 @@ void MainWindow::setupConnections() {
     connect(menuList, &QListWidget::currentRowChanged, this, [this](int index) {
         switch (index) {
             case 0:
-                mapBackend->requestUserOrderInfo();
                 stackedWidget->setCurrentWidget(routeMapWidget);
                 break;
             case 1:
                 stackedWidget->setCurrentWidget(ticketBookingWindow);
                 break;
             case 2:
-                stackedWidget->setCurrentWidget(personalCenterWindow);
-                personalCenterWindow->refreshOrderList();
+                stackedWidget->setCurrentWidget(orderWindow);
+                orderWindow->refreshOrderList();
                 break;
             default:
                 break;

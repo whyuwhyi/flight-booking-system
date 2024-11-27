@@ -47,8 +47,6 @@ public:
 
     void sort(std::function<bool(const T&, const T&)> compare);
 
-    
-
     template<typename U>
     friend std::ostream& operator<<(std::ostream& out, const LinkedList<U>& list);
 

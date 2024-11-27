@@ -83,12 +83,14 @@ void LoginWindow::onLoginClicked() {
     User* user_node = user_map.find(phoneNumber.toStdString().c_str());
 
     if (user_node != nullptr && password == QString::fromStdString(user_node->getPassword().c_str())) {
+        current_login_user = User(phoneNumber.toStdString().c_str(), password.toStdString().c_str());
         if (autoLoginCheckBox->isChecked()) {
-            current_login_user = User(phoneNumber.toStdString().c_str(), password.toStdString().c_str());
-            
-            
             writeLocalUserToFile(current_login_user, LOCAL_USER_PATH.c_str());
         }
+        String fileName = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
+        loadMapFromFile(order_map, fileName.c_str());
+        user_profile.create();
+        
         emit loginSuccess();
         return;
     }
@@ -113,6 +115,11 @@ void LoginWindow::checkAutoLogin() {
             phoneNumberLineEdit->setText(QString::fromStdString(current_login_user.getPhoneNumber().c_str()));
             passwordLineEdit->setText(QString::fromStdString(current_login_user.getPassword().c_str()));
             autoLoginCheckBox->setChecked(true);
+
+            String fileName = USERS_DIR + current_login_user.getPhoneNumber() + "/tickets.txt";
+            loadMapFromFile(order_map, fileName.c_str());
+            user_profile.create();
+
             emit loginSuccess();
         }
     }

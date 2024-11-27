@@ -34,7 +34,7 @@ private:
     void traverseNode(Node* node, std::function<void(Value*)> func) const;
 
 public:
-    Map(std::function<Key(const Value&)> getKeyFunc, std::function<bool(const Key&, const Key&)> compareFunc = std::less<Key>());
+    Map(std::function<Key(const Value&)> getKeyFunc = NULL, std::function<bool(const Key&, const Key&)> compareFunc = std::less<Key>());
     Map(const Map& other);
     Map(Map&& other) noexcept;
     ~Map();
@@ -47,7 +47,8 @@ public:
     void traverse(std::function<void(const Value&)> func) const;
     void traverse(std::function<void(Value*)> func) const;
     int getNodeCount() const;
-    void sort(std::function<bool(const Key&, const Key&)> newCompare);
+    void setCompareFunc(std::function<bool(const Key&, const Key&)> compareFunc);
+    void setGetKeyFunc(std::function<Key(const Value&)> getKeyFunc);
 
     Map& operator=(const Map& other);
     Map& operator=(Map&& other) noexcept;
@@ -346,16 +347,6 @@ int Map<Key, Value>::getNodeCount() const {
     return nodeCount;
 }
 
-template<typename Key, typename Value>
-void Map<Key, Value>::sort(std::function<bool(const Key&, const Key&)> newCompare) {
-    Map<Key, Value> newMap(getKey, newCompare);
-    traverse([&](const Value& value) {
-        newMap.insert(value);
-    });
-    *this = std::move(newMap);
-}
-
-
 template<typename K, typename V>
 std::ostream& operator<<(std::ostream& out, const Map<K, V>& map) {
     out << map.nodeCount << "\n";
@@ -387,4 +378,14 @@ template<typename Key, typename Value>
 void Map<Key, Value>::operator delete(void* ptr) {
     std::cout << "Freeing memory for Map." << std::endl;
     ::operator delete(ptr);
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::setCompareFunc(std::function<bool(const Key&, const Key&)> compareFunc) {
+    compare = compareFunc;
+}
+
+template<typename Key, typename Value>
+void Map<Key, Value>::setGetKeyFunc(std::function<Key(const Value&)> getKeyFunc) {
+    getKey = getKeyFunc;
 }

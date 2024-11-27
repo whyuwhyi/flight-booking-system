@@ -33,7 +33,9 @@ public:
     void addFlight(Flight* flight);
 
     LinkedList<ConnectingTicket> findConnectingFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
-    LinkedList<ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops) const;
+    LinkedList<ConnectingTicket> findConnectingFlights(const String& departureCity, const String& arrivalCity, const Date& date, int maxStops, bool userpre = 0) const;
+    LinkedList<ConnectingTicket> findUserPreferredFlights(LinkedList<Flight*>** flightNetwork, const String& departureCity, const String& arrivalCity, const Date& date) const;
+    double calculatePreferenceScore(const Ticket& ticket) const;
 
     void traverseCities(std::function<void(const String&, const CityInfo&)> func) const;
 };

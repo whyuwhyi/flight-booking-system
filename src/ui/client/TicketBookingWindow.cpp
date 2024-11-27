@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <QScrollArea>
 #include <QButtonGroup>
+#include <QRegularExpression>
 #include <QRadioButton>
 
 enum SortRule {
@@ -16,11 +17,13 @@ enum SortRule {
     EARLIEST_DEPARTURE,
     EARLIEST_ARRIVAL,
     SHORTEST_DURATION,
-    CHEAPEST_PRICE
+    CHEAPEST_PRICE,
+    USER_PREFERENCE
 };
 
 static LinkedList<ConnectingTicket> connectingFlights;
 static enum SortRule sortRule = NO_RULE;
+static bool user_pred = false;
 
 static std::function<bool(const ConnectingTicket&, const ConnectingTicket&)> getSortFunction(SortRule rule);
 static std::function<bool(const ConnectingTicket&, const ConnectingTicket&)> sortFunction;
@@ -141,7 +144,7 @@ QHBoxLayout* TicketBookingWindow::createSelectionLayout() {
     QVBoxLayout *filterLayout = new QVBoxLayout();
     QLabel *filterLabel = new QLabel("排序选项:", this);
     filterComboBox = new QComboBox(this);
-    filterComboBox->addItems({"默认", "出发最早", "到达最早", "耗时最短", "价格最低"});
+    filterComboBox->addItems({"默认", "出发最早", "到达最早", "耗时最短", "价格最低", "用户偏好"});
     filterLayout->addWidget(filterLabel);
     filterLayout->addWidget(filterComboBox);
 
@@ -208,12 +211,14 @@ void TicketBookingWindow::populateCityComboBoxes() {
 
 void TicketBookingWindow::onSearchButtonClicked() {
     QString selectedFilter = filterComboBox->currentText();
+    user_pred = false;
     switch (filterComboBox->currentIndex()) {
         case 0: sortRule = NO_RULE; break;
         case 1: sortRule = EARLIEST_DEPARTURE; break;
         case 2: sortRule = EARLIEST_ARRIVAL; break;
         case 3: sortRule = SHORTEST_DURATION; break;
         case 4: sortRule = CHEAPEST_PRICE; break;
+        case 5: user_pred = true; break;
         default: sortRule = NO_RULE; break;
     }
     sortFunction = getSortFunction(sortRule);
@@ -251,7 +256,7 @@ bool TicketBookingWindow::validateCities(const String &departureCity, const Stri
 }
 
 void TicketBookingWindow::queryConnectingFlights(const String &departureCity, const String &arrivalCity, const Date &date) {
-    connectingFlights = std::move(flight_network.findConnectingFlights(departureCity, arrivalCity, date, 2));
+    connectingFlights = std::move(flight_network.findConnectingFlights(departureCity, arrivalCity, date, 2, user_pred));
     connectingFlights.sort(sortFunction);
     connectingFlights.traverse([this](const ConnectingTicket &connectingTicket) {
         addConnectingTicketItem(connectingTicket);
@@ -275,9 +280,15 @@ void TicketBookingWindow::onFlightItemClicked(QListWidgetItem *item) {
 
 void TicketBookingWindow::onConnectingTicketItemClicked(const ConnectingTicket &connectingTicket) {
     QDialog detailWindow;
-    QVBoxLayout *mainLayout = new QVBoxLayout(&detailWindow);
-    int segmentCount = connectingTicket.getNumberOfTickets();
+    detailWindow.setWindowTitle("联程航班详情");
+    detailWindow.setMinimumSize(500, 400);
 
+    QScrollArea *scrollArea = new QScrollArea(&detailWindow);
+    scrollArea->setWidgetResizable(true);
+    QWidget *scrollWidget = new QWidget(&detailWindow);
+    QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
+
+    int segmentCount = connectingTicket.getNumberOfTickets();
     LinkedList<CabinType> selectedCabins;
 
     for (int i = 0; i < segmentCount; ++i) {
@@ -288,15 +299,42 @@ void TicketBookingWindow::onConnectingTicketItemClicked(const ConnectingTicket &
         const Ticket &ticket = connectingTicket.getTickets().getElementAt(i);
 
         if (segmentCount > 1) {
-            mainLayout->addWidget(createConnectingFlightInfoLabel(i + 1, &detailWindow));
+            scrollLayout->addWidget(createConnectingFlightInfoLabel(i + 1, &detailWindow));
         }
 
-        mainLayout->addWidget(createFlightInfoLabels(ticket, &detailWindow));
-        mainLayout->addLayout(createCabinSelectionLayout(ticket, i, selectedCabins, &detailWindow));
+        scrollLayout->addWidget(createFlightInfoLabels(ticket, &detailWindow));
+        scrollLayout->addLayout(createCabinSelectionLayout(ticket, i, selectedCabins, &detailWindow));
     }
 
-    QPushButton *confirmButton = new QPushButton("确认订购", &detailWindow);
-    mainLayout->addWidget(confirmButton, 0, Qt::AlignCenter);
+    QPushButton *confirmButton = new QPushButton("确认订购", scrollWidget);
+    scrollLayout->addWidget(confirmButton, 0, Qt::AlignCenter);
+
+    scrollWidget->setLayout(scrollLayout);
+    scrollArea->setWidget(scrollWidget);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&detailWindow);
+    mainLayout->addWidget(scrollArea);
+
+    detailWindow.setStyleSheet(
+        "QDialog {"
+        "   background-color: #f8f8f8;"
+        "}"
+        "QPushButton {"
+        "   font-size: 16px;"
+        "   padding: 10px 20px;"
+        "   background-color: #007BFF;"
+        "   color: white;"
+        "   border: none;"
+        "   border-radius: 5px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: #0056b3;"
+        "}"
+        "QLabel {"
+        "   font-size: 14px;"
+        "   margin-bottom: 5px;"
+        "}"
+    );
 
     connect(confirmButton, &QPushButton::clicked, this, [&]() {
         bool allSelected = true;
@@ -306,9 +344,10 @@ void TicketBookingWindow::onConnectingTicketItemClicked(const ConnectingTicket &
                 break;
             }
         }
-        std::cout << selectedCabins;
+
         if (allSelected) {
             handleConnectingTicketPurchase(connectingTicket, selectedCabins);
+            detailWindow.accept();
         } else {
             QMessageBox::warning(this, "错误", "请为每一程选择舱位");
         }
@@ -316,6 +355,7 @@ void TicketBookingWindow::onConnectingTicketItemClicked(const ConnectingTicket &
 
     detailWindow.exec();
 }
+
 
 QLabel* TicketBookingWindow::createConnectingFlightInfoLabel(int segmentNumber, QWidget *parent) {
     QLabel *flightInfoLabel = new QLabel(QString("第%1程").arg(segmentNumber), parent);
@@ -410,42 +450,119 @@ QGridLayout* TicketBookingWindow::createCabinSelectionLayout(const Ticket &ticke
     return ticketLayout;
 }
 
+
 void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket &connectingTicket, const LinkedList<CabinType> &selectedCabins) {
     QDialog passengerInfoDialog;
-    passengerInfoDialog.setWindowTitle("乘车人信息");
-    passengerInfoDialog.setMinimumSize(300, 200);
-    QVBoxLayout layout(&passengerInfoDialog);
-    QLineEdit nameInput(&passengerInfoDialog);
-    nameInput.setPlaceholderText("请输入乘客姓名");
-    layout.addWidget(&nameInput);
-    QLineEdit idInput(&passengerInfoDialog);
-    idInput.setPlaceholderText("请输入乘客身份证号");
-    layout.addWidget(&idInput);
-    QPushButton confirmPassengerButton("确认", &passengerInfoDialog);
-    layout.addWidget(&confirmPassengerButton);
-    connect(&confirmPassengerButton, &QPushButton::clicked, &passengerInfoDialog, [&]() {
+    passengerInfoDialog.setWindowTitle("乘客信息");
+    passengerInfoDialog.setMinimumSize(400, 300);
+
+    QVBoxLayout *layout = new QVBoxLayout(&passengerInfoDialog);
+
+    QLabel *nameLabel = new QLabel("乘客姓名:", &passengerInfoDialog);
+    QLineEdit *nameInput = new QLineEdit(&passengerInfoDialog);
+    nameInput->setPlaceholderText("请输入乘客姓名");
+    layout->addWidget(nameLabel);
+    layout->addWidget(nameInput);
+
+    QLabel *idLabel = new QLabel("身份证号:", &passengerInfoDialog);
+    QLineEdit *idInput = new QLineEdit(&passengerInfoDialog);
+    idInput->setPlaceholderText("请输入乘客身份证号");
+    layout->addWidget(idLabel);
+    layout->addWidget(idInput);
+
+    QPushButton *confirmPassengerButton = new QPushButton("确认", &passengerInfoDialog);
+    layout->addWidget(confirmPassengerButton);
+
+    // 界面美化
+    passengerInfoDialog.setStyleSheet(
+        "QDialog {"
+        "   background-color: #f0f0f0;"
+        "}"
+        "QLabel {"
+        "   font-size: 14px;"
+        "}"
+        "QLineEdit {"
+        "   font-size: 14px;"
+        "   padding: 5px;"
+        "   border: 1px solid #ccc;"
+        "   border-radius: 4px;"
+        "}"
+        "QPushButton {"
+        "   font-size: 14px;"
+        "   padding: 8px 15px;"
+        "   background-color: #4CAF50;"
+        "   color: white;"
+        "   border: none;"
+        "   border-radius: 4px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: #45a049;"
+        "}"
+    );
+
+    connect(confirmPassengerButton, &QPushButton::clicked, this, [&]() {
+        QString name = nameInput->text().trimmed();
+        QString idNumber = idInput->text().trimmed();
+
+        if (name.isEmpty()) {
+            QMessageBox::warning(&passengerInfoDialog, "错误", "请输入乘客姓名");
+            return;
+        }
+        QRegularExpression idRegex("^[1-9]\\d{16}[\\dXx]$");
+        if (!idRegex.match(idNumber).hasMatch()) {
+            QMessageBox::warning(&passengerInfoDialog, "错误", "请输入有效的18位身份证号码");
+            return;
+        }
+
         String user = current_login_user.getPhoneNumber();
-        String name = nameInput.text().toStdString().c_str();
-        String id = idInput.text().toStdString().c_str();
-        Passenger passenger(name, id);
-        QVector<Order> orders;
+        Passenger passenger(name.toStdString().c_str(), idNumber.toStdString().c_str());
+        Order order(user);
+        LinkedList<OrderInfo> orderInfos;
         double totalPrice = 0.0;
-        for (int i = 0; i < connectingTicket.getTickets().size(); ++i) {
-            const Ticket *ticket = &connectingTicket.getTickets().getElementAt(i);
-            const CabinType& cabinType = selectedCabins.getElementAt(i);
-            Flight *flight = ticket->getFlight();
-            FlightTicketDetail *ticketDetail = ticket->getFlightTicketDetail();
+
+        for (int i = 0; i < connectingTicket.getNumberOfTickets(); ++i) {
+            const Ticket &ticket = connectingTicket.getTickets().getElementAt(i);
+            const CabinType &cabinType = selectedCabins.getElementAt(i);
+            Flight *flight = ticket.getFlight();
+            FlightTicketDetail *ticketDetail = ticket.getFlightTicketDetail();
             double price = ticketDetail->getCabinPrice(cabinType);
-            Order order(flight->getFlightName(), flight->getairRoute(), user, passenger, cabinType, price, ticketDetail->getFlightDate(), "NULL");
-            orders.push_back(order);
+            
+            OrderInfo orderInfo(
+                flight->getFlightName(),
+                flight->getairRoute(),
+                flight->getAirplaneModel(),
+                flight->getAirline(),
+                flight->getDepartureTime().getTimeSlot(),
+                cabinType,
+                price,
+                ticketDetail->getFlightDate(),
+                ticket,
+                passenger
+            );
+            orderInfos.append(orderInfo);
             totalPrice += price;
         }
+        order.setOrderInfos(std::move(orderInfos));
+
         QDialog orderDialog(&passengerInfoDialog);
         orderDialog.setWindowTitle("订单确认");
-        orderDialog.setMinimumSize(400, 300);
-        QVBoxLayout orderLayout(&orderDialog);
-        for (int i = 0; i < orders.size(); ++i) {
-            const Order &order = orders[i];
+        orderDialog.setMinimumSize(500, 400);
+
+        QScrollArea *scrollArea = new QScrollArea(&orderDialog);
+        scrollArea->setWidgetResizable(true);
+        QWidget *scrollWidget = new QWidget();
+        QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
+
+        // 显示订单信息（仅一次）
+        QLabel *orderHeaderLabel = new QLabel(QString("订单号: %1\n乘客姓名: %2\n身份证号: %3")
+                                              .arg(order.getOrderNumber().c_str())
+                                              .arg(name)
+                                              .arg(idNumber), scrollWidget);
+        orderHeaderLabel->setStyleSheet("font-size: 16px; font-weight: bold;");
+        scrollLayout->addWidget(orderHeaderLabel);
+
+        for (int i = 0; i < order.getOrderInfos().size(); ++i) {
+            const OrderInfo &orderInfo = order.getOrderInfos().getElementAt(i);
             QString cabinStr;
             switch (selectedCabins.getElementAt(i)) {
                 case FirstClass: cabinStr = "头等舱"; break;
@@ -453,37 +570,61 @@ void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket 
                 case EconomyClass: cabinStr = "经济舱"; break;
                 default: cabinStr = "未知舱位";
             }
-            QLabel *orderInfoLabel = new QLabel(QString("订单 %1:\n订单号: %2\n乘客: %3\n航班: %4\n舱位: %5\n费用: %6")
-                                                .arg(i + 1)
-                                                .arg(order.getOrderNumber().c_str())
-                                                .arg(nameInput.text())
-                                                .arg(order.getFlightNumber().c_str())
+            QLabel *orderInfoLabel = new QLabel(QString("航班: %1\n舱位: %2\n费用: %3")
+                                                .arg(orderInfo.getFlightNumber().c_str())
                                                 .arg(cabinStr)
-                                                .arg(order.getPrice()), &orderDialog);
-            orderLayout.addWidget(orderInfoLabel);
+                                                .arg(orderInfo.getPrice()), scrollWidget);
+            orderInfoLabel->setStyleSheet("font-size: 14px;");
+            scrollLayout->addWidget(orderInfoLabel);
         }
-        QLabel totalLabel(QString("总费用: %1").arg(totalPrice), &orderDialog);
-        orderLayout.addWidget(&totalLabel);
-        QPushButton payButton("支付", &orderDialog);
-        orderLayout.addWidget(&payButton);
-        connect(&payButton, &QPushButton::clicked, &orderDialog, [&]() {
-            bool success = true;
-            for (const Order &order : orders) {
-                if (!buyTicket(order)) {
-                    success = false;
-                    break;
-                }
-            }
-            if (success) {
-                QMessageBox::information(this, "订票成功", "联程航班订票成功！");
-                orderDialog.accept();
-                passengerInfoDialog.accept();
-            } else {
-                QMessageBox::warning(this, "订票失败", "订票失败，请重试！");
-            }
+
+        QLabel *totalLabel = new QLabel(QString("总费用: %1").arg(totalPrice), scrollWidget);
+        totalLabel->setStyleSheet("font-weight: bold; font-size: 16px;");
+        scrollLayout->addWidget(totalLabel);
+
+        QPushButton *payButton = new QPushButton("支付", scrollWidget);
+        payButton->setFixedWidth(100);
+        scrollLayout->addWidget(payButton, 0, Qt::AlignCenter);
+
+        scrollWidget->setLayout(scrollLayout);
+        scrollArea->setWidget(scrollWidget);
+
+        QVBoxLayout *orderDialogLayout = new QVBoxLayout(&orderDialog);
+        orderDialogLayout->addWidget(scrollArea);
+
+        // 界面美化
+        orderDialog.setStyleSheet(
+            "QDialog {"
+            "   background-color: #f0f0f0;"
+            "}"
+            "QLabel {"
+            "   font-size: 14px;"
+            "}"
+            "QPushButton {"
+            "   font-size: 14px;"
+            "   padding: 8px 15px;"
+            "   background-color: #4CAF50;"
+            "   color: white;"
+            "   border: none;"
+            "   border-radius: 4px;"
+            "}"
+            "QPushButton:hover {"
+            "   background-color: #45a049;"
+            "}"
+        );
+
+        connect(payButton, &QPushButton::clicked, &orderDialog, [&]() {
+            if (buyTicket(order))
+                QMessageBox::information(&orderDialog, "订票成功", "联程航班订票成功！");
+            else
+                QMessageBox::warning(&orderDialog, "订票失败", "订票失败，请确保没有重复购票或者稍后重试！");
+            orderDialog.accept();
+            passengerInfoDialog.accept();
         });
+
         orderDialog.exec();
     });
+
     passengerInfoDialog.exec();
 }
 

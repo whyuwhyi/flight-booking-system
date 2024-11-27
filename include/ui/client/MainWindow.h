@@ -8,7 +8,7 @@
 #include <ui/client/LoginWindow.h>
 #include <ui/client/RegisterWindow.h>
 #include <ui/client/TicketBookingWindow.h>
-#include <ui/client/PersonalCenterWindow.h>
+#include <ui/client/OrderWindow.h>
 
 class MapBackend : public QObject {
     Q_OBJECT
@@ -41,7 +41,7 @@ private:
     LoginWindow *loginWindow;
     RegisterWindow *registerWindow;
     TicketBookingWindow *ticketBookingWindow;
-    PersonalCenterWindow *personalCenterWindow;
+    OrderWindow *orderWindow;
     QWidget *routeMapWidget;
 
     void setupUI();
