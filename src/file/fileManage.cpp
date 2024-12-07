@@ -223,7 +223,6 @@ bool changeTicket(const Order& order, const Order& newOrder) {
     return refundTicket(order) && buyTicket(newOrder);
 }
 
-
 bool buyMeal(const Order& order, int segmentIndex, enum Meal meal) {
     if (segmentIndex < 0 || segmentIndex >= order.getOrderInfos().size()) {
         std::cerr << "Invalid segment index" << std::endl;

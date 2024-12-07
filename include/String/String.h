@@ -38,4 +38,3 @@ private:
 
     String(char* data, size_t length);
 };
-

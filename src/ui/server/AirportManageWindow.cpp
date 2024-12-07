@@ -7,43 +7,53 @@
 AirportManageWindow::AirportManageWindow(QWidget *parent) : QWidget(parent) {
     setupUI();
     setupConnections();
+    populateList();
 }
 
 void AirportManageWindow::setupUI() {
-    mainLayout = new QVBoxLayout(this);
+    mainLayout = new QVBoxLayout;
 
     airportListWidget = new QListWidget(this);
+    airportListWidget->setStyleSheet("border: 1px solid #ccc; background-color: #f9f9f9;");
     mainLayout->addWidget(airportListWidget);
 
     addAirportButton = new QPushButton("添加机场", this);
+    addAirportButton->setStyleSheet("background-color: #4CAF50; color: white; font-size: 14px; padding: 8px;");
     mainLayout->addWidget(addAirportButton);
 
-    airport_map.traverse([this](const Airport& airport){ addAirportItem(airport); });
+    setLayout(mainLayout);
 }
 
 void AirportManageWindow::setupConnections() {
     connect(addAirportButton, &QPushButton::clicked, this, &AirportManageWindow::openMapSearchWindow);
 }
 
+void AirportManageWindow::populateList() {
+    airportListWidget->clear();
+    airport_map.traverse([this](const Airport &airport) { addAirportItem(airport); });
+}
+
 void AirportManageWindow::openMapSearchWindow() {
-    QDialog *mapDialog = new QDialog(this);
-    mapDialog->setWindowTitle("搜索机场");
-    mapDialog->resize(800, 650);
+    QDialog mapDialog;
+    mapDialog.setWindowTitle("搜索机场");
+    mapDialog.setFixedSize(800, 650);
+    mapDialog.setStyleSheet("background-color: #f5f5f5; border-radius: 10px;");
 
-    QVBoxLayout *layout = new QVBoxLayout(mapDialog);
-    QWebEngineView *webView = new QWebEngineView(mapDialog);
-    QWebChannel *channel = new QWebChannel(this);
+    QVBoxLayout layout(&mapDialog);
+    QWebEngineView webView(&mapDialog);
+    QWebChannel channel(this);
 
-    AirportManageBackend *backend = new AirportManageBackend(this);
-    connect(backend, &AirportManageBackend::airportDataReceived, this, &AirportManageWindow::handleAirportData);
+    AirportManageBackend backend(this);
+    connect(&backend, &AirportManageBackend::airportDataReceived, this, &AirportManageWindow::handleAirportData);
 
-    webView->page()->setWebChannel(channel);
-    channel->registerObject(QStringLiteral("qt_addAirport"), backend);
+    webView.page()->setWebChannel(&channel);
+    channel.registerObject(QStringLiteral("qt_addAirport"), &backend);
 
-    webView->load(QUrl("qrc:/pages/airport/addAirport.html"));
-    layout->addWidget(webView);
-    mapDialog->setLayout(layout);
-    mapDialog->exec();
+    webView.load(QUrl("qrc:/pages/airport/addAirport.html"));
+    layout.addWidget(&webView);
+
+    mapDialog.setLayout(&layout);
+    mapDialog.exec();
 }
 
 void AirportManageWindow::handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude) {
@@ -55,7 +65,7 @@ void AirportManageWindow::handleAirportData(const QString &name, const QString &
     }
 }
 
-void AirportManageWindow::addAirportItem(const Airport& airport) {
+void AirportManageWindow::addAirportItem(const Airport &airport) {
     AirportItem *item = new AirportItem(airport, airportListWidget);
     airportListWidget->addItem(item);
     connect(item->getDeleteButton(), &QPushButton::clicked, this, [this, item]() {
@@ -69,7 +79,6 @@ void AirportManageWindow::onDeleteAirport(AirportItem *item) {
         int row = airportListWidget->row(item);
         if (row != -1) {
             String key = item->getAirportName();
-            
             if (deleteElementInMap(airport_map, key, AIRPORTS_PATH.c_str())) {
                 delete airportListWidget->takeItem(row);
             } else {
@@ -79,13 +88,14 @@ void AirportManageWindow::onDeleteAirport(AirportItem *item) {
     }
 }
 
-AirportItem::AirportItem(const Airport& airport, QListWidget *parent)
+AirportItem::AirportItem(const Airport &airport, QListWidget *parent)
     : QListWidgetItem(parent) {
     deleteButton = new QPushButton("删除", parent);
+    deleteButton->setStyleSheet("background-color: #f44336; color: white; padding: 5px;");
     nameLabel = new QLabel(airport.getName().c_str(), parent);
     countryLabel = new QLabel(airport.getCountry().c_str(), parent);
     cityLabel = new QLabel(airport.getCity().c_str(), parent);
-    
+
     deleteButton->setFixedWidth(80);
     nameLabel->setFixedWidth(200);
     countryLabel->setFixedWidth(200);

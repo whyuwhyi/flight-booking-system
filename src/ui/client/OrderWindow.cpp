@@ -28,6 +28,10 @@ OrderItem::OrderItem(const Order &order, QWidget *parent)
     setupConnections();
 }
 
+const Order& OrderItem::getOrder() const {
+    return order;
+}
+
 void OrderItem::setupUI() {
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
@@ -236,7 +240,169 @@ void OrderWindow::addOrderItem(const Order &order) {
 }
 
 void OrderWindow::onOrderItemClicked(QListWidgetItem *item) {
+    if (!item) return;
 
+    OrderItem *orderItemWidget = qobject_cast<OrderItem*>(orderListWidget->itemWidget(item));
+    if (!orderItemWidget) {
+        QMessageBox::warning(this, "错误", "无法获取订单信息");
+        return;
+    }
+
+    const Order &order = orderItemWidget->getOrder();
+
+    QDialog detailsDialog(this);
+    detailsDialog.setWindowTitle("订单详情");
+    detailsDialog.setFixedSize(600, 700);
+    detailsDialog.setStyleSheet(
+        "QDialog {"
+        "   background-color: #f5f5f5;"
+        "   border-radius: 10px;"
+        "}"
+        "QLabel {"
+        "   font-size: 14px;"
+        "}"
+        "QPushButton {"
+        "   font-size: 14px;"
+        "   padding: 8px 16px;"
+        "   background-color: #4CAF50;"
+        "   color: white;"
+        "   border: none;"
+        "   border-radius: 5px;"
+        "}"
+        "QPushButton:hover {"
+        "   background-color: #45a049;"
+        "}"
+    );
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(&detailsDialog);
+
+    QScrollArea *scrollArea = new QScrollArea(&detailsDialog);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setStyleSheet("border: none;");
+
+    QWidget *scrollWidget = new QWidget();
+    QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
+
+    QString statusStr;
+    switch (order.getStatus()) {
+        case BOOKED: statusStr = "已订票"; break;
+        case CANCELED: statusStr = "已取消"; break;
+        case CHECKED_IN: statusStr = "已登机"; break;
+        case REFUNDED: statusStr = "已退票"; break;
+        default: statusStr = "未知状态";
+    }
+
+    QString passengerName = QString::fromUtf8(order.getPassenger(0).getName().c_str());
+    QString passengerID = QString::fromUtf8(order.getPassenger(0).getIdNumber().c_str());
+
+    QString orderInfoText = QString("订单号：%1\n用户手机号：%2\n订单状态：%3\n乘客姓名：%4\n身份证号：%5")
+        .arg(QString::fromUtf8(order.getOrderNumber().c_str()))
+        .arg(QString::fromUtf8(order.getBookTicketUser().c_str()))
+        .arg(statusStr)
+        .arg(passengerName)
+        .arg(passengerID);
+
+    QLabel *orderInfoLabel = new QLabel(orderInfoText, scrollWidget);
+    orderInfoLabel->setStyleSheet("font-size: 16px; font-weight: bold;");
+    orderInfoLabel->setAlignment(Qt::AlignLeft);
+    orderInfoLabel->setWordWrap(true);
+    scrollLayout->addWidget(orderInfoLabel);
+
+    QFrame *separator = new QFrame(scrollWidget);
+    separator->setFrameShape(QFrame::HLine);
+    separator->setFrameShadow(QFrame::Sunken);
+    scrollLayout->addWidget(separator);
+
+    const LinkedList<OrderInfo>& orderInfos = order.getOrderInfos();
+    for (int i = 0; i < orderInfos.size(); ++i) {
+        const OrderInfo &info = orderInfos.getElementAt(i);
+        const Ticket &ticket = info.getTicket();
+
+        QString cabinStr;
+        switch (info.getCabinType()) {
+            case FirstClass: cabinStr = "头等舱"; break;
+            case BusinessClass: cabinStr = "商务舱"; break;
+            case EconomyClass: cabinStr = "经济舱"; break;
+            default: cabinStr = "未知舱位";
+        }
+
+        QString segmentDetails = QString("<b>航段 %1:</b><br>").arg(i + 1);
+        segmentDetails += QString("航班号: %1<br>").arg(QString::fromUtf8(info.getFlightNumber().c_str()));
+        segmentDetails += QString("出行日期: %1<br>").arg(info.getDate().toString().c_str());
+
+        Flight *flight = ticket.getFlight();
+        if (flight) {
+            DateTime departureDT = DateTime(info.getDate(), flight->getDepartureTime());
+            DateTime arrivalDT = departureDT + flight->getCostTime();
+
+            QString departureAirport = QString::fromUtf8(flight->getDepartureAirport().getName().c_str());
+            QString arrivalAirport = QString::fromUtf8(flight->getArrivalAirport().getName().c_str());
+
+            QString departureTimeStr = QString::fromStdString(departureDT.toString().c_str());
+            QString arrivalTimeStr = QString::fromStdString(arrivalDT.toString().c_str());
+
+            QString airline = QString::fromUtf8(flight->getAirline().c_str());
+            QString airplaneModel = QString::fromUtf8(flight->getAirplaneModel().c_str());
+
+            segmentDetails += QString("航空公司: %1<br>").arg(airline);
+            segmentDetails += QString("机型: %1<br>").arg(airplaneModel);
+            segmentDetails += QString("<b>出发:</b> %1 (%2)<br>").arg(departureAirport).arg(departureTimeStr);
+            segmentDetails += QString("<b>到达:</b> %1 (%2)<br>").arg(arrivalAirport).arg(arrivalTimeStr);
+            segmentDetails += QString("舱位类型: %1<br>").arg(cabinStr);
+            segmentDetails += QString("座位号: %1<br>").arg(QString::fromUtf8(info.getSeatNum().c_str()));
+        } else {
+            segmentDetails += "航班信息不可用<br>";
+        }
+
+        QString mealStr;
+        switch (info.getMeal()) {
+            case NO_MEAL: mealStr = "无"; break;
+            case WESTERN: mealStr = "西餐"; break;
+            case CHINESE: mealStr = "中餐"; break;
+            case VEGETARIAN: mealStr = "素食"; break;
+            default: mealStr = "未知";
+        }
+        segmentDetails += QString("餐食: %1<br>").arg(mealStr);
+        segmentDetails += QString("票价: ¥%1<br>").arg(QString::number(info.getPrice(), 'f', 2));
+
+        QLabel *segmentLabel = new QLabel(segmentDetails, scrollWidget);
+        segmentLabel->setStyleSheet("font-size: 14px; color: #333; margin: 10px;");
+        segmentLabel->setAlignment(Qt::AlignLeft);
+        segmentLabel->setWordWrap(true);
+        scrollLayout->addWidget(segmentLabel);
+
+        if (i < orderInfos.size() - 1) {
+            QFrame *segmentSeparator = new QFrame(scrollWidget);
+            segmentSeparator->setFrameShape(QFrame::HLine);
+            segmentSeparator->setFrameShadow(QFrame::Sunken);
+            scrollLayout->addWidget(segmentSeparator);
+        }
+    }
+
+    // 计算并显示总费用
+    double totalPrice = 0.0;
+    for (int i = 0; i < orderInfos.size(); ++i) {
+        totalPrice += orderInfos.getElementAt(i).getPrice();
+    }
+    QLabel *totalLabel = new QLabel(QString("总费用: ¥%1").arg(QString::number(totalPrice, 'f', 2)), scrollWidget);
+    totalLabel->setStyleSheet("font-weight: bold; font-size: 16px;");
+    scrollLayout->addWidget(totalLabel);
+
+    scrollWidget->setLayout(scrollLayout);
+    scrollArea->setWidget(scrollWidget);
+    mainLayout->addWidget(scrollArea);
+
+    // 添加关闭按钮
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *closeButton = new QPushButton("关闭", &detailsDialog);
+    closeButton->setFixedWidth(100);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(closeButton);
+    mainLayout->addLayout(buttonLayout);
+
+    connect(closeButton, &QPushButton::clicked, &detailsDialog, &QDialog::accept);
+
+    detailsDialog.exec();
 }
 
 void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const Ticket &ticket) {
@@ -245,15 +411,15 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
     dialog.setFixedSize(600, 500);
     dialog.setStyleSheet("background-color: #f5f5f5; border-radius: 10px;");
 
-    QVBoxLayout mainLayout(&dialog);
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
-    QLabel infoLabel("请选择座位:", &dialog);
-    infoLabel.setAlignment(Qt::AlignCenter);
-    infoLabel.setStyleSheet("font-size: 16px; color: #333; margin: 10px;");
-    mainLayout.addWidget(&infoLabel);
+    QLabel *infoLabel = new QLabel("请选择座位:", &dialog);
+    infoLabel->setAlignment(Qt::AlignCenter);
+    infoLabel->setStyleSheet("font-size: 16px; color: #333; margin: 10px;");
+    mainLayout->addWidget(infoLabel);
 
     AirplaneModel *airplaneModel = airplane_model_map.find(ticket.getFlight()->getAirplaneModel());
-    if (!airplaneModel) {
+    if (airplaneModel == nullptr) {
         QMessageBox::warning(&dialog, "错误", "飞机型号不存在");
         return;
     }
@@ -262,7 +428,7 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
     CabinType cabinType = orderInfo.getCabinType();
     Cabin cabin = airplaneModel->getCabin(cabinType);
 
-    QGridLayout seatLayout;
+    QGridLayout *seatLayout = new QGridLayout();
 
     int rows = cabin.getRows();
     int columns = cabin.getColumns();
@@ -295,11 +461,12 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
 
             seatButtonLayout->addWidget(seatLabel);
             seatButtonLayout->addWidget(seatButton);
-            seatLayout.addLayout(seatButtonLayout, i, j);
+            seatLayout->addLayout(seatButtonLayout, i, j);
 
             seatButtons[seatNum] = seatButton;
 
-            connect(seatButton, &QPushButton::clicked, &dialog, [=, &seatButtons]() {
+            // 优化 Lambda 捕获
+            connect(seatButton, &QPushButton::clicked, &dialog, [availableSeatImage, selectedSeatImage, &seatButtons, seatButton]() {
                 for (auto &button : seatButtons) {
                     button->setStyleSheet(QString("QPushButton { border-image: url(%1); }").arg(availableSeatImage));
                 }
@@ -316,7 +483,7 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
         return;
     }
 
-    passengerMap.traverse([&seatButtons, &occupiedSeatImage](const Passenger &passenger) {
+    passengerMap.traverse([&](const Passenger &passenger) {
         String seatNumStr = passenger.getSeatNum();
         if (seatNumStr == "NULL" || seatNumStr == "") return;
         QString seatNum = QString::fromUtf8(seatNumStr.c_str());
@@ -327,20 +494,20 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
         }
     });
 
-    QWidget seatWidget(&dialog);
-    seatWidget.setLayout(&seatLayout);
+    QWidget *seatWidget = new QWidget(&dialog);
+    seatWidget->setLayout(seatLayout);
 
-    QScrollArea scrollArea(&dialog);
-    scrollArea.setWidget(&seatWidget);
-    scrollArea.setWidgetResizable(true);
-    scrollArea.setStyleSheet("border: none; background: transparent;");
-    mainLayout.addWidget(&scrollArea);
+    QScrollArea *scrollArea = new QScrollArea(&dialog);
+    scrollArea->setWidget(seatWidget);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setStyleSheet("border: none; background: transparent;");
+    mainLayout->addWidget(scrollArea);
 
-    QPushButton confirmButton("确认", &dialog);
-    confirmButton.setStyleSheet("background-color: #4CAF50; color: white; font-size: 14px; padding: 8px 16px; border-radius: 5px;");
-    mainLayout.addWidget(&confirmButton);
+    QPushButton *confirmButton = new QPushButton("确认", &dialog);
+    confirmButton->setStyleSheet("background-color: #4CAF50; color: white; font-size: 14px; padding: 8px 16px; border-radius: 5px;");
+    mainLayout->addWidget(confirmButton);
 
-    connect(&confirmButton, &QPushButton::clicked, &dialog, [&]() {
+    connect(confirmButton, &QPushButton::clicked, &dialog, [&]() {
         QString selectedSeatNum;
         for (auto it = seatButtons.begin(); it != seatButtons.end(); ++it) {
             if (it.value()->styleSheet().contains(selectedSeatImage)) {
@@ -364,6 +531,7 @@ void OrderWindow::handleSelectSeat(const Order &order, int segmentIndex, const T
 
     dialog.exec();
 }
+
 
 void OrderWindow::handleOrderMeal(const Order &order, int segmentIndex, const Ticket &ticket) {
     QDialog dialog;
@@ -502,7 +670,6 @@ void OrderWindow::handleRefundTicket(const Order &order) {
     refundDialog.exec();
 }
 
-
 void OrderWindow::handleChangeTicket(const Order &order) {
     QDialog dialog;
     dialog.setWindowTitle("改签");
@@ -607,6 +774,9 @@ void OrderWindow::handleChangeTicket(const Order &order) {
             double totalOriginalPrice = 0.0;
             double totalNewPrice = 0.0;
 
+            // 新增：计算改签手续费
+            double totalChangeFee = 0.0;
+
             int segmentIndex = 0;
             bool errorOccurred = false;
             orderInfos.traverse([&](const OrderInfo& orderInfo) {
@@ -636,6 +806,11 @@ void OrderWindow::handleChangeTicket(const Order &order) {
                 totalOriginalPrice += originalPrice;
                 totalNewPrice += newPrice;
 
+                DateTime departureDateTime = DateTime(newDate, flight->getDepartureTime()) + flight->getCostTime();
+                QDateTime qDepartureDateTime = QDateTime::fromString(departureDateTime.toString().c_str(), "yyyy-MM-dd HH:mm:ss");
+                double changeFee = calculateRefundFee(originalPrice, qDepartureDateTime);
+                totalChangeFee += changeFee;
+
                 newOrderInfo.setPrice(newPrice);
                 newOrderInfo.setTicket(Ticket(flight, newTicketDetail));
                 newOrderInfos.append(newOrderInfo);
@@ -648,15 +823,33 @@ void OrderWindow::handleChangeTicket(const Order &order) {
             newOrder.setOrderInfos(std::move(newOrderInfos));
 
             double priceDifference = totalNewPrice - totalOriginalPrice;
-            QString priceDifferenceMessage = (priceDifference > 0)
-                                             ? QString("改签后需要补差价: %1").arg(priceDifference)
-                                             : QString("改签后将退还差价: %1").arg(-priceDifference);
+            
+            QString priceDifferenceMessage;
+            if (priceDifference > 0) {
+                priceDifferenceMessage = QString("需要补差价: ¥%1").arg(priceDifference, 0, 'f', 2);
+            } else {
+                priceDifferenceMessage = QString("将退还差价: ¥%1").arg(-priceDifference, 0, 'f', 2);
+            }
+
+            QString changeFeeMessage = QString("改签手续费总计: ¥%1").arg(totalChangeFee, 0, 'f', 2);
+
+            double finalPay = priceDifference;
+            double finalAmount = priceDifference + totalChangeFee;
+
+            QString finalMessage;
+            if (finalAmount > 0) {
+                finalMessage = QString("最终需支付金额: ¥%1").arg(finalAmount, 0, 'f', 2);
+            } else {
+                finalMessage = QString("最终将退还金额: ¥%1").arg(-finalAmount, 0, 'f', 2);
+            }
 
             int ret = QMessageBox::question(&dialog, "确认改签",
-                                            QString("原总票价: %1\n新总票价: %2\n%3\n是否确认改签？")
-                                                .arg(totalOriginalPrice)
-                                                .arg(totalNewPrice)
-                                                .arg(priceDifferenceMessage),
+                                            QString("原总票价: ¥%1\n新总票价: ¥%2\n%3\n%4\n%5\n是否确认改签？")
+                                                .arg(totalOriginalPrice, 0, 'f', 2)
+                                                .arg(totalNewPrice, 0, 'f', 2)
+                                                .arg(priceDifferenceMessage)
+                                                .arg(changeFeeMessage)
+                                                .arg(finalMessage),
                                             QMessageBox::Yes | QMessageBox::No);
 
             if (ret == QMessageBox::Yes) {

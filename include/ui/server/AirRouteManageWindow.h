@@ -43,6 +43,7 @@ public:
 private:
     void setupUI();
     void setupConnections();
+    void populateList();
     void openAddAirRouteWindow();
     QDialog* createAddAirRouteDialog();
     QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);

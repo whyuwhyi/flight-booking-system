@@ -1,0 +1,1616 @@
+\documentclass[UTF8, a4paper,12pt]{ctexart}
+\usepackage{amsmath}
+\usepackage{xeCJK}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\geometry{a4paper}
+\usepackage{indentfirst}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+
+\titleformat{\section}[hang]{\bfseries\heiti\Huge}{\thesection}{1em}{}
+\titleformat{\subsection}[hang]{\bfseries\heiti\LARGE}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}[hang]{\bfseries\heiti\large}{\thesubsubsection}{1em}{}
+
+\renewcommand{\baselinestretch}{1.5}
+\setlength{\parindent}{2em}
+
+\begin{document}
+
+\tableofcontents
+
+\newpage
+
+\section{需求分析}
+
+\subsection{程序功能需求}
+本系统主要面向航班管理和机票预定，包含如下主要功能：
+
+\subsubsection{客户端功能：}
+\begin{itemize}
+    \item \textbf{登录与注册：}
+    \begin{itemize}
+        \item 用户可以通过注册界面进行注册，输入用户名、密码并验证。
+        \item 注册成功后，可以通过登录界面输入用户名和密码登录。
+    \end{itemize}
+    
+    \item \textbf{机票预订：}
+    \begin{itemize}
+        \item 用户可以查询航班信息，选择航班并进行机票预定。
+        \item 在预定过程中，显示航班的座位情况并允许用户选择座位。
+        \item 提供订单确认和支付功能。
+    \end{itemize}
+
+    \item \textbf{个人信息管理：}
+    \begin{itemize}
+        \item 用户可以查看和修改个人资料。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{服务器端功能：}
+\begin{itemize}
+    \item \textbf{航空公司管理：}
+    \begin{itemize}
+        \item 管理航空公司信息（如航空公司名称、航班等）。
+        \item 管理员可以查看、添加、编辑和删除航空公司。
+    \end{itemize}
+
+    \item \textbf{机场管理：}
+    \begin{itemize}
+        \item 管理员可以查看机场信息、添加机场、编辑机场和删除机场。
+        \item 机场的地理位置通过地图界面提供交互功能，使用 Leaflet 地图和 OSM 数据进行搜索。
+    \end{itemize}
+
+    \item \textbf{航线管理：}
+    \begin{itemize}
+        \item 管理员可以创建、修改、查看和删除航线。
+        \item 为航线指定起始和终止机场，计算航线长度并展示航线图。
+    \end{itemize}
+
+    \item \textbf{机型管理：}
+    \begin{itemize}
+        \item 管理员可以查看、添加、编辑和删除机型。
+    \end{itemize}
+
+    \item \textbf{航班管理：}
+    \begin{itemize}
+        \item 管理员可以创建、查看、编辑和删除航班信息，分配机型和航班时刻。
+    \end{itemize}
+
+    \item \textbf{订单管理：}
+    \begin{itemize}
+        \item 管理员可以查看所有机票订单的详情，进行订单管理。
+    \end{itemize}
+\end{itemize}
+
+\subsection{数据处理}
+本系统将处理以下类型的数据：
+\begin{itemize}
+    \item \textbf{用户数据：} 包括用户注册信息（用户名、密码、联系方式等）。
+    \item \textbf{航班数据：} 包括航班的起止机场、出发时间、到达时间、航班号等。
+    \item \textbf{机场数据：} 包括机场名称、地点、经纬度等信息。
+    \item \textbf{机票数据：} 包括票号、预定用户、航班信息、座位选择、票价等。
+    \item \textbf{航线数据：} 包括起始机场、终止机场、航线长度、经过的城市等。
+    \item \textbf{航空公司数据：} 包括航空公司名称、航线、机型等信息。
+    \item \textbf{订单数据：} 包括订单号、用户、航班信息、支付状态等。
+\end{itemize}
+
+所有数据将以文本文件（\texttt{.txt} 格式）存储在项目的 \texttt{data} 文件夹中。
+
+\subsection{开发和运行环境}
+\begin{itemize}
+    \item \textbf{开发环境：}
+    \begin{itemize}
+        \item 操作系统：Windows / Linux / macOS
+        \item 开发工具：VS Code, CMake, Qt 6.7.2
+        \item 编程语言：C++, JavaScript, HTML, CSS
+        \item 数据存储：本地文件系统（使用文本文件 \texttt{.txt} 格式存储数据）
+    \end{itemize}
+    
+    \item \textbf{运行环境：}
+    \begin{itemize}
+        \item 客户端：Qt应用程序，支持跨平台运行。
+        \item 服务器端：Qt应用程序，管理后台功能。
+        \item 地图显示：使用 Leaflet.js 与 OpenStreetMap 提供的地图数据进行交互。
+    \end{itemize}
+\end{itemize}
+
+\subsection{用户界面设计}
+系统分为客户端与服务器端两部分，界面设计要求简洁直观，满足不同用户的需求。
+
+\subsubsection{客户端界面：}
+\begin{itemize}
+    \item \textbf{登录界面：}
+    \begin{itemize}
+        \item 提供用户名和密码输入框，登录按钮，忘记密码和注册链接。
+    \end{itemize}
+    \item \textbf{主界面：}
+    \begin{itemize}
+        \item 显示航班查询、机票预订、个人信息管理等模块。
+        \item 显示航班信息表格，提供筛选功能。
+    \end{itemize}
+    \item \textbf{机票预订界面：}
+    \begin{itemize}
+        \item 显示可用航班，选择座位并确认预定。
+    \end{itemize}
+    \item \textbf{个人信息界面：}
+    \begin{itemize}
+        \item 显示用户资料，允许修改并保存。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{服务器端界面：}
+\begin{itemize}
+    \item \textbf{航空公司管理界面：}
+    \begin{itemize}
+        \item 列出所有航空公司，提供添加、编辑和删除功能。
+    \end{itemize}
+    \item \textbf{机场管理界面：}
+    \begin{itemize}
+        \item 显示机场列表，支持添加、编辑、删除机场。
+        \item 通过地图进行地理位置选择，支持搜索和定位机场。
+    \end{itemize}
+    \item \textbf{航线管理界面：}
+    \begin{itemize}
+        \item 管理航线数据，支持添加、修改、删除航线。
+        \item 提供图形化航线绘制功能，展示航线图。
+    \end{itemize}
+    \item \textbf{航班管理界面：}
+    \begin{itemize}
+        \item 列出所有航班，支持查看、编辑和删除航班。
+    \end{itemize}
+    \item \textbf{订单管理界面：}
+    \begin{itemize}
+        \item 查看用户的所有订单，支持订单的详细查看与管理。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{地图界面：}
+\begin{itemize}
+    \item 在机场管理和航线管理界面中，通过 Leaflet.js 显示机场和航线图。
+    \item 支持地图缩放、点击查看地理位置、航线展示等功能。
+\end{itemize}
+
+\newpage
+
+
+\section{数据结构设计}
+
+\subsection{辅助数据结构}
+
+本系统在开发过程中，为了更好地管理和操作数据，定义了多个辅助数据结构。这些数据结构包括
+\begin{itemize}
+    \item \textbf{String 类}：提供了字符串的基本操作，方便在系统中处理文本数据，如用户输入、日志记录等。
+    \item \textbf{LinkedList 类}：用于存储有序的数据集合，如乘客列表、订单列表等，支持高效的插入和删除操作。
+    \item \textbf{Map 类}：基于 AVL 树的映射，适用于需要保持键值对有序的场景，如按照日期管理航班信息。
+    \item \textbf{HashMap 类}：提供了高效的键值对存储和查找，适用于需要快速访问的数据，如用户偏好设置、城市索引映射等。
+\end{itemize}
+
+\textbf{Map}、\textbf{HashMap}、\textbf{String} 和 \textbf{LinkedList}，它们为系统的核心功能提供了有力的支持。
+
+\subsubsection{String 类}
+
+\textbf{定义}：自定义的字符串类，用于替代标准库中的 \texttt{std::string}，提供字符串的基本操作和管理。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 管理字符数组，支持字符串的创建、复制、拼接和比较等操作。
+    \item 提供对字符串长度的获取和字符串内容的访问。
+    \item 重载了常用的运算符，如赋值运算符、加法运算符（用于字符串拼接）、比较运算符等。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{char* data}：用于存储字符串内容的字符指针。
+    \item \texttt{size\_t length}：字符串的长度。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{String()}：默认构造函数，创建一个空字符串。
+    \item \texttt{String(const char* str)}：使用 C 风格字符串初始化字符串对象。
+    \item \texttt{String(const String\& other)}：拷贝构造函数，创建字符串的副本。
+    \item \texttt{String\& operator=(String other)}：赋值运算符，实现字符串的赋值。
+    \item \texttt{size\_t size() const}：获取字符串长度。
+    \item \texttt{const char* c\_str() const}：获取 C 风格的字符串指针。
+    \item 重载的运算符：\texttt{operator+}、\texttt{operator==}、\texttt{operator!=} 等。
+\end{itemize}
+
+\subsubsection{LinkedList 模板类}
+
+\textbf{定义}：自定义的双向链表模板类，用于存储任意类型的元素，提供链表的基本操作。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 动态存储数据，支持在链表的任意位置插入和删除元素。
+    \item 提供链表的遍历、查找、排序等功能。
+    \item 支持链表的深拷贝和移动语义。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{Link<T>* head}：指向链表的头节点。
+    \item \texttt{Link<T>* tail}：指向链表的尾节点。
+    \item \texttt{int nodeCount}：链表中节点的数量。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{LinkedList()}：默认构造函数，初始化一个空链表。
+    \item \texttt{void append(const T\& element)}：在链表末尾添加一个元素。
+    \item \texttt{void insert(int index, const T\& element)}：在指定位置插入一个元素。
+    \item \texttt{bool remove(const T\& element)}：从链表中删除指定的元素。
+    \item \texttt{T\& getElementAt(int index) const}：获取指定位置的元素。
+    \item \texttt{int size() const}：获取链表中元素的数量。
+    \item \texttt{void clear()}：清空链表，释放所有节点。
+    \item \texttt{void sort(std::function<bool(const T\&, const T\&)> compare)}：对链表进行排序，接受一个比较函数作为参数。
+\end{itemize}
+
+\textbf{Link 节点类}：
+
+\begin{itemize}
+    \item \texttt{T element}：存储节点的数据。
+    \item \texttt{Link<T>* next}：指向下一个节点的指针。
+    \item \texttt{Link<T>* prev}：指向前一个节点的指针。
+\end{itemize}
+
+\subsubsection{Map 模板类}
+
+\textbf{定义}：自定义的映射（AVL 树实现）模板类，用于存储键值对，支持快速的插入、查找和删除操作。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 基于 AVL 平衡二叉树实现，保证了操作的平均和最坏情况下的时间复杂度为 $O(\log n)$。
+    \item 支持自定义键的比较函数和键的获取函数，以适应不同类型的键。
+    \item 提供键值对的插入、查找、删除、遍历等操作。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{Node* root}：指向 AVL 树的根节点。
+    \item \texttt{int nodeCount}：映射中键值对的数量。
+    \item \texttt{std::function<bool(const Key\&, const Key\&)> compare}：键的比较函数。
+    \item \texttt{std::function<Key(const Value\&)> getKey}：从值中提取键的函数。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{bool insert(const Value\& value)}：插入一个键值对，如果键已存在则插入失败。
+    \item \texttt{Value* find(const Key\& key) const}：查找指定键对应的值，返回值的指针。
+    \item \texttt{bool erase(const Key\& key)}：删除指定键的键值对。
+    \item \texttt{void clear()}：清空映射，释放所有节点。
+    \item \texttt{void traverse(std::function<void(const Value\&)> func) const}：遍历映射中的所有值，接受一个函数对象作为参数。
+\end{itemize}
+
+\textbf{Node 节点结构}：
+
+\begin{itemize}
+    \item \texttt{Value value}：存储节点的值。
+    \item \texttt{Node* left}：指向左子节点。
+    \item \texttt{Node* right}：指向右子节点。
+    \item \texttt{int height}：节点的高度，用于维持 AVL 树的平衡。
+\end{itemize}
+
+\subsubsection{HashMap 模板类}
+
+\textbf{定义}：自定义的哈希映射模板类，用于存储键值对，通过哈希函数实现快速的插入和查找操作。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 使用开放地址法解决哈希冲突，默认采用线性探测的方式。
+    \item 提供插入、查找、删除、遍历等操作。
+    \item 支持动态扩容，当负载因子超过设定值时自动扩容并再哈希。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{HashNode* table[MAX\_CAPACITY]}：存储哈希表数据的数组。
+    \item \texttt{size\_t capacity}：哈希表的容量。
+    \item \texttt{size\_t size}：当前存储的键值对数量。
+    \item \texttt{double max\_load\_factor}：最大负载因子，控制哈希表的扩容。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{bool insert(const Key\& key, const Value\& value)}：插入一个键值对，如果键已存在则更新对应的值。
+    \item \texttt{std::optional<Value> get(const Key\& key) const}：查找指定键对应的值，返回一个 \texttt{std::optional} 对象。
+    \item \texttt{bool erase(const Key\& key)}：删除指定键的键值对。
+    \item \texttt{void clear()}：清空哈希表。
+    \item \texttt{void traverse(std::function<void(const Key\&, const Value\&)> func) const}：遍历哈希表中的所有键值对。
+\end{itemize}
+
+\textbf{HashNode 结构}：
+
+\begin{itemize}
+    \item \texttt{Key key}：键。
+    \item \texttt{Value value}：值。
+    \item \texttt{bool is\_deleted}：标记该节点是否被删除，用于解决哈希冲突时的查找问题。
+\end{itemize}
+
+\textbf{哈希函数}：
+
+\begin{itemize}
+    \item 使用标准库的 \texttt{std::hash} 对字符串进行哈希，计算键的哈希值。
+\end{itemize}
+
+\subsection{航班系统主要数据结构}
+
+本航班系统的核心功能由以下主要数据结构支撑：
+
+\begin{itemize}
+    \item \textbf{FlightTicketDetail 类}：表示航班在特定日期的票务详情，包括不同舱位的票价和剩余座位数量。
+    \item \textbf{Flight 类}：表示单个航班的详细信息，包括航班号、航空公司、起飞和到达机场、起飞时间、飞行时长等。
+    \item \textbf{FlightNetwork 类}：管理整个航班网络，支持添加城市、添加航班以及查找航班的功能。
+    \item \textbf{OrderInfo 类}：表示订单的详细信息，包括航班信息、舱位类型、价格和乘客信息等。
+    \item \textbf{Order 类}：表示用户的订单，包含订单编号、订票用户信息、订单状态以及多个航段的详细信息。
+    \item \textbf{Passenger 类}：表示乘客的详细信息，包括姓名、身份证号、座位号和餐食偏好。
+    \item \textbf{Ticket 类}：表示单张机票的信息，包含航班信息和票务详情。
+\end{itemize}
+
+\textbf{FlightTicketDetail}、\textbf{Flight}、\textbf{FlightNetwork}、\textbf{OrderInfo}、\textbf{Order}、\textbf{Passenger} 和 \textbf{Ticket} 类，它们为系统的核心功能提供了有力的支持。
+
+\subsubsection{FlightTicketDetail 类}
+
+\textbf{定义}：该类表示航班在特定日期的票务详情，包括不同舱位的票价和剩余座位数量。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 管理不同舱位（头等舱、商务舱、经济舱）的票价和剩余座位数量。
+    \item 提供获取和设置票价、余票数量的方法。
+    \item 支持航班日期的获取和设置。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{double firstClassPrice}：头等舱票价。
+    \item \texttt{double businessClassPrice}：商务舱票价。
+    \item \texttt{double economyClassPrice}：经济舱票价。
+    \item \texttt{int firstClassTickets}：头等舱剩余票数。
+    \item \texttt{int businessClassTickets}：商务舱剩余票数。
+    \item \texttt{int economyClassTickets}：经济舱剩余票数。
+    \item \texttt{Date flightDate}：航班日期。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{FlightTicketDetail()}：默认构造函数，初始化票务详情。
+    \item \texttt{FlightTicketDetail(double firstClassPrice, double businessClassPrice, double economyClassPrice, int firstClassTickets, int businessClassTickets, int economyClassTickets, const Date\& flightDate)}：构造函数，初始化所有成员变量。
+    \item \texttt{double getCabinPrice(CabinType type) const}：获取指定舱位的票价。
+    \item \texttt{void setCabinPrice(CabinType type, double price)}：设置指定舱位的票价。
+    \item \texttt{int getRemainingTickets(CabinType type) const}：获取指定舱位的剩余票数。
+    \item \texttt{void setRemainingTickets(CabinType type, int tickets)}：设置指定舱位的剩余票数。
+    \item \texttt{const Date\& getFlightDate() const}：获取航班日期。
+    \item \texttt{void setFlightDate(const Date\& date)}：设置航班日期。
+\end{itemize}
+
+\subsubsection{Flight 类}
+
+\textbf{定义}：该类表示单个航班的详细信息，包括航班号、航空公司、飞机型号、起飞和到达机场、起飞时间、飞行时长等。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 管理航班的基本信息，如航班号、航空公司、起飞和到达信息等。
+    \item 管理航班的票务信息，支持添加和获取特定日期的票务详情。
+    \item 提供航班的查询和日程安排功能。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{String flightNumber}：航班号。
+    \item \texttt{String airline}：航空公司名称。
+    \item \texttt{String airplaneModel}：飞机型号。
+    \item \texttt{Airport departureAirport}：出发机场。
+    \item \texttt{Airport arrivalAirport}：到达机场。
+    \item \texttt{String airRoute}：航线名称。
+    \item \texttt{Time departureTime}：起飞时间。
+    \item \texttt{Time costTime}：飞行时长。
+    \item \texttt{double initialFirstClassPrice}：头等舱初始票价。
+    \item \texttt{double initialBusinessClassPrice}：商务舱初始票价。
+    \item \texttt{double initialEconomyClassPrice}：经济舱初始票价。
+    \item \texttt{FlightScheduleMap flightScheduleMap}：航班日期与票务详情的映射关系。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{Flight()}：默认构造函数，初始化航班信息。
+    \item \texttt{Flight(const String\& flightNumber, const String\& airline, const String\& airplaneModel, const Airport\& departureAirport, const Airport\& arrivalAirport, const String\& airRoute, const Time\& departureTime, const Time\& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice)}：构造函数，初始化所有成员变量。
+    \item \texttt{const String\& getFlightNumber() const}：获取航班号。
+    \item \texttt{void setFlightNumber(const String\& flightNumber)}：设置航班号。
+    \item \texttt{const String\& getAirline() const}：获取航空公司名称。
+    \item \texttt{void setAirline(const String\& airline)}：设置航空公司名称。
+    \item \texttt{...}（其他 getter 和 setter 方法）。
+    \item \texttt{bool hasFlightOnDate(const Date\& date) const}：判断指定日期是否有该航班。
+    \item \texttt{bool addFlightSchedule(const FlightTicketDetail\& ticketInfo)}：添加指定日期的票务详情。
+    \item \texttt{FlightTicketDetail* getFlightTicketDetail(const Date\& date)}：获取指定日期的票务详情。
+\end{itemize}
+
+\subsubsection{FlightNetwork 类}
+
+\textbf{定义}：该类管理整个航班网络，包含城市和航班信息，支持查找航班和连接航班的功能。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 管理城市信息和城市索引映射。
+    \item 管理国内和国际航班矩阵。
+    \item 支持添加城市和航班。
+    \item 提供查找直飞或中转航班的功能。
+    \item 支持用户偏好计算，优化航班推荐。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{HashMap<String, CityInfo> cityIndexMap}：城市名称到城市信息的映射。
+    \item \texttt{LinkedList<Flight*>** internationalFlight}：国际航班矩阵。
+    \item \texttt{LinkedList<Flight*>** domesticFlight}：国内航班矩阵。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{FlightNetwork(int maxCityCount)}：构造函数，初始化航班网络，设定最大城市数量。
+    \item \texttt{void addCity(const Airport\& airport)}：添加城市信息。
+    \item \texttt{bool cityExists(const String\& city) const}：判断城市是否存在。
+    \item \texttt{int getCityIndex(const String\& city) const}：获取城市索引。
+    \item \texttt{void addFlight(Flight* flight)}：添加航班。
+    \item \texttt{LinkedList<ConnectingTicket> findConnectingFlights(const String\& departureCity, const String\& arrivalCity, const Date\& date, int maxStops, bool userPref = false) const}：查找连接航班。
+    \item \texttt{double calculatePreferenceScore(const Ticket\& ticket) const}：计算航班的用户偏好分数。
+\end{itemize}
+
+\subsubsection{OrderInfo 类}
+
+\textbf{定义}：该类表示订单的详细信息，包括航班信息、舱位类型、价格和乘客信息等。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 存储订单中单个航段的详细信息。
+    \item 管理航班信息、舱位、价格和乘客信息。
+    \item 提供获取和设置各项信息的方法。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{String flightNumber}：航班号。
+    \item \texttt{String airRoute}：航线名称。
+    \item \texttt{String airplaneModel}：飞机型号。
+    \item \texttt{String airline}：航空公司名称。
+    \item \texttt{TimeSlot departureTimeSlot}：起飞时间段。
+    \item \texttt{CabinType cabin}：舱位类型。
+    \item \texttt{double price}：票价。
+    \item \texttt{Date date}：航班日期。
+    \item \texttt{Ticket ticket}：机票信息。
+    \item \texttt{Passenger passenger}：乘客信息。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item 构造函数和必要的 getter、setter 方法。
+    \item \texttt{const String\& getFlightNumber() const}：获取航班号。
+    \item \texttt{void setFlightNumber(const String\& flightNumber)}：设置航班号。
+    \item \texttt{...}（其他 getter 和 setter 方法）。
+\end{itemize}
+
+\subsubsection{Order 类}
+
+\textbf{定义}：该类表示用户的订单，包含订单编号、订票用户信息、订单状态以及多个航段的详细信息。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 管理订单的基本信息和状态。
+    \item 存储订单中的多个航段信息。
+    \item 提供添加航段、修改订单状态的方法。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{String orderNumber}：订单编号。
+    \item \texttt{String bookTicketUser}：订票用户手机号。
+    \item \texttt{TicketStatus status}：订单状态。
+    \item \texttt{LinkedList<OrderInfo> orderInfos}：订单详情列表。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item 构造函数和必要的 getter、setter 方法。
+    \item \texttt{const String\& getOrderNumber() const}：获取订单编号。
+    \item \texttt{void setStatus(TicketStatus status)}：设置订单状态。
+    \item \texttt{void addOrderInfo(const OrderInfo\& orderInfo)}：添加订单详情。
+    \item \texttt{...}（其他方法）。
+\end{itemize}
+
+\subsubsection{Passenger 类}
+
+\textbf{定义}：该类表示乘客的详细信息，包括姓名、身份证号、座位号和餐食偏好。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 存储乘客的个人信息和特殊需求。
+    \item 提供获取和设置乘客信息的方法。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{String name}：乘客姓名。
+    \item \texttt{String idNumber}：乘客身份证号。
+    \item \texttt{String seatNum}：座位号。
+    \item \texttt{Meal meal}：餐食偏好（枚举类型）。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item 构造函数和必要的 getter、setter 方法。
+    \item \texttt{const String\& getName() const}：获取乘客姓名。
+    \item \texttt{void setName(const String\& name)}：设置乘客姓名。
+    \item \texttt{...}（其他 getter 和 setter 方法）。
+\end{itemize}
+
+\subsubsection{Ticket 类}
+
+\textbf{定义}：该类表示单张机票的信息，包含航班信息和票务详情。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 存储机票的航班信息和票务详情。
+    \item 提供获取价格、出发和到达时间、飞行时长等方法。
+    \item 支持比较操作，用于排序和筛选机票。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{Flight* flight}：指向航班的指针。
+    \item \texttt{FlightTicketDetail* flightTicketDetail}：指向票务详情的指针。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item 构造函数和必要的 getter、setter 方法。
+    \item \texttt{DateTime getDepartureDateTime() const}：获取起飞日期和时间。
+    \item \texttt{DateTime getArrivalDateTime() const}：获取到达日期和时间。
+    \item \texttt{Time getDuration() const}：获取飞行时长。
+    \item \texttt{double getPrice() const}：获取机票价格。
+    \item \texttt{double getPrice(CabinType cabinType) const}：获取指定舱位的价格。
+\end{itemize}
+
+
+\subsection{用户信息相关数据结构}
+
+本系统还设计了用户信息相关的数据结构，包括 \textbf{User} 类和 \textbf{UserProfile} 类，用于管理用户的基本信息和用户的偏好设置。
+
+\subsubsection{User 类}
+
+\textbf{定义}：该类表示系统的用户账户信息，包括用户的手机号和密码。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 存储用户的基本账户信息，用于用户登录和身份验证。
+    \item 提供获取和设置用户信息的方法。
+    \item 支持用户账户的比较操作。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{String phoneNumber}：用户的手机号码，作为用户的唯一标识。
+    \item \texttt{String password}：用户的登录密码。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{User()}：默认构造函数，初始化用户信息。
+    \item \texttt{User(const String\& phoneNumber, const String\& password)}：构造函数，使用手机号和密码初始化用户。
+    \item \texttt{User(const User\& other)}：拷贝构造函数。
+    \item \texttt{const String\& getPhoneNumber() const}：获取用户的手机号码。
+    \item \texttt{void setPhoneNumber(const String\& phoneNumber)}：设置用户的手机号码。
+    \item \texttt{const String\& getPassword() const}：获取用户的密码。
+    \item \texttt{void setPassword(const String\& password)}：设置用户的密码。
+    \item \texttt{bool operator==(const User\& other) const}：重载等于运算符，用于比较两个用户是否相等。
+    \item \texttt{friend std::ostream\& operator<<(std::ostream\& out, const User\& user)}：重载输出流运算符，支持用户信息的输出。
+    \item \texttt{friend std::istream\& operator>>(std::istream\& in, User\& user)}：重载输入流运算符，支持用户信息的输入。
+\end{itemize}
+
+\subsubsection{UserProfile 类}
+
+\textbf{定义}：该类表示用户的个人偏好设置，包括对不同时间段、飞机型号和航空公司的偏好，用于优化航班推荐。
+
+\textbf{主要功能}：
+
+\begin{itemize}
+    \item 存储用户的时间段偏好、飞机型号偏好和航空公司偏好。
+    \item 支持更新用户的偏好设置，根据用户的订单信息进行调整。
+    \item 提供获取特定偏好值的方法，辅助航班的个性化推荐。
+\end{itemize}
+
+\textbf{主要成员变量}：
+
+\begin{itemize}
+    \item \texttt{int timeSlotPreferences[4]}：用户对四个时间段（早上、下午、晚上、夜间）的偏好值。
+    \item \texttt{HashMap<String, int> airplaneModelPreferences}：用户对不同飞机型号的偏好值映射。
+    \item \texttt{HashMap<String, int> airlinePreferences}：用户对不同航空公司的偏好值映射。
+\end{itemize}
+
+\textbf{主要成员函数}：
+
+\begin{itemize}
+    \item \texttt{UserProfile()}：构造函数，初始化用户偏好设置。
+    \item \texttt{void addTimeSlotPreference(TimeSlot timeSlot)}：增加指定时间段的偏好值。
+    \item \texttt{void addAirplaneModel(const String\& model)}：增加指定飞机型号的偏好值。
+    \item \texttt{void addAirline(const String\& airline)}：增加指定航空公司的偏好值。
+    \item \texttt{int getTimeSlotPreference(TimeSlot timeSlot) const}：获取指定时间段的偏好值。
+    \item \texttt{int getAirplaneModelPreference(const String\& model) const}：获取指定飞机型号的偏好值。
+    \item \texttt{int getAirlinePreference(const String\& airline) const}：获取指定航空公司的偏好值。
+    \item \texttt{void update(const Order\& order, bool reverse = false)}：根据订单信息更新用户的偏好设置，\texttt{reverse} 参数用于撤销之前的偏好调整。
+    \item \texttt{void create()}：初始化用户的偏好设置。
+\end{itemize}
+
+\subsection{程序整体结构}
+
+本系统采用客户端-服务器（Client-Server）架构，分为客户端和管理端（服务器端）两大部分。
+客户端面向普通用户，提供航班查询、机票预订、订单管理及个人信息管理等功能；管理端面向系统管理员，
+负责航班信息管理、用户信息管理、订单信息管理及系统监控等功能。数据存储部分采用自定义的 \textbf{Map} 类来模拟数据库，
+通过文本文件进行持久化存储。以下将详细描述程序的整体结构以及各模块的功能。
+
+系统整体结构如图 \ref{fig:system_architecture} 所示：
+
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=3cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1.5cm},
+        module/.style={fill=blue!20},
+        data/.style={fill=green!20},
+        logic/.style={fill=orange!20},
+        client/.style={fill=purple!20},
+        server/.style={fill=red!20},
+        arrow/.style={->, thick, >=stealth},
+        font=\normalsize
+    ]
+        \node[client] (client) {客户端模块};
+        \node[server, right of=client, xshift=5cm] (server) {管理端模块};
+        \node[data, below of=client, yshift=-4cm] (data) {数据存储模块};
+        \node[logic, below of=server, yshift=-4cm] (logic) {业务逻辑模块};
+        
+        \draw[arrow] (client) -- (logic) node[midway, above, sloped] {请求};
+        \draw[arrow] (server) -- (data) node[midway, right] {管理数据};
+        \draw[arrow] (logic) -- (data) node[midway, left, sloped] {读写数据};
+        \draw[arrow] (data) -- (logic) node[midway, below, sloped] {返回数据};
+    \end{tikzpicture}
+    \caption{系统整体架构图}
+    \label{fig:system_architecture}
+\end{figure}
+
+主要由以下几个模块组成：
+
+\begin{itemize}
+    \item \textbf{客户端模块}：供用户进行航班查询、机票预订、订单管理及个人信息管理等操作。
+    \item \textbf{管理端模块}：供管理员进行航班信息管理、用户信息管理、订单信息管理及系统监控等操作。
+    \item \textbf{数据存储模块}：负责系统数据的存储和读取，使用自定义的 \textbf{Map} 类模拟数据库，数据以文本文件形式保存。
+    \item \textbf{业务逻辑模块}：处理系统的核心业务逻辑，如航班搜索、订单处理、用户偏好分析等。
+\end{itemize}
+
+\subsection{各模块功能描述}
+
+\subsubsection{客户端模块}
+
+客户端模块是用户与系统交互的主要界面，提供直观友好的用户体验。主要包括以下子模块：
+
+\begin{enumerate}
+    \item \textbf{登录界面（LoginWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：提供用户登录功能，用户通过输入手机号和密码进行身份验证。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 用户输入手机号和密码。
+            \item 验证用户信息的正确性。
+            \item 登录成功后跳转到主界面，失败则提示错误信息。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{注册界面（RegisterWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：提供新用户注册功能，用户通过输入必要信息创建账户。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 用户输入手机号、密码及其他个人信息。
+            \item 检查手机号是否已被注册。
+            \item 注册成功后保存用户信息并跳转到登录界面。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{主界面（MainWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：系统的主操作界面，提供航班查询入口、订单管理入口和个人信息管理入口。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示系统欢迎信息和用户基本信息。
+            \item 提供导航按钮进入航班查询、订单管理和个人信息管理模块。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{航班查询界面（FlightSearchWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：允许用户根据出发地、目的地、出发日期、舱位类型等条件查询航班信息。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 用户输入查询条件。
+            \item 系统返回符合条件的航班列表。
+            \item 用户可以选择航班查看详细信息或直接预订。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{机票预订界面（TicketBookingWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：允许用户选择航班并进行机票预订，填写乘客信息，选择座位和餐食偏好等。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示选定航班的详细信息。
+            \item 用户输入乘客信息，包括姓名、身份证号等。
+            \item 用户选择座位和餐食偏好。
+            \item 提交预订请求，系统生成订单并保存相关信息。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{订单管理界面（OrderWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：允许用户查看、取消或修改已预订的订单。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示用户的所有订单列表。
+            \item 用户可以选择订单查看详情。
+            \item 提供取消订单或进行改签操作的功能。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{个人信息管理界面（UserProfileWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：允许用户查看和修改个人信息，包括密码修改和偏好设置。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示用户的基本信息。
+            \item 用户可以修改密码和更新联系方式。
+            \item 用户可以设置或更新个人偏好，如常用航线、偏好舱位等。
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{管理端模块}
+
+管理端模块是系统管理员用于维护和管理系统的后台界面，提供全面的系统管理功能。主要包括以下子模块：
+
+\begin{enumerate}
+    \item \textbf{航班管理界面（FlightManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：允许管理员添加、修改或删除航班信息。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有航班的列表。
+            \item 提供添加新航班的表单，输入航班号、航空公司、起降机场、票价等信息。
+            \item 允许编辑现有航班的详细信息。
+            \item 允许删除不再运营的航班。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{飞机型号管理界面（AirplaneModelManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：管理系统中所有飞机型号的信息，包括添加、修改和删除飞机型号。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有飞机型号的列表。
+            \item 提供添加新飞机型号的表单，输入型号名称、舱位布局等信息。
+            \item 允许编辑现有飞机型号的详细信息。
+            \item 允许删除不再使用的飞机型号。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{机场管理界面（AirportManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：管理系统中所有机场的信息，包括添加、修改和删除机场。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有机场的列表。
+            \item 提供添加新机场的表单，输入机场名称、所在地等信息。
+            \item 允许编辑现有机场的详细信息。
+            \item 允许删除不再服务的机场。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{航线管理界面（AirRouteManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：管理系统中的航线信息，包括添加、修改和删除航线。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有航线的列表。
+            \item 提供添加新航线的表单，输入起点、终点、航线名称等信息。
+            \item 允许编辑现有航线的详细信息。
+            \item 允许删除不再运营的航线。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{用户管理界面（UserManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：管理系统中的用户信息，包括查看用户列表、重置用户密码、禁用或启用用户账户。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有注册用户的列表。
+            \item 提供搜索功能，根据手机号或用户名查找用户。
+            \item 允许管理员重置用户密码。
+            \item 允许管理员禁用或启用用户账户，以防止非法访问。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{订单管理界面（OrderManageWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：管理系统中的所有订单信息，包括查看订单列表、处理退款或改签请求。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示所有订单的列表，支持按日期、用户或状态筛选。
+            \item 允许管理员查看订单的详细信息。
+            \item 提供处理用户退款或改签请求的功能，更新订单状态。
+        \end{itemize}
+    \end{itemize}
+    
+    \item \textbf{系统监控界面（ServerWindow.h）}
+    \begin{itemize}
+        \item \textbf{功能描述}：提供系统运行状态的监控功能，包括实时数据统计、日志查看等。
+        \item \textbf{主要功能}：
+        \begin{itemize}
+            \item 显示系统当前运行状态，如在线用户数、活跃航班数等。
+            \item 提供日志查看功能，记录系统操作日志和错误日志，便于问题排查。
+            \item 显示数据统计报表，如航班销售情况、用户增长趋势等。
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{数据存储模块}
+
+数据存储模块负责系统中各类数据的持久化存储，采用自定义的 \textbf{Map} 类来模拟数据库，数据以文本文件形式保存。主要包括以下子模块：
+
+\begin{enumerate}
+    \item \textbf{用户数据管理（User.h / UserProfile.h）}
+    \begin{itemize}
+        \item 存储用户的基本信息和个人偏好设置。
+        \item 通过 \textbf{UserMap} 和 \textbf{UserProfile} 类实现用户数据的快速查询和更新。
+    \end{itemize}
+    
+    \item \textbf{航班数据管理（Flight.h / FlightNetwork.h）}
+    \begin{itemize}
+        \item 存储所有航班的基本信息和票务详情。
+        \item 通过 \textbf{FlightMap} 和 \textbf{FlightNetwork} 类实现航班数据的管理和查询。
+    \end{itemize}
+    
+    \item \textbf{机场、航线和飞机型号数据管理（Airport.h / AirRoute.h / AirplaneModel.h）}
+    \begin{itemize}
+        \item 分别存储所有机场、航线和飞机型号的信息。
+        \item 通过 \textbf{AirportMap}、\textbf{AirRouteMap} 和 \textbf{AirplaneModelMap} 类实现相关数据的管理和查询。
+    \end{itemize}
+    
+    \item \textbf{订单数据管理（Order.h）}
+    \begin{itemize}
+        \item 存储所有用户订单的信息。
+        \item 通过 \textbf{OrderMap} 类实现订单数据的管理和查询。
+    \end{itemize}
+    
+    \item \textbf{文件操作管理（fileManage.h）}
+    \begin{itemize}
+        \item 提供文件和目录的创建、删除、读取和写入功能。
+        \item 通过封装的文件操作函数，简化数据存储模块的实现。
+    \end{itemize}
+\end{enumerate}
+
+\subsubsection{业务逻辑模块}
+
+业务逻辑模块是系统的核心部分，负责处理所有的业务流程和逻辑判断。主要包括以下功能：
+
+\begin{enumerate}
+    \item \textbf{航班搜索与排序}
+    \begin{itemize}
+        \item 根据用户输入的查询条件（出发地、目的地、日期、舱位类型等）搜索匹配的航班。
+        \item 根据用户的偏好设置，对搜索结果进行排序，提高推荐的准确性。
+    \end{itemize}
+    
+    \item \textbf{订单处理}
+    \begin{itemize}
+        \item 处理用户的机票预订请求，验证票务可用性，生成订单并更新票务信息。
+        \item 处理订单的取消和改签请求，更新订单状态并调整票务信息。
+    \end{itemize}
+    
+    \item \textbf{用户偏好分析}
+    \begin{itemize}
+        \item 根据用户的历史预订记录，分析用户的偏好（常用航线、偏好舱位等）。
+        \item 动态调整用户的偏好设置，优化个性化推荐。
+    \end{itemize}
+    
+    \item \textbf{座位分配与管理}
+    \begin{itemize}
+        \item 处理乘客的座位选择，确保座位的唯一性和合理分配。
+        \item 提供座位图界面，允许用户选择特定座位。
+    \end{itemize}
+    
+    \item \textbf{餐食安排}
+    \begin{itemize}
+        \item 根据乘客的餐食偏好，安排航班的餐食供应。
+        \item 管理航班餐食库存，确保餐食供应的及时性和准确性。
+    \end{itemize}
+\end{enumerate}
+
+\subsection{安全性与可靠性设计}
+
+为了确保系统的安全性和可靠性，设计中考虑了以下几个方面：
+
+\begin{itemize}
+    \item \textbf{用户认证与授权}：采用密码加密存储，登录时进行身份验证，防止非法访问。管理员拥有更高的权限，能够访问和管理系统的核心功能。
+    \item \textbf{数据加密传输}：敏感数据在数据传输过程中进行加密，保护用户隐私，防止数据泄露和篡改。
+    \item \textbf{异常处理}：对可能出现的异常情况进行捕获和处理，如文件读取失败等，提供可靠的错误提示和重试机制，确保系统的稳定性。
+    \item \textbf{数据备份}：定期对系统数据进行备份，防止数据丢失，确保在系统故障时能够快速恢复数据。
+    \item \textbf{日志记录}：记录系统运行日志，包括用户操作日志和错误日志，方便系统维护和问题排查，提高系统的可维护性。
+    \item \textbf{输入验证}：对用户输入的数据进行严格的验证，防止注入攻击和数据篡改，确保系统数据的完整性和一致性。
+\end{itemize}
+
+通过以上设计，系统在数据存储、传输和操作过程中具有较高的安全性和可靠性，能够有效地保护用户信息和系统数据，提升用户的使用体验和系统的稳定性。
+
+\subsection{性能优化与扩展设计}
+
+为了提升系统的性能和支持未来的功能扩展，设计中考虑了以下优化策略：
+
+\begin{itemize}
+    \item \textbf{数据结构优化}：采用高效的数据结构（如 \textbf{HashMap} 和 \textbf{AVL Tree}）实现快速的数据查找和插入，提升系统的响应速度。
+    \item \textbf{缓存机制}：在业务逻辑模块中引入缓存机制，缓存频繁访问的数据，减少对数据存储模块的访问次数，提升系统性能。
+    \item \textbf{并发处理}：考虑多用户同时访问系统的情况，采用多线程或异步处理技术，提高系统的并发处理能力。
+    \item \textbf{模块化扩展}：通过模块化设计，方便在系统中新增功能模块，如增加支付模块、消息通知模块等，满足用户不断变化的需求。
+    \item \textbf{数据库迁移}：未来可以考虑将自定义的 \textbf{Map} 类迁移到关系型数据库或 NoSQL 数据库，提升数据存储的效率和安全性。
+\end{itemize}
+\newpage
+
+\section{详细设计}
+
+\subsection{主要函数流程图}
+
+在这一部分，我们将展示系统中几个关键函数的流程图，帮助理解系统的主要工作流。以下是几个关键功能的流程图：
+
+\subsubsection{main函数}
+main函数主要负责系统的初始化和启动，包括创建用户界面、加载数据、处理用户输入等。以下是 main 函数的流程图：
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=3cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=5cm, minimum height=1.5cm},
+        startstop/.style={fill=red!20},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm, minimum height=2cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\normalsize
+    ]
+
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (initApp) {初始化 QApplication};
+        \node[process, below of=initApp] (setAppProperties) {设置应用程序图标和名称};
+        \node[decision, below of=setAppProperties, yshift=-0.5cm] (checkArg) {命令行参数是否为 --server？};
+        \node[process, right of=checkArg, xshift=5cm] (serverWindow) {创建并显示 \\ 管理端窗口};
+        \node[process, below of=checkArg, yshift=-1cm] (clientWindow) {创建并显示 \\ 客户端主窗口};
+        \node[process, below of=serverWindow, yshift=-1cm] (execApp) {执行 QApplication::exec()};
+        \node[startstop, below of=execApp, yshift=-0.5cm] (end) {结束};
+
+        \draw[arrow] (start) -- (initApp);
+        \draw[arrow] (initApp) -- (setAppProperties);
+        \draw[arrow] (setAppProperties) -- (checkArg);
+        \draw[arrow] (checkArg.east) -- (serverWindow.west) node[midway, above, yshift = -0.5cm] {是};
+        \draw[arrow] (checkArg.south) -- (clientWindow.north) node[midway, right, xshift = -2.2cm] {否};
+        \draw[arrow] (serverWindow.south)  -- (execApp.north);
+        \draw[arrow] (clientWindow.east) -- (execApp.west);
+        \draw[arrow] (execApp) -- (end);
+
+    \end{tikzpicture}
+    \caption{主函数流程图}
+    \label{fig:main_function_flowchart}
+\end{figure}
+
+\subsubsection{查询航班功能流程图}
+
+查询航班功能是系统中核心功能之一，允许用户查询从出发城市到达城市的所有直达航班或中转航班。以下是查询航班功能的流程图：
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2.5cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=6cm, minimum height=1.5cm},
+        startstop/.style={fill=red!20},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4.5cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\normalsize
+    ]
+
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (validateInput) {验证输入的出发城市和到达城市};
+        \node[decision, below of=validateInput, yshift=-0.5cm] (validCities) {城市是否存在？};
+        \node[process, right of=validCities, xshift=6cm] (returnEmpty) {返回空航班列表};
+        \node[decision, below of=validCities, yshift=-0.5cm] (userPreference) {用户是否启用偏好？};
+        \node[process, right of=userPreference, xshift=6cm] (findPreferredFlights) {查找用户偏好的航班};
+        \node[process, below of=userPreference, yshift=-0.5cm] (findFlights) {查找直达或中转航班};
+        \node[process, below of=findFlights, yshift=-0.5cm] (returnFlights) {返回航班列表};
+        \node[startstop, below of=returnFlights] (end) {结束};
+
+        \draw[arrow] (start) -- (validateInput);
+        \draw[arrow] (validateInput) -- (validCities);
+        \draw[arrow] (validCities.east) -- (returnEmpty.west) node[midway, above, yshift = -0.5cm] {否};
+        \draw[arrow] (validCities.south) -- (userPreference.north) node[midway, right, xshift = -2.5cm] {是};
+        \draw[arrow] (userPreference.east) -- (findPreferredFlights.west) node[midway, above, yshift = -0.5cm] {是};
+        \draw[arrow] (userPreference.south) -- (findFlights.north) node[midway, right, xshift = -2.5cm] {否};
+        \draw[arrow] (findPreferredFlights.south) -- (returnFlights.east);
+        \draw[arrow] (findFlights) -- (returnFlights);
+        \draw[arrow] (returnFlights) -- (end);
+
+    \end{tikzpicture}
+    \caption{查询航班功能流程图}
+    \label{fig:search_flights_flowchart}
+\end{figure}
+
+\subsubsection{联程航班查询功能流程图}
+
+联程航班查询功能负责根据用户输入的起始城市、目的地城市、出发日期和最大中转次数，递归查找可能的联程航班路径。以下是联程航班查询功能的详细流程图：
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=3cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % Nodes
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (initialize) {初始化起始城市索引、目标城市索引、\\航班堆栈和结果列表};
+        \node[process, below of=initialize] (findFirstFlights) {查找出发城市的所有直飞航班并加入堆栈};
+        \node[decision, below of=findFirstFlights, yshift=-0.3cm] (stackNotEmpty) {堆栈是否为空？};
+        \node[startstop, right of=stackNotEmpty, xshift=4cm] (end) {结束并返回结果列表};
+        \node[process, below of=stackNotEmpty, yshift=-0.3cm] (popFlight) {从堆栈中弹出当前航班路径};
+        \node[decision, below of=popFlight, yshift=-0.3cm] (isTargetCity) {当前城市是否为目标城市？};
+        \node[process, right of=isTargetCity, xshift=4cm] (addToResult) {将当前路径添加到结果列表};
+        \node[decision, below of=isTargetCity, yshift=-0.3cm] (exceedStops) {是否超过最大中转次数？};
+        \node[process, below of=exceedStops, yshift=-0.3cm] (findNextFlights) {查找当前城市的下一航班};
+        \node[decision, below of=findNextFlights, yshift=-0.3cm] (validNextFlight) {下一航班是否有效？};
+        \node[process, right of=validNextFlight, xshift=4cm] (pushToStack) {将下一航班路径加入堆栈};
+
+        % Arrows
+        \draw[arrow] (start) -- (initialize);
+        \draw[arrow] (initialize) -- (findFirstFlights);
+        \draw[arrow] (findFirstFlights) -- (stackNotEmpty);
+        \draw[arrow] (stackNotEmpty.east) -- ++(0.5,0) |- (end.west) node[midway, above] {否};
+        \draw[arrow] (stackNotEmpty.south) -- ++(0,-0.5) -- (popFlight.north) node[midway, right] {是};
+        \draw[arrow] (popFlight) -- (isTargetCity);
+        \draw[arrow] (isTargetCity.east) -- ++(0.5,0) |- (addToResult.west) node[midway, above] {是};
+        \draw[arrow] (addToResult.south) -- ++(0,-1.5) -| (stackNotEmpty.east);
+        \draw[arrow] (isTargetCity.south) -- ++(0,-0.5) -- (exceedStops.north) node[midway, right] {否};
+        \draw[arrow] (exceedStops.south) -- ++(0,-0.5) -- (findNextFlights.north) node[midway, right] {否};
+        \draw[arrow] (findNextFlights) -- (validNextFlight);
+        \draw[arrow] (validNextFlight.east) -- ++(0.5,0) |- (pushToStack.west) node[midway, above] {是};
+        \draw[arrow] (validNextFlight.south) -- ++(0,-1) -| (stackNotEmpty.west) node[midway, right] {否};
+        \draw[arrow] (pushToStack.south) -- ++(0,-2) -| (stackNotEmpty.west);
+
+    \end{tikzpicture}
+    \caption{联程航班查询功能流程图}
+    \label{fig:connecting_flights_flowchart}
+\end{figure}
+
+\subsubsection{查询用户偏好航班流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=3cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % Nodes
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (initialize) {初始化起始城市索引、目标城市索引、\\优先队列和偏好分数记录};
+        \node[process, below of=initialize] (findFirstFlights) {查找出发城市的所有航班并加入队列};
+        \node[decision, below of=findFirstFlights, yshift=-0.3cm] (queueNotEmpty) {队列是否为空？};
+        \node[startstop, right of=queueNotEmpty, xshift=5cm] (end) {结束并返回结果列表};
+        \node[process, below of=queueNotEmpty, yshift=-0.3cm] (popFlight) {从队列中取出\\偏好分数最高的路径};
+        \node[decision, below of=popFlight, yshift=-0.3cm] (isTargetCity) {当前城市是否为目标城市？};
+        \node[process, right of=isTargetCity, xshift=5cm] (addToResult) {将路径添加到结果列表\\并退出循环};
+        \node[process, below of=isTargetCity, yshift=-1cm] (processNextFlights) {查找当前城市的所有下一航班};
+        \node[decision, below of=processNextFlights, yshift=-0.3cm] (validNextFlight) {下一航班是否满足条件？};
+        \node[process, right of=validNextFlight, xshift=5cm] (updateQueue) {更新偏好分数\\并将路径加入队列};
+
+        % Arrows
+        \draw[arrow] (start) -- (initialize);
+        \draw[arrow] (initialize) -- (findFirstFlights);
+        \draw[arrow] (findFirstFlights) -- (queueNotEmpty);
+        \draw[arrow] (queueNotEmpty.east) -- ++(0.5,0) |- (end.west) node[midway, above] {否};
+        \draw[arrow] (queueNotEmpty.south) -- ++(0,-0.5) -- (popFlight.north) node[midway, right] {是};
+        \draw[arrow] (popFlight) -- (isTargetCity);
+        \draw[arrow] (isTargetCity.east) -- ++(0.5,0) |- (addToResult.west) node[midway, above] {是};
+        \draw[arrow] (addToResult.south) -- ++(0,-1.5) -| (queueNotEmpty.east);
+        \draw[arrow] (isTargetCity.south) -- ++(0,-0.5) -- (processNextFlights.north) node[midway, right] {否};
+        \draw[arrow] (processNextFlights) -- (validNextFlight);
+        \draw[arrow] (validNextFlight.east) -- ++(0.5,0) |- (updateQueue.west) node[midway, above] {是};
+        \draw[arrow] (validNextFlight.south) -- ++(0,-1) -| (queueNotEmpty.west) node[midway, right] {否};
+        \draw[arrow] (updateQueue.south) -- ++(0,-1.5) -| (queueNotEmpty.west);
+
+    \end{tikzpicture}
+    \caption{查询用户偏好航班流程图}
+    \label{fig:user_preferred_flights_flowchart}
+\end{figure}
+
+\subsubsection{买票功能流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.8cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20, minimum width=3cm},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % 节点
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (init) {初始化订单数据结构};
+        \node[process, below of=init] (checkSegments) {检查订单中每个航段的航班和余票情况};
+        \node[decision, below of=checkSegments, yshift=-0.3cm] (availability) {所有航段有余票吗？};
+        \node[decision, below of=availability, yshift=-0.3cm] (passengerCheck) {有重复乘客吗？};
+        \node[process, below of=passengerCheck, yshift=-0.3cm] (updateData) {更新余票与乘客信息文件};
+        \node[decision, below of=updateData, yshift=-0.3cm] (flightMapOk) {航班数据写入成功？};
+        \node[decision, below of=flightMapOk, yshift=-0.3cm] (orderOk) {订单数据写入成功？};
+        \node[process, below of=orderOk, yshift=-0.3cm] (updateProfile) {更新用户偏好信息};
+        \node[startstop, below of=updateProfile, yshift=-0.3cm, fill=red!20!green!20] (success) {购票成功，结束};
+        \node[startstop, fill=red!20, minimum width=4cm, left of=passengerCheck, xshift=-4cm, yshift=-0.5cm] (fail) {购票失败，结束};
+
+        % 连接线
+        \draw[arrow] (start) -- (init);
+        \draw[arrow] (init) -- (checkSegments);
+        \draw[arrow] (checkSegments) -- (availability);
+        \draw[arrow] (availability.east) -- ++(0.5,0) |- (fail.west) node[midway, above] {否};
+        \draw[arrow] (availability.south) -- ++(0,-0.3) node[midway, right] {是} -- (passengerCheck.north);
+        \draw[arrow] (passengerCheck.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {是};
+        \draw[arrow] (passengerCheck.south) -- ++(0,-0.3) node[midway, right] {否} -- (updateData.north);
+        \draw[arrow] (updateData) -- (flightMapOk);
+        \draw[arrow] (flightMapOk.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (flightMapOk.south) -- ++(0,-0.3) node[midway, right] {是} -- (orderOk.north);
+        \draw[arrow] (orderOk.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (orderOk.south) -- ++(0,-0.3) node[midway, right] {是} -- (updateProfile.north);
+        \draw[arrow] (updateProfile) -- (success);
+    
+    \end{tikzpicture}
+    \caption{买票功能流程图}
+    \label{fig:buy_ticket_flowchart}
+\end{figure}
+
+\subsubsection{退票功能流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.8cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20, minimum width=3cm},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % 节点
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (copyOrder) {复制订单并设为已退款状态};
+        \node[process, below of=copyOrder] (restore) {遍历航段，恢复余票、删除乘客记录};
+        \node[decision, below of=restore, yshift=-0.3cm] (restoreOk) {票务和乘客数据恢复成功？};
+        \node[process, below of=restoreOk, yshift=-0.3cm] (modifyOrder) {修改订单文件中对应记录};
+        \node[decision, below of=modifyOrder, yshift=-0.3cm] (orderModified) {订单修改成功？};
+        \node[process, below of=orderModified, yshift=-0.3cm] (updateProfile) {更新用户偏好信息};
+        \node[startstop, below of=updateProfile, yshift=-0.3cm, fill=red!20!green!20] (success2) {退票成功，结束};
+        
+        % 单一失败节点
+        \node[startstop, fill=red!20, minimum width=4cm, left of=restoreOk, xshift=-4cm, yshift=-0.5cm] (fail2) {退票失败，结束};
+
+        % 连接
+        \draw[arrow] (start) -- (copyOrder);
+        \draw[arrow] (copyOrder) -- (restore);
+        \draw[arrow] (restore) -- (restoreOk);
+        \draw[arrow] (restoreOk.east) -- ++(0.5,0) |- (fail2.west) node[midway, above] {否};
+        \draw[arrow] (restoreOk.south) -- ++(0,-0.3) node[midway, right] {是} -- (modifyOrder.north);
+        \draw[arrow] (modifyOrder) -- (orderModified);
+        \draw[arrow] (orderModified.east) -- ++(0.5,0) |- (fail2.east) node[midway, above] {否};
+        \draw[arrow] (orderModified.south) -- ++(0,-0.3) node[midway, right] {是} -- (updateProfile.north);
+        \draw[arrow] (updateProfile) -- (success2);
+    \end{tikzpicture}
+    \caption{退票功能流程图}
+    \label{fig:refund_ticket_flowchart}
+\end{figure}
+
+\subsubsection{订餐功能流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.8cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20, minimum width=3cm},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % 节点
+        \node[startstop] (start) {开始};
+        \node[decision, below of=start, yshift=-0.3cm] (checkSegment) {segmentIndex有效吗？};
+        \node[process, below of=checkSegment, yshift=-0.3cm] (copyOrder) {复制订单并设置指定航段的餐食类型};
+        \node[process, below of=copyOrder] (loadPassenger) {从对应航班文件加载乘客数据};
+        \node[decision, below of=loadPassenger, yshift=-0.3cm] (modifyPassenger) {修改乘客记录成功？};
+        \node[decision, below of=modifyPassenger, yshift=-0.3cm] (modifyOrderMap) {修改订单文件成功？};
+        \node[startstop, below of=modifyOrderMap, yshift=-0.3cm, fill=red!20!green!20] (success) {订餐成功，结束};
+        \node[startstop, fill=red!20, minimum width=4cm, left of=modifyPassenger, xshift=-4cm, yshift=-0.5cm] (fail) {订餐失败，结束};
+
+        % 连接线
+        \draw[arrow] (start) -- (checkSegment);
+        \draw[arrow] (checkSegment.east) -- ++(0.5,0) |- (fail.west) node[midway, above] {否};
+        \draw[arrow] (checkSegment.south) -- ++(0,-0.3) node[midway, right] {是} -- (copyOrder.north);
+        \draw[arrow] (copyOrder) -- (loadPassenger);
+        \draw[arrow] (loadPassenger) -- (modifyPassenger);
+        \draw[arrow] (modifyPassenger.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (modifyPassenger.south) -- ++(0,-0.3) node[midway, right] {是} -- (modifyOrderMap.north);
+        \draw[arrow] (modifyOrderMap.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (modifyOrderMap.south) -- ++(0,-0.3) node[midway, right] {是} -- (success.north);
+    \end{tikzpicture}
+    \caption{订餐功能流程图}
+    \label{fig:buy_meal_flowchart}
+\end{figure}
+
+\subsubsection{选座功能流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.8cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20, minimum width=3cm},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % 节点
+        \node[startstop] (start) {开始};
+        \node[decision, below of=start, yshift=-0.3cm] (checkSegment) {segmentIndex有效吗？};
+        \node[process, below of=checkSegment, yshift=-0.3cm] (copyOrder) {复制订单并设置指定航段座位号};
+        \node[process, below of=copyOrder] (loadPassenger) {从对应航班文件加载乘客数据};
+        \node[decision, below of=loadPassenger, yshift=-0.3cm] (modifyPassenger) {修改乘客记录成功？};
+        \node[decision, below of=modifyPassenger, yshift=-0.3cm] (modifyOrderMap) {修改订单文件成功？};
+        \node[startstop, below of=modifyOrderMap, yshift=-0.3cm, fill=red!20!green!20] (success) {选座成功，结束};
+        \node[startstop, fill=red!20, minimum width=4cm, left of=modifyPassenger, xshift=-4cm, yshift=-0.5cm] (fail) {选座失败，结束};
+
+        % 连接线
+        \draw[arrow] (start) -- (checkSegment);
+        \draw[arrow] (checkSegment.east) -- ++(0.5,0) |- (fail.west) node[midway, above] {否};
+        \draw[arrow] (checkSegment.south) -- ++(0,-0.3) node[midway, right] {是} -- (copyOrder.north);
+        \draw[arrow] (copyOrder) -- (loadPassenger);
+        \draw[arrow] (loadPassenger) -- (modifyPassenger);
+        \draw[arrow] (modifyPassenger.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (modifyPassenger.south) -- ++(0,-0.3) node[midway, right] {是} -- (modifyOrderMap.north);
+        \draw[arrow] (modifyOrderMap.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (modifyOrderMap.south) -- ++(0,-0.3) node[midway, right] {是} -- (success.north);
+    \end{tikzpicture}
+    \caption{选座功能流程图}
+    \label{fig:choose_seat_flowchart}
+\end{figure}
+
+\subsubsection{管理数据流程图}
+
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.8cm,
+        every node/.style={rectangle, rounded corners, align=center, minimum width=4cm, minimum height=1cm},
+        startstop/.style={fill=red!20, minimum width=3cm},
+        process/.style={fill=blue!20},
+        decision/.style={diamond, aspect=2, fill=green!20, minimum width=4cm},
+        arrow/.style={->, thick, >=stealth},
+        font=\small
+    ]
+
+        % 节点定义
+        \node[startstop] (start) {开始};
+        \node[process, below of=start] (receiveRequest) {接收管理员请求};
+        \node[decision, below of=receiveRequest, yshift=-0.3cm] (validateRequest) {请求数据是否合法？};
+        \node[process, below of=validateRequest, yshift=-0.3cm] (determineType) {确定请求类型\\（新增/删除/修改）};
+        \node[decision, below of=determineType, yshift=-0.3cm] (processType) {请求类型是否有效？};
+        \node[process, below of=processType, yshift=-0.3cm] (executeOperation) {执行相应的数据库操作};
+        \node[decision, below of=executeOperation, yshift=-0.3cm] (operationSuccess) {操作是否成功？};
+        \node[process, below of=operationSuccess, yshift=-0.3cm] (updateStorage) {更新数据存储};
+        \node[decision, below of=updateStorage, yshift=-0.3cm] (storageOk) {数据存储更新成功吗？};
+        \node[process, below of=storageOk, yshift=-0.3cm] (sendResponse) {发送操作结果回前端};
+        \node[startstop, below of=sendResponse, yshift=-0.3cm, fill=red!20!green!20] (success) {操作成功，结束};
+        
+        % 单一失败节点
+        \node[startstop, fill=red!20, minimum width=4cm, left of=validateRequest, xshift=-4cm, yshift=-0.5cm] (fail) {操作失败，结束};
+
+        % 连接线
+        \draw[arrow] (start) -- (receiveRequest);
+        \draw[arrow] (receiveRequest) -- (validateRequest);
+        \draw[arrow] (validateRequest.east) -- ++(0.5,0) |- (fail.west) node[midway, above] {否};
+        \draw[arrow] (validateRequest.south) -- ++(0,-0.3) node[midway, right] {是} -- (determineType.north);
+        \draw[arrow] (determineType) -- (processType);
+        \draw[arrow] (processType.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (processType.south) -- ++(0,-0.3) node[midway, right] {是} -- (executeOperation.north);
+        \draw[arrow] (executeOperation) -- (operationSuccess);
+        \draw[arrow] (operationSuccess.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (operationSuccess.south) -- ++(0,-0.3) node[midway, right] {是} -- (updateStorage.north);
+        \draw[arrow] (updateStorage) -- (storageOk);
+        \draw[arrow] (storageOk.east) -- ++(0.5,0) |- (fail.east) node[midway, above] {否};
+        \draw[arrow] (storageOk.south) -- ++(0,-0.3) node[midway, right] {是} -- (sendResponse.north);
+        \draw[arrow] (sendResponse) -- (success);
+    
+    \end{tikzpicture}
+    \caption{管理数据流程图}
+    \label{fig:manage_data_flowchart}
+\end{figure}
+
+\subsection{局部数据结构说明}
+
+\subsubsection{CityInfo 结构体}
+
+\begin{itemize}
+    \item \textbf{CityInfo}：表示城市的相关信息。
+    \begin{itemize}
+        \item \texttt{bool isAbroad}：标识该城市是否为国外城市。
+        \item \texttt{int index}：城市的索引，用于快速查找和映射。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{CityInfo} 用于存储城市的基本信息，支持系统在处理航班、订单和路径搜索时快速访问城市属性。
+        \item 通过 \texttt{isAbroad}，系统可以区分国内外航班，应用不同的处理逻辑，如签证需求、国际税费等。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{FlightPath 结构体}
+
+\begin{itemize}
+    \item \textbf{FlightPath}：用于查找联程航班时的路径信息。
+    \begin{itemize}
+        \item \texttt{LinkedList<Ticket> tickets}：当前路径中的所有\texttt{Ticket}对象，代表联程中的各个航段。
+        \item \texttt{int currentCityIndex}：当前所在城市的索引，用于标识路径中的当前位置。
+        \item \texttt{DateTime lastArrivalTime}：上一个航班的到达时间，用于判断下一航班的起飞时间是否合理。
+        \item \texttt{Map<int, int> visitedCities}：已访问过的城市索引，防止路径中出现循环。
+        \item \texttt{double preferenceScore}：路径的偏好评分，用于根据用户偏好选择最优路径。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{FlightPath} 在搜索联程航班时，用于记录和评估当前搜索路径。
+        \item 通过 \texttt{preferenceScore}，系统可以根据用户的偏好（如最短时间、最低价格等）对不同路径进行评分和比较。
+        \item \texttt{visitedCities} 变量帮助避免在搜索过程中重复访问同一城市，防止无限循环。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{CityPreference 结构体}
+
+\begin{itemize}
+    \item \textbf{CityPreference}：表示城市的偏好评分。
+    \begin{itemize}
+        \item \texttt{int cityIndex}：城市的索引，用于唯一标识一个城市。
+        \item \texttt{double preferenceScore}：该城市的偏好分数，用于在路径选择中进行排序和筛选。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{CityPreference} 用于存储和管理用户对不同城市的偏好，支持个性化的航班路径推荐。
+        \item 在多条联程路径的比较过程中，系统根据 \texttt{preferenceScore} 对路径进行加权评分，从而推荐最符合用户偏好的路径。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{TimeSlot 枚举类型}
+
+\begin{itemize}
+    \item \textbf{TimeSlot}：表示一天中的时间段，用于航班时间管理。
+    \begin{itemize}
+        \item \texttt{MORNING}：上午时段。
+        \item \texttt{AFTERNOON}：下午时段。
+        \item \texttt{EVENING}：傍晚时段。
+        \item \texttt{NIGHT}：夜间时段。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{TimeSlot} 用于对航班进行时间段分类，方便用户根据偏好选择合适的航班时间。
+        \item 在航班查询和推荐功能中，系统可以根据用户选择的 \texttt{TimeSlot} 过滤和排序航班，提高查询效率和用户满意度。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Meal 枚举类型}
+
+\begin{itemize}
+    \item \textbf{Meal}：表示乘客的餐食选择。
+    \begin{itemize}
+        \item \texttt{NO\_MEAL}：不需要餐食。
+        \item \texttt{WESTERN}：西餐。
+        \item \texttt{CHINESE}：中餐。
+        \item \texttt{VEGETARIAN}：素食。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{Meal} 用于记录和管理乘客在特定航段的餐食需求，提升用户体验。
+        \item 在订单管理中，乘客可以根据个人饮食偏好选择相应的餐食类型，系统将根据选择更新订单信息。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{CabinType 枚举类型}
+
+\begin{itemize}
+    \item \textbf{CabinType}：表示航班的舱位类型。
+    \begin{itemize}
+        \item \texttt{None}：无指定舱位。
+        \item \texttt{FirstClass}：头等舱。
+        \item \texttt{BusinessClass}：商务舱。
+        \item \texttt{EconomyClass}：经济舱。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{CabinType} 用于分类和管理不同舱位类型的航班票务，支持用户根据预算和需求选择合适的舱位。
+        \item 在订单管理和票务分配中，系统根据 \texttt{CabinType} 确认和更新票务信息，确保舱位分配的准确性。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{SortRule 枚举类型}
+
+\begin{itemize}
+    \item \textbf{SortRule}：表示在查询航班、联程航班或订单结果时的排序规则，用于根据用户或系统需求对结果进行多维度排序。
+    \begin{itemize}
+        \item \texttt{NO\_RULE}：无特定排序规则，返回结果按默认顺序或随机顺序展示。
+        \item \texttt{EARLIEST\_DEPARTURE}：按最早起飞时间排序，起飞时间越早优先级越高。
+        \item \texttt{EARLIEST\_ARRIVAL}：按最早到达时间排序，到达时间越早优先级越高。
+        \item \texttt{SHORTEST\_DURATION}：按最短总时长排序，飞行时间加中转时间越短越优先。
+        \item \texttt{CHEAPEST\_PRICE}：按最低票价排序，价格越低优先级越高。
+        \item \texttt{USER\_PREFERENCE}：按用户偏好排序，根据用户历史数据和偏好分数为结果排名。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{SortRule} 用于在航班查询和推荐功能中，根据不同的排序需求对查询结果进行排序，提升用户体验。
+        \item 系统可以根据用户选择的 \texttt{SortRule}（如最早起飞、最低价格等），动态调整结果列表的展示顺序。
+        \item 在 \texttt{USER\_PREFERENCE} 场景下，结合 \texttt{CityPreference} 和 \texttt{FlightPath} 中的 \texttt{preferenceScore}，实现个性化的航班推荐。
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{SortRule 枚举类型}
+
+\begin{itemize}
+    \item \textbf{SortRule}：表示在查询航班、联程航班或订单结果时的排序规则，用于根据用户或系统需求对结果进行多维度排序。
+    \begin{itemize}
+        \item \texttt{NO\_RULE}：无特定排序规则，返回结果按默认顺序或随机顺序展示。
+        \item \texttt{EARLIEST\_DEPARTURE}：按最早起飞时间排序，起飞时间越早优先级越高。
+        \item \texttt{EARLIEST\_ARRIVAL}：按最早到达时间排序，到达时间越早优先级越高。
+        \item \texttt{SHORTEST\_DURATION}：按最短总时长排序，飞行时间加中转时间越短越优先。
+        \item \texttt{CHEAPEST\_PRICE}：按最低票价排序，价格越低优先级越高。
+        \item \texttt{USER\_PREFERENCE}：按用户偏好排序，根据用户历史数据和偏好分数为结果排名。
+    \end{itemize}
+    \item \textbf{使用场景与作用}：
+    \begin{itemize}
+        \item \texttt{SortRule} 用于在航班查询和推荐功能中，根据不同的排序需求对查询结果进行排序，提升用户体验。
+        \item 系统可以根据用户选择的 \texttt{SortRule}（如最早起飞、最低价格等），动态调整结果列表的展示顺序。
+        \item 在 \texttt{USER\_PREFERENCE} 场景下，结合 \texttt{CityPreference} 和 \texttt{FlightPath} 中的 \texttt{preferenceScore}，实现个性化的航班推荐。
+    \end{itemize}
+\end{itemize}
+
+\newpage
+
+\section{测试}
+\subsection{客户端}
+\subsubsection{登陆注册功能测试}
+
+
+\newpage
+
+
+\section{总结与提高}
+
+\subsection{程序开发中的体会与收获}
+
+在本次课程设计中，我深入了解了如何将理论知识应用于实际开发中，尤其是在构建复杂的系统时，如何进行模块化设计、数据存储管理及多层架构实现。
+通过这次开发，我掌握了以下几点重要经验和技能：
+
+\begin{itemize}
+    \item \textbf{模块化设计与架构搭建}：我学会了如何将一个庞大的系统划分成多个模块，每个模块负责不同的功能，减少模块间的耦合度，
+    提高了系统的可维护性和可扩展性。在设计系统架构时，我特别注意了模块之间的接口设计，使得各个模块能够独立开发并顺利集成。
+    
+    \item \textbf{数据存储与文件管理}：由于本系统的设计是基于文件存储的，我学习了如何使用 C++ 对文件进行高效的读写操作，
+    如何设计一个模拟数据库的系统来管理用户、航班、订单等数据。通过使用自定义的 \texttt{Map} 数据结构，我能够以高效的方式存取和管理大量数据。
+    这一部分让我更加深刻理解了数据结构和算法的应用，特别是哈希表和平衡二叉树。
+
+    \item \textbf{界面设计与用户体验}：本次项目采用 Qt 进行图形界面开发，让我对 Qt 的使用有了更加深入的了解。
+    通过设计简单而清晰的界面，我意识到界面设计不仅仅是美观的呈现，更多的是要关注用户的体验和操作流程的简洁。
+    通过设计合理的界面布局和交互方式，系统的易用性得到了提升。
+
+    \item \textbf{系统集成与调试}：系统开发的最后阶段，我学习了如何将各个模块进行集成，确保系统各个部分能够协同工作。
+    调试过程中，我深刻理解了系统中潜在的错误可能来源于各个模块的交互、数据传递和接口实现，调试技能也因此得到了提升。
+\end{itemize}
+
+\subsection{开发中遇到的问题与解决情况}
+
+在开发过程中，我遇到了一些挑战，并且从中获得了宝贵的经验：
+
+\begin{itemize}
+    \item \textbf{模块设计不够清晰}：在早期的设计中，由于系统功能比较复杂，我没有清晰地划分模块的责任和界限，导致部分功能交叉重叠。
+    后来，我通过对功能进行拆解和优化，将每个模块的功能界定得更加明确，避免了模块间的不必要依赖，使得整个系统更加清晰和高效。
+
+    \item \textbf{数据存储管理的复杂性}：由于数据存储采用文本文件形式，文件读写有一定的复杂性，需要严格控制文件的格式和数据的一致性。
+
+    \item \textbf{用户界面响应速度慢}：在设计客户端界面时，我发现界面响应较慢，特别是在用户数据量大时，界面的操作会变得迟缓。
+
+    \item \textbf{系统架构的调整与优化}：在系统初步搭建完成后，我的系统的各模块的划分不是很清晰，没有单独的文件读写模块，
+    导致系统的耦合度较高，不利于后期的维护和扩展。于是，我重新调整了系统架构，将业务逻辑处理独立出来，
+    优化了模块之间的分工，使得系统更加清晰和易于维护。
+\end{itemize}
+
+\subsection{自己对完成课设情况的评价}
+
+通过本次课程设计，我成功地实现了一个功能完整的航班查询和机票订购系统。在整个开发过程中，我经历了需求分析、系统设计、编码实现、调试测试等多个阶段，
+积累了丰富的经验。特别是在系统架构设计和模块化开发方面，我获得了较大的提升，能够更加清晰地理解各个模块的职责和功能。
+
+虽然系统实现的功能较为基础，但它涵盖了从数据存储、业务逻辑到用户界面的完整开发流程，并且能够顺利运行。
+总体来说，系统的设计和实现符合课设要求，并在规定时间内完成了各项任务。特别是在界面设计和用户体验方面，我尽力做到了简洁而清晰，使得操作直观易懂。
+
+然而，在性能优化和一些细节功能的实现上，还有很大的提升空间。例如，对于大量数据的处理，数据存储方面仍然可以进行更多的优化，
+提升系统在高并发情况下的响应速度。未来如果继续开发这个项目，我计划在以下几个方面进行改进：
+
+\begin{itemize}
+    \item \textbf{数据库设计与优化}：通过引入更高效的数据库管理系统，替代当前的文本文件存储，进一步提高数据处理和查询的效率。
+    \item \textbf{系统性能优化}：针对性能瓶颈进行优化，尤其是在数据量大的情况下，提升系统的响应速度和稳定性。
+    \item \textbf{功能扩展}：增加更多的用户交互功能，比如航班实时信息查询、航班推荐系统等，提升系统的功能性。
+\end{itemize}
+
+\subsection{总结}
+
+本次课程设计让我对软件开发有了更深入的理解，特别是在系统设计、数据存储管理以及界面设计等方面收获颇丰。
+在开发过程中，我遇到了不少困难，但通过调试和不断优化，最终克服了这些问题。完成这个课设不仅提升了我的编程技能，
+也让我更加注重项目的整体设计和性能优化。我将继续努力，不断提升自己的技术水平，未来能够开发出更高效、更完善的系统。
+
+\end{document}

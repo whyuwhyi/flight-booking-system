@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QTimeEdit>
 #include <QMessageBox>
+#include <QDoubleSpinBox>
 #include <FlightSystem/Flight.h>
 #include <FlightSystem/AirplaneModel.h>
 #include <FlightSystem/Airport.h>
@@ -71,12 +72,11 @@ private:
     // UI setup and connections
     void setupUI();
     void setupConnections();
-    void loadFlights();
+    void populateList();
 
     // Dialogs
     void openAddFlightDialog();
     void openAddDateDialog();
-    void setupAddFlightDialog(QDialog *addFlightDialog);
     void confirmAddFlight(const QString& flightNumber, const QString& airline, const QString& airplaneModel,const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, const QTime& departureTime,const QTime& costTime, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice, QDialog* dialog);
 
     // Flight management
@@ -85,6 +85,7 @@ private:
     void connectFlightItemActions(FlightItem* item);
     void onDeleteFlight(FlightItem* item);
     void onManageFlight(FlightItem* item);
+    QDoubleSpinBox* createPriceSpinBox(QWidget* parent);
 
     // Flight Schedule management
     void addFlightScheduleItem(const FlightTicketDetail &detail);
@@ -92,7 +93,7 @@ private:
     void onDeleteFlightScheduleItem(FlightScheduleItem* item);
     void onManageFlightScheduleItem(FlightScheduleItem* item);
     void addDate(const QDate &date, double firstClassPrice, double businessClassPrice, double economyClassPrice);
-    void updateFlightSchedule(FlightScheduleItem* item, QLineEdit* firstClassPriceEdit, QLineEdit* businessClassPriceEdit, QLineEdit* economyClassPriceEdit);
+    void updateFlightSchedule(FlightScheduleItem* item, QDoubleSpinBox* firstClassPriceEdit, QDoubleSpinBox* businessClassPriceEdit, QDoubleSpinBox* economyClassPriceEdit);
 
     // Utility functions
     bool validateFlightInput(const QString& flightNumber, const QString& airline, const QString& airplaneModel, const QString& routeName, const QString& departureAirport, const QString& arrivalAirport, double initialFirstClassPrice, double initialBusinessClassPrice, double initialEconomyClassPrice) const;

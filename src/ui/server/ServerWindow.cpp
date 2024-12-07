@@ -23,7 +23,7 @@ ServerWindow::ServerWindow(QWidget *parent) : QMainWindow(parent) {
 ServerWindow::~ServerWindow() {}
 
 void ServerWindow::setupUI() {
-    setWindowTitle("服务器管理系统");
+    setWindowTitle("航班管理系统");
     setFixedSize(1200, 800);
 
     centralWidget = new QWidget(this);

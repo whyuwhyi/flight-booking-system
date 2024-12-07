@@ -280,7 +280,7 @@ void TicketBookingWindow::onFlightItemClicked(QListWidgetItem *item) {
 
 void TicketBookingWindow::onConnectingTicketItemClicked(const ConnectingTicket &connectingTicket) {
     QDialog detailWindow;
-    detailWindow.setWindowTitle("联程航班详情");
+    detailWindow.setWindowTitle("航班详情");
     detailWindow.setMinimumSize(500, 400);
 
     QScrollArea *scrollArea = new QScrollArea(&detailWindow);
@@ -450,7 +450,6 @@ QGridLayout* TicketBookingWindow::createCabinSelectionLayout(const Ticket &ticke
     return ticketLayout;
 }
 
-
 void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket &connectingTicket, const LinkedList<CabinType> &selectedCabins) {
     QDialog passengerInfoDialog;
     passengerInfoDialog.setWindowTitle("乘客信息");
@@ -473,7 +472,6 @@ void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket 
     QPushButton *confirmPassengerButton = new QPushButton("确认", &passengerInfoDialog);
     layout->addWidget(confirmPassengerButton);
 
-    // 界面美化
     passengerInfoDialog.setStyleSheet(
         "QDialog {"
         "   background-color: #f0f0f0;"
@@ -553,7 +551,6 @@ void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket 
         QWidget *scrollWidget = new QWidget();
         QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
 
-        // 显示订单信息（仅一次）
         QLabel *orderHeaderLabel = new QLabel(QString("订单号: %1\n乘客姓名: %2\n身份证号: %3")
                                               .arg(order.getOrderNumber().c_str())
                                               .arg(name)
@@ -615,7 +612,7 @@ void TicketBookingWindow::handleConnectingTicketPurchase(const ConnectingTicket 
 
         connect(payButton, &QPushButton::clicked, &orderDialog, [&]() {
             if (buyTicket(order))
-                QMessageBox::information(&orderDialog, "订票成功", "联程航班订票成功！");
+                QMessageBox::information(&orderDialog, "订票成功", "航班订票成功！");
             else
                 QMessageBox::warning(&orderDialog, "订票失败", "订票失败，请确保没有重复购票或者稍后重试！");
             orderDialog.accept();

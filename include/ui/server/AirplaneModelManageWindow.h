@@ -33,6 +33,7 @@ public:
 private:
     void setupUI();
     void setupConnections();
+    void populateList();
     void openAddModelDialog();
     QLineEdit* createLineEdit(QWidget* parent, const QString& placeholder);
     bool validateModelInput();

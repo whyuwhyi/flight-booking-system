@@ -207,7 +207,7 @@ LinkedList<ConnectingTicket> FlightNetwork::findUserPreferredFlights(LinkedList<
         int cityIndex;
         double preferenceScore;
     };
-
+    
 
     // 使用优先队列，根据偏好分数从高到低排序
     auto compareFlightPaths = [](const FlightPath& a, const FlightPath& b) {

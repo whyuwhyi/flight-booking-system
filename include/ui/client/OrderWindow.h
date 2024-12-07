@@ -17,6 +17,7 @@ class OrderItem : public QWidget {
 
 public:
     explicit OrderItem(const Order &order, QWidget *parent = nullptr);
+    const Order& getOrder() const;
 
 signals:
     void selectSeat(const Order &order, int segmentIndex, const Ticket &ticket);

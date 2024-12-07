@@ -45,6 +45,7 @@ public:
 private:
     void setupUI();
     void setupConnections();
+    void populateList();
     void openMapSearchWindow();
     void handleAirportData(const QString &name, const QString &country, const QString &city, double latitude, double longitude);
     void addAirportItem(const Airport& airport);
